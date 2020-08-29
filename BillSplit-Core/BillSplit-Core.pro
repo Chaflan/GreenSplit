@@ -17,15 +17,21 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    datacore.cpp \
     peoplemodel.cpp \
     person.cpp \
-    transaction.cpp
+    resultsmodel.cpp \
+    transaction.cpp \
+    transactionsmodel.cpp
 
 HEADERS += \
     BillSplit-Core_global.h \
+    datacore.h \
     peoplemodel.h \
     person.h \
-    transaction.h
+    resultsmodel.h \
+    transaction.h \
+    transactionsmodel.h
 
 # Default rules for deployment.
 unix {

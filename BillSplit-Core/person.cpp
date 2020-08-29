@@ -1,6 +1,6 @@
 #include "person.h"
 
-unsigned int Person::nextId = 0;
+int Person::nextId = 0;
 
 Person::Person() :
     id(nextId++)

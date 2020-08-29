@@ -1,6 +1,7 @@
 #include "peoplewidget.h"
 #include "ui_peoplewidget.h"
 #include "nameeditdialog.h"
+#include "peoplemodel.h"
 
 #include <QMessageBox>
 #include <QItemSelectionModel>
@@ -28,7 +29,73 @@ void PeopleWidget::SetPeopleModel(PeopleModel* peopleModel)
         [this]()
         {
             ui->pushButtonView->setDisabled(!ui->listView->selectionModel()->hasSelection());
-        });
+    });
+}
+
+void PeopleWidget::ViewSelected(const QModelIndex& index)
+{
+    if (!index.isValid())
+    {
+        return;
+    }
+
+    QString oldInitials = model->data(index, PeopleModel::InitialsRole).toString();
+    QString oldName = model->data(index, PeopleModel::NameRole).toString();
+
+    QString newInitials(oldInitials);
+    QString newName(oldName);
+
+    for (bool isValid = false; !isValid;)
+    {
+        NameEditDialog dialog(newInitials, newName, NameEditDialog::Mode::Edit);
+        dialog.setModal(true);
+        dialog.exec();
+
+        if (dialog.result() == NameEditDialog::CustomDialogCode::Save)
+        {
+            bool initialsSuccess = true;
+            if (oldInitials != newInitials &&
+                !model->setData(index, newInitials, PeopleModel::Roles::InitialsRole))
+            {
+                QMessageBox message(QMessageBox::Icon::Critical, "Error",
+                    "The chosen initials are invalid.  Please choose non-empty and unique initials.");
+                message.exec();
+                initialsSuccess = false;
+            }
+
+            bool nameSuccess = true;
+            if (oldName != newName &&
+                !model->setData(index, newName, PeopleModel::Roles::NameRole))
+            {
+                QMessageBox message(QMessageBox::Icon::Critical, "Error",
+                    "The chosen name is invalid.  Please choose a non-empty name.");
+                message.exec();
+                nameSuccess = false;
+            }
+
+            // If one failed and the other succeeded, attempt to revert the
+            // one that succeeded in case the user cancels
+            if (!initialsSuccess && nameSuccess)
+            {
+                model->setData(index, oldName, PeopleModel::Roles::NameRole);
+            }
+            else if (!nameSuccess && initialsSuccess)
+            {
+                model->setData(index, oldInitials, PeopleModel::Roles::InitialsRole);
+            }
+
+            isValid = initialsSuccess && nameSuccess;
+        }
+        else if (dialog.result() == NameEditDialog::CustomDialogCode::Delete)
+        {
+            model->removeRow(index.row());
+            isValid = true;
+        }
+        else // Cancel, do nothing
+        {
+            isValid = true;
+        }
+    }
 }
 
 void PeopleWidget::on_pushButtonNew_clicked()
@@ -63,60 +130,10 @@ void PeopleWidget::on_pushButtonNew_clicked()
 
 void PeopleWidget::on_pushButtonView_clicked()
 {
-    QModelIndex currSelectionIndex = ui->listView->selectionModel()->currentIndex();
+    ViewSelected(ui->listView->selectionModel()->currentIndex());
+}
 
-    QString oldInitials = model->data(currSelectionIndex, PeopleModel::InitialsRole).toString();
-    QString oldName = model->data(currSelectionIndex, PeopleModel::NameRole).toString();
-
-    QString newInitials(oldInitials);
-    QString newName(oldName);
-
-    for (bool isValid = false; !isValid;)
-    {
-        NameEditDialog dialog(newInitials, newName, NameEditDialog::Mode::Edit);
-        dialog.setModal(true);
-        dialog.exec();
-
-        if (dialog.result() == NameEditDialog::CustomDialogCode::Save)
-        {
-            // Validate first, then insert.  This is slower but better for the user.
-            isValid = true;
-            if (oldInitials != newInitials && !model->validateData(currSelectionIndex, newInitials, PeopleModel::Roles::InitialsRole))
-            {
-                QMessageBox message(QMessageBox::Icon::Critical, "Error",
-                    "The chosen initials are invalid.  Please choose non-empty and unique initials.");
-                message.exec();
-                isValid = false;
-            }
-            if (oldName != newName && !model->validateData(currSelectionIndex, newName, PeopleModel::Roles::NameRole))
-            {
-                QMessageBox message(QMessageBox::Icon::Critical, "Error",
-                    "The chosen name is invalid.  Please choose a non-empty name.");
-                message.exec();
-                isValid = false;
-            }
-
-            if (isValid)
-            {
-                if (oldInitials != newInitials)
-                {
-                    model->setData(currSelectionIndex, newInitials, PeopleModel::Roles::InitialsRole);
-                }
-                if (oldName != newName)
-                {
-                    model->setData(currSelectionIndex, newName, PeopleModel::Roles::NameRole);
-                }
-            }
-
-        }
-        else if (dialog.result() == NameEditDialog::CustomDialogCode::Delete)
-        {
-            model->removeRow(currSelectionIndex.row());
-            isValid = true;
-        }
-        else // Cancel, do nothing
-        {
-            isValid = true;
-        }
-    }
+void PeopleWidget::on_listView_doubleClicked(const QModelIndex& index)
+{
+    ViewSelected(index);
 }

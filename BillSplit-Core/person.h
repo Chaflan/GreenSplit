@@ -1,20 +1,21 @@
 #ifndef PERSON_H
 #define PERSON_H
 
+#include "BillSplit-Core_global.h"
 #include <QString>
 
-class Person
+class BILLSPLITCORE_EXPORT Person
 {
 public:
     Person();
     Person(QString initials, QString name);
 
-    unsigned int id;
+    const int id;
     QString initials;
     QString name;
 
 private:
-    static unsigned int nextId;
+    static int nextId;
 };
 
 #endif // PERSON_H

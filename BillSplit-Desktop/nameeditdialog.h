@@ -9,6 +9,7 @@ class NameEditDialog;
 
 class QString;
 
+// Do this one like you did the other dialog.  No more reference member variables
 class NameEditDialog : public QDialog
 {
     Q_OBJECT

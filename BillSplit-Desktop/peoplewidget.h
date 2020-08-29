@@ -2,13 +2,13 @@
 #define PEOPLEWIDGET_H
 
 #include <QWidget>
-#include "peoplemodel.h"
 
 namespace Ui {
 class PeopleWidget;
 }
 
 class QItemSelectionModel;
+class PeopleModel;
 
 class PeopleWidget : public QWidget
 {
@@ -19,10 +19,12 @@ public:
     ~PeopleWidget();
 
     void SetPeopleModel(PeopleModel* peopleModel);
+    void ViewSelected(const QModelIndex& index);
 
 private slots:
     void on_pushButtonNew_clicked();
     void on_pushButtonView_clicked();
+    void on_listView_doubleClicked(const QModelIndex &index);
 
 private:
     Ui::PeopleWidget *ui;

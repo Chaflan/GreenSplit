@@ -21,6 +21,7 @@ SOURCES += \
     nameeditdialog.cpp \
     peoplewidget.cpp \
     resultswidget.cpp \
+    transactioneditdialog.cpp \
     transactionswidget.cpp
 
 HEADERS += \
@@ -28,6 +29,7 @@ HEADERS += \
     nameeditdialog.h \
     peoplewidget.h \
     resultswidget.h \
+    transactioneditdialog.h \
     transactionswidget.h
 
 FORMS += \
@@ -35,6 +37,7 @@ FORMS += \
     nameeditdialog.ui \
     peoplewidget.ui \
     resultswidget.ui \
+    transactioneditdialog.ui \
     transactionswidget.ui
 
 # Default rules for deployment.

@@ -2,7 +2,7 @@
 #define PEOPLEMODEL_H
 
 #include "BillSplit-Core_global.h"
-#include "person.h"
+#include "datacore.h"
 
 #include <QAbstractListModel>
 
@@ -23,16 +23,12 @@ public:
     };
 
 public:
-    PeopleModel(QObject* parent = nullptr);
+    PeopleModel(DataCore& dataCore, QObject* parent = nullptr);
 
     int rowCount(const QModelIndex& parent = QModelIndex()) const override;
     QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
     bool setData(const QModelIndex& index, const QVariant& value, int role) override;
     bool removeRows(int row, int count, const QModelIndex& parent) override;
-
-    bool validateData(const QModelIndex& index, const QVariant& value, int role) const;
-    bool validateData(const QVariant& value, int role) const;
-    bool validateData(const QString& value, int role) const;
     bool addPerson(QString initials, QString name);
 
     void jsonRead(const QJsonObject& json);
@@ -42,9 +38,7 @@ private:
     bool isIndexValid(const QModelIndex& i) const;
 
 private:
-    // TODO: Did you need this?  I don't think you use the lookup outside of an initials set
-    std::vector<std::shared_ptr<Person> > people;
-    std::unordered_map<QString, std::shared_ptr<Person> > initialsLookup;
+    DataCore& m_data;
 };
 
 #endif // PEOPLEMODEL_H

@@ -18,7 +18,7 @@
     <item>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>0</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="tabPeople">
        <attribute name="title">
@@ -34,11 +34,21 @@
        <attribute name="title">
         <string>Transactions</string>
        </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_3">
+        <item>
+         <widget class="TransactionsWidget" name="transactionsWidget" native="true"/>
+        </item>
+       </layout>
       </widget>
       <widget class="QWidget" name="tabResults">
        <attribute name="title">
         <string>Results</string>
        </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_4">
+        <item>
+         <widget class="ResultsWidget" name="resultsWidget" native="true"/>
+        </item>
+       </layout>
       </widget>
      </widget>
     </item>
@@ -61,6 +71,18 @@
    <class>PeopleWidget</class>
    <extends>QWidget</extends>
    <header>peoplewidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>TransactionsWidget</class>
+   <extends>QWidget</extends>
+   <header>transactionswidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ResultsWidget</class>
+   <extends>QWidget</extends>
+   <header>resultswidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

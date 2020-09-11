@@ -26,13 +26,26 @@ public:
         //CoveringPidsRole
     };
 
+    enum Column
+    {
+        Cost = 0,
+        Payer = 1,
+        Covering = 2,
+        Description = 3,
+        COUNT
+    };
+
 public:
     TransactionsModel(DataCore& dataCore, QObject* parent = nullptr);
 
+    // TODO: Isn't this numRows in the other one?
     int rowCount(const QModelIndex& parent = QModelIndex()) const override;
+    int columnCount(const QModelIndex& parent) const override;
+    QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
     QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
     bool setData(const QModelIndex& index, const QVariant& value, int role) override;
     bool removeRows(int row, int count, const QModelIndex& parent) override;
+    Qt::ItemFlags flags(const QModelIndex& index) const override;
 
     bool addTransaction(const QString& payerName,
                         double cost,

@@ -10,34 +10,50 @@ TransactionsModel::TransactionsModel(DataCore& dataCore, QObject* parent) :
 
 int TransactionsModel::rowCount(const QModelIndex& parent) const
 {
-    Q_UNUSED(parent);
-    return m_data.NumTransactions();
+    return parent.isValid() ? 0 : m_data.NumTransactions();
+}
+
+int TransactionsModel::columnCount(const QModelIndex& parent) const
+{
+    return parent.isValid() ? 0 : Column::COUNT;
+}
+
+QVariant TransactionsModel::headerData(int section, Qt::Orientation orientation, int role) const
+{
+    if (orientation == Qt::Orientation::Horizontal && role == Qt::DisplayRole) {
+        switch(section) {
+            case Column::Cost: return "Cost";
+            case Column::Payer: return "Payer";
+            case Column::Covering: return "Covering";
+            case Column::Description: return "Description";
+        }
+    }
+
+    return QAbstractItemModel::headerData(section, orientation, role);
 }
 
 QVariant TransactionsModel::data(const QModelIndex& index, int role) const
 {
-    if (isIndexValid(index))
-    {
+    if (isIndexValid(index)) {
         auto transaction = m_data.GetTransactionByIndex(index.row());
 
         switch (role)
         {
             case Qt::DisplayRole:
             {
-                QString groupString;
-                for (auto pid : transaction.coveringPids)
-                {
-                    groupString += (groupString.isEmpty() ? "" : ",") + m_data.GetPersonById(pid).initials;
+                switch(index.column()) {
+                    case Column::Cost: return QString::number(transaction.cost, 'f', 2);
+                    case Column::Payer: return getInitialFromPid(transaction.payerPid);
+                    case Column::Covering: {
+                        QString groupString;
+                        for (int pid : transaction.coveringPids) {
+                            groupString += (groupString.isEmpty() ? "" : ",") + getInitialFromPid(pid);
+                        }
+                        return groupString;
+                    }
+                    case Column::Description: return transaction.description;
                 }
-
-                QString displayString = QString("$%1\t %2 %3 %4\t\t %5")
-                    .arg(QString::number(transaction.cost, 'f', 2))
-                    .arg(m_data.GetPersonById(transaction.payerPid).initials)
-                    .arg("~")
-                    .arg(groupString)
-                    .arg(transaction.description);
-
-                return displayString;
+                break;
             }
 
             case Roles::IdRole: return transaction.id;
@@ -55,32 +71,38 @@ QVariant TransactionsModel::data(const QModelIndex& index, int role) const
 // TODO: Not convinced we need this method, probably want to set transaction
 bool TransactionsModel::setData(const QModelIndex& index, const QVariant& value, int role)
 {
-    if (isIndexValid(index) && (
-                role == Roles::PayerRole ||
-                role == Roles::PayerPidRole ||
-                role == Roles::DescriptionRole ||
-                role == Roles::CoveringInitialsRole ||
-                role == Roles::CostRole))
+    if (!isIndexValid(index)) {
+        return false;
+    }
+
+    if (role == Qt::EditRole) {
+        switch (index.column()) {
+            case Column::Cost: return setData(index, value, Roles::CostRole);
+            case Column::Payer: return setData(index, value, Roles::PayerRole);
+            case Column::Covering: return setData(index, value, Roles::CoveringInitialsRole);
+            case Column::Description: return setData(index, value, Roles::DescriptionRole);
+        }
+        return false;
+    }
+
+    Transaction transactionCopy(m_data.GetTransactionByIndex(index.row()));
+
+    switch (role)
     {
-        Transaction transactionCopy(m_data.GetTransactionByIndex(index.row()));
+        case Roles::PayerRole: transactionCopy.payerPid = getPidFromInitials(value.toString()); break;
+        case Roles::PayerPidRole: transactionCopy.payerPid = value.toInt(); break;
+        case Roles::DescriptionRole: transactionCopy.description = value.toString(); break;
+        case Roles::CostRole: transactionCopy.cost = value.toDouble(); break;
 
-        switch (role)
-        {
-            case Roles::PayerRole: transactionCopy.payerPid = getPidFromInitials(value.toString()); break;
-            case Roles::PayerPidRole: transactionCopy.payerPid = value.toInt(); break;
-            case Roles::DescriptionRole: transactionCopy.description = value.toString(); break;
-            case Roles::CostRole: transactionCopy.cost = value.toDouble(); break;
+        case Roles::CoveringInitialsRole:
+            transactionCopy.coveringPids = getPidSetFromInitials(value.toStringList());
+            break;
+    }
 
-            case Roles::CoveringInitialsRole:
-                transactionCopy.coveringPids = getPidSetFromInitials(value.toStringList());
-                break;
-        }
-
-        if (m_data.EditTransaction(index.row(), transactionCopy))
-        {
-            emit dataChanged(index, index);
-            return true;
-        }
+    if (m_data.EditTransaction(index.row(), transactionCopy))
+    {
+        emit dataChanged(index, index);
+        return true;
     }
 
     return false;
@@ -92,6 +114,15 @@ bool TransactionsModel::removeRows(int row, int count, const QModelIndex& parent
     bool result = m_data.DeleteTransactions(row, count);
     endRemoveRows();
     return result;
+}
+
+Qt::ItemFlags TransactionsModel::flags(const QModelIndex& index) const
+{
+    // TODO: I don't understand the purpose of this return variable.
+    if (!index.isValid())
+        return Qt::ItemIsEnabled;
+
+    return QAbstractItemModel::flags(index) | Qt::ItemIsEditable;
 }
 
 bool TransactionsModel::addTransaction(const QString& payerName,

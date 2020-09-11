@@ -19,17 +19,23 @@ PeopleWidget::~PeopleWidget()
     delete ui;
 }
 
+// TODO: Maybe call this init?
 void PeopleWidget::SetPeopleModel(PeopleModel* peopleModel)
 {
     model = peopleModel;
-    ui->listView->setModel(model);
+    ui->tableView->setModel(model);
 
     ui->pushButtonView->setDisabled(true);
-    connect(ui->listView->selectionModel(), &QItemSelectionModel::selectionChanged,
+    connect(ui->tableView->selectionModel(), &QItemSelectionModel::selectionChanged,
         [this]()
         {
-            ui->pushButtonView->setDisabled(!ui->listView->selectionModel()->hasSelection());
-    });
+            ui->pushButtonView->setDisabled(!ui->tableView->selectionModel()->hasSelection());
+        });
+
+    // Table formatting
+    ui->tableView->horizontalHeader()->setDefaultAlignment(Qt::AlignLeft);
+    ui->tableView->horizontalHeader()->setStretchLastSection(true);
+    ui->tableView->setStyleSheet("QHeaderView::section { background-color:gray }");
 }
 
 void PeopleWidget::ViewSelected(const QModelIndex& index)
@@ -130,10 +136,5 @@ void PeopleWidget::on_pushButtonNew_clicked()
 
 void PeopleWidget::on_pushButtonView_clicked()
 {
-    ViewSelected(ui->listView->selectionModel()->currentIndex());
-}
-
-void PeopleWidget::on_listView_doubleClicked(const QModelIndex& index)
-{
-    ViewSelected(index);
+    ViewSelected(ui->tableView->selectionModel()->currentIndex());
 }

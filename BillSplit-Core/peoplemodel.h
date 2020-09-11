@@ -10,7 +10,7 @@
 #include <vector>
 #include <unordered_map>
 
-class BILLSPLITCORE_EXPORT PeopleModel : public QAbstractListModel
+class BILLSPLITCORE_EXPORT PeopleModel : public QAbstractTableModel
 {
     Q_OBJECT
 
@@ -22,13 +22,24 @@ public:
         NameRole
     };
 
+    enum Sections
+    {
+        Initials = 0,
+        Name = 1,
+        COUNT = 2
+    };
+
 public:
     PeopleModel(DataCore& dataCore, QObject* parent = nullptr);
 
     int rowCount(const QModelIndex& parent = QModelIndex()) const override;
+    int columnCount(const QModelIndex& parent = QModelIndex()) const override;
     QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
     bool setData(const QModelIndex& index, const QVariant& value, int role) override;
-    bool removeRows(int row, int count, const QModelIndex& parent) override;
+    bool removeRows(int row, int count, const QModelIndex& parent = QModelIndex()) override;
+    QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
+    Qt::ItemFlags flags(const QModelIndex& index) const override;
+
     bool addPerson(QString initials, QString name);
 
     void jsonRead(const QJsonObject& json);

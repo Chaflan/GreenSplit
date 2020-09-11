@@ -2,6 +2,7 @@
 #include "ui_transactionswidget.h"
 #include "transactionsmodel.h"
 #include "transactioneditdialog.h"
+#include "comboboxitemdelegate.h"
 #include <QMessageBox>
 
 TransactionsWidget::TransactionsWidget(QWidget *parent) :
@@ -20,14 +21,27 @@ TransactionsWidget::~TransactionsWidget()
 void TransactionsWidget::SetTransactionsModel(TransactionsModel* transactionsModel)
 {
     model = transactionsModel;
-    ui->listView->setModel(model);
+    ui->tableView->setModel(model);
 
     ui->pushButtonView->setDisabled(true);
-    connect(ui->listView->selectionModel(), &QItemSelectionModel::selectionChanged,
+    connect(ui->tableView->selectionModel(), &QItemSelectionModel::selectionChanged,
         [this]()
         {
-            ui->pushButtonView->setDisabled(!ui->listView->selectionModel()->hasSelection());
+            ui->pushButtonView->setDisabled(!ui->tableView->selectionModel()->hasSelection());
         });
+
+    // Table formatting
+    ui->tableView->horizontalHeader()->setDefaultAlignment(Qt::AlignLeft);
+    ui->tableView->horizontalHeader()->setStretchLastSection(true);
+    ui->tableView->setStyleSheet("QHeaderView::section { background-color:gray }");
+
+    // Format second column to have a persistent combo box
+    const int payerColumn = 1;
+    ui->tableView->setItemDelegateForColumn(payerColumn, new ComboBoxItemDelegate(model, this));
+
+    for (int row = 0; row < model->rowCount(); ++row) {
+        ui->tableView->openPersistentEditor(model->index(row, payerColumn));
+    }
 }
 
 void TransactionsWidget::ViewSelected(const QModelIndex& index)
@@ -112,10 +126,5 @@ void TransactionsWidget::on_pushButtonNew_clicked()
 
 void TransactionsWidget::on_pushButtonView_clicked()
 {
-    ViewSelected(ui->listView->selectionModel()->currentIndex());
-}
-
-void TransactionsWidget::on_listView_doubleClicked(const QModelIndex &index)
-{
-    ViewSelected(index);
+    ViewSelected(ui->tableView->selectionModel()->currentIndex());
 }

@@ -24,7 +24,6 @@ public:
 private slots:
     void on_pushButtonNew_clicked();
     void on_pushButtonView_clicked();
-    void on_listView_doubleClicked(const QModelIndex &index);
 
 private:
     Ui::PeopleWidget *ui;

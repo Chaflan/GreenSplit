@@ -39,8 +39,9 @@ public:
     bool removeRows(int row, int count, const QModelIndex& parent = QModelIndex()) override;
     QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
     Qt::ItemFlags flags(const QModelIndex& index) const override;
+    QHash<int, QByteArray> roleNames() const override;
 
-    bool addPerson(QString initials, QString name);
+    Q_INVOKABLE bool addPerson(QString initials, QString name);
 
     void jsonRead(const QJsonObject& json);
     void jsonWrite(QJsonObject& json) const;

@@ -117,6 +117,14 @@ Qt::ItemFlags PeopleModel::flags(const QModelIndex& index) const
     return QAbstractItemModel::flags(index) | Qt::ItemIsEditable;
 }
 
+QHash<int, QByteArray> PeopleModel::roleNames() const
+{
+    QHash<int, QByteArray> roles;
+    roles[Roles::InitialsRole] = "initials";
+    roles[Roles::NameRole] = "name";
+    return roles;
+}
+
 bool PeopleModel::addPerson(QString initials, QString name)
 {
     beginInsertRows(QModelIndex(), rowCount(), rowCount());

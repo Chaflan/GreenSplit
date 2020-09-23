@@ -139,16 +139,20 @@ bool PeopleModel::addPerson(QString initials, QString name)
 // TODO: Resize on value change
 int PeopleModel::columnWidth(int c, const QFont* font)
 {
+    Q_UNUSED(font);
+    
     if (c < 0 || c >= Sections::COUNT) {
         return 0;
     }
 
-    QFont hackFont;
-    hackFont.setPointSize(15);
-
     if (!m_columnWidths[c]) {
+
+        // The font is always passed as nullptr, so I am hacking past this
+        QFont hackFont;
+        hackFont.setPointSize(15);    
 //        QFontMetrics defaultFontMetrics = QFontMetrics(QGuiApplication::font());
 //        QFontMetrics fm = (font ? QFontMetrics(*font) : defaultFontMetrics);
+
         QFontMetrics fm(hackFont);
         int ret = fm.horizontalAdvance(headerData(c, Qt::Horizontal).toString() + QLatin1String(" ^")) + 8;
 

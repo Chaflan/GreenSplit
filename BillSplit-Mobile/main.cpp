@@ -14,6 +14,10 @@ int main(int argc, char *argv[])
 
     DataCore dataCore;
     PeopleModel peopleModel(dataCore);
+    peopleModel.addPerson("C", "Chad");
+    peopleModel.addPerson("J", "Jeremy");
+    peopleModel.addPerson("L", "Lucas");
+    peopleModel.addPerson("Q", "QQQQQQQQQQQQQQQ");
 
     QQmlContext* context = engine.rootContext();
     context->setContextProperty("peopleModel", &peopleModel);

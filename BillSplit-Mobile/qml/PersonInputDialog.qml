@@ -6,67 +6,140 @@ import QtQuick.Window 2.2
 import "."
 
 Dialog {
+    id: root
+    width: 400
+    title: "Add Person"
+    standardButtons: StandardButton.NoButton
 
-    // See if you can remove this, i don't see a reason for it other to expose
-    // values if that is necessary
-    property alias initials: textInputInitials
-    property alias name: textInputName
-    title: "Initials"
-    
-    standardButtons: StandardButton.Ok | StandardButton.Cancel
-    
-    Rectangle {
-        id: rectangle
-        color: "#ffffff"
+    property alias initials: textFieldInitials.text
+    property alias name: textFieldName.text
+
+    Column {
+        id: column
         anchors.fill: parent
-    }
-//    onVisibleChanged: {
-//        //editTextItem.focus = true
-//        //editTextItem.selectAll()
-//    }
-//    onButtonClicked: {
-//        Qt.inputMethod.hide();
-//    }
+        spacing: 20
 
-//    Rectangle {
-//        id: initialsInputRect
-//        implicitWidth: parent.width
-//        implicitHeight: 100
+        GroupBox {
+            id: groupBox
+            anchors.left: parent.left
+            anchors.right: parent.right
 
-//        //Label: qsTr("Initials:")
+            title: qsTr("Initials/ID (3 Char Max)")
 
-//        TextInput {
-//            id: textInputInitials
-//            inputMethodHints: Qt.ImhPreferUppercase
-//            text: qsTr("kh")
-//            color: Style.text
-//        }
-//    }
+            TextField {
+                id: textFieldInitials
+                anchors.fill: parent
+                placeholderText: qsTr("J")
+            }
+        }
 
-    Rectangle {
-        id: nameInputRect
-        implicitWidth: parent.width
-        implicitHeight: 100
+        GroupBox {
+            id: groupBox1
+            anchors.left: parent.left
+            anchors.right: parent.right
+            title: qsTr("Name (Optional)")
 
-        ColumnLayout {
-            Text {
-                id: labelItem
-                //text: label
-                //color: Style.text
+            TextField {
+                id: textFieldName
+                anchors.fill: parent
+                placeholderText: qsTr("Jane Smith")
+            }
+        }
+
+        Row {
+            id: row
+            spacing: 50
+
+            Button {
+                id: buttonDelete
+                text: qsTr("Delete")
+                onClicked: reject()
             }
 
-            TextInput {
-                id: textInputInitials
-                inputMethodHints: Qt.ImhPreferUppercase
-                text: qsTr("kh")
-                color: Style.text
+            Button {
+                id: buttonSave
+                text: qsTr("Save")
+                onClicked: accept()
             }
 
-            TextInput {
-                id: textInputName
-                text: qsTr("aaaaaaaaaa")
-                color: Style.text
+            Button {
+                id: buttonCancel
+                text: qsTr("Cancel")
+                onClicked: close()
             }
         }
     }
+
 }
+
+//Dialog {
+
+//    // See if you can remove this, i don't see a reason for it other to expose
+//    // values if that is necessary
+//    property alias initials: textInputInitials
+//    property alias name: textInputName
+//    title: "Initials"
+    
+//    standardButtons: StandardButton.Ok | StandardButton.Cancel | StandardButton.Delete
+    
+//    Rectangle {
+//        id: rectangle
+//        color: "#ffffff"
+//        anchors.fill: parent
+//    }
+////    onVisibleChanged: {
+////        //editTextItem.focus = true
+////        //editTextItem.selectAll()
+////    }
+////    onButtonClicked: {
+////        Qt.inputMethod.hide();
+////    }
+
+////    Rectangle {
+////        id: initialsInputRect
+////        implicitWidth: parent.width
+////        implicitHeight: 100
+
+////        //Label: qsTr("Initials:")
+
+////        TextInput {
+////            id: textInputInitials
+////            inputMethodHints: Qt.ImhPreferUppercase
+////            text: qsTr("kh")
+////            color: Style.text
+////        }
+////    }
+
+//    Rectangle {
+//        id: nameInputRect
+//        implicitWidth: parent.width
+//        implicitHeight: 100
+
+//        ColumnLayout {
+//            Text {
+//                id: labelItem
+//                //text: label
+//                //color: Style.text
+//            }
+
+//            TextInput {
+//                id: textInputInitials
+//                inputMethodHints: Qt.ImhPreferUppercase
+//                text: qsTr("kh")
+//                color: Style.text
+//            }
+
+//            TextInput {
+//                id: textInputName
+//                text: qsTr("aaaaaaaaaa")
+//                color: Style.text
+//            }
+//        }
+//    }
+//}
+
+/*##^##
+Designer {
+    D{i:0;autoSize:true;height:480;width:640}D{i:2}D{i:4}D{i:6}
+}
+##^##*/

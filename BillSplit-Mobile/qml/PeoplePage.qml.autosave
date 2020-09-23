@@ -55,7 +55,7 @@ Page {
         spacing: 5
 
         Repeater {
-            model: tableview.model.columnCount()
+            model: tableview.model.columnCount()  // Is this needed?  Seems weird
             Rectangle {
                 width: tableview.model.columnWidth(index, Qt.font({ pointSize: 15 }))
 

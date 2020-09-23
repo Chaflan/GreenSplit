@@ -37,11 +37,12 @@ public:
     QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
     bool setData(const QModelIndex& index, const QVariant& value, int role) override;
     bool removeRows(int row, int count, const QModelIndex& parent = QModelIndex()) override;
-    QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
+    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
     Qt::ItemFlags flags(const QModelIndex& index) const override;
     QHash<int, QByteArray> roleNames() const override;
 
     Q_INVOKABLE bool addPerson(QString initials, QString name);
+    Q_INVOKABLE int columnWidth(int c, const QFont* font);
 
     void jsonRead(const QJsonObject& json);
     void jsonWrite(QJsonObject& json) const;
@@ -51,6 +52,7 @@ private:
 
 private:
     DataCore& m_data;
+    QVector<int> m_columnWidths;
 };
 
 #endif // PEOPLEMODEL_H

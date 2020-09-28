@@ -7,5 +7,6 @@
         <file>qml/ResultsPage.qml</file>
         <file>qml/PersonInputDialog.qml</file>
         <file>qml/Test.qml</file>
+        <file>qml/TransactionsInputDialog.qml</file>
     </qresource>
 </RCC>

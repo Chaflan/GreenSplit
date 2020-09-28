@@ -41,13 +41,13 @@ public:
     // TODO: Isn't this numRows in the other one?
     int rowCount(const QModelIndex& parent = QModelIndex()) const override;
     int columnCount(const QModelIndex& parent) const override;
-    QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
+    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
     QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
     bool setData(const QModelIndex& index, const QVariant& value, int role) override;
     bool removeRows(int row, int count, const QModelIndex& parent) override;
     Qt::ItemFlags flags(const QModelIndex& index) const override;
 
-    bool addTransaction(const QString& payerName,
+    Q_INVOKABLE bool addTransaction(const QString& payerName,
                         double cost,
                         const QString& description,
                         const QStringList& coveringPids);
@@ -63,6 +63,8 @@ public:
     std::set<int> getPidSetFromInitials(const QStringList& initials) const;
     // Make some of these private?
 
+    Q_INVOKABLE int columnWidth(int c, const QFont* font = nullptr);
+
     void jsonRead(const QJsonObject& json);
     void jsonWrite(QJsonObject& json) const;
 
@@ -71,6 +73,7 @@ private:
 
 private:
     DataCore& m_data;
+    QVector<int> m_columnWidths;
 };
 
 #endif // TRANSACTIONSMODEL_H

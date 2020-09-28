@@ -8,7 +8,7 @@
 PeopleModel::PeopleModel(DataCore& dataCore, QObject* parent) :
     QAbstractTableModel(parent),
     m_data(dataCore),
-    m_columnWidths(Sections::COUNT)
+    m_columnWidths(Column::COUNT)
 {
 }
 
@@ -19,7 +19,7 @@ int PeopleModel::rowCount(const QModelIndex& parent) const
 
 int PeopleModel::columnCount(const QModelIndex& parent) const
 {
-    return parent.isValid() ? 0 : Sections::COUNT;
+    return parent.isValid() ? 0 : Column::COUNT;
 }
 
 QVariant PeopleModel::data(const QModelIndex& index, int role) const
@@ -34,8 +34,8 @@ QVariant PeopleModel::data(const QModelIndex& index, int role) const
             {
                 switch (index.column())
                 {
-                    case Sections::Initials: return person.initials;
-                    case Sections::Name: return person.name;
+                    case Column::Initials: return person.initials;
+                    case Column::Name: return person.name;
                 }
                 break;
             }
@@ -60,8 +60,8 @@ bool PeopleModel::setData(const QModelIndex& index, const QVariant& value, int r
 
     if (role == Qt::EditRole) {
         switch(index.column()) {
-            case Sections::Initials: return setData(index, value, Roles::InitialsRole);
-            case Sections::Name: return setData(index, value, Roles::NameRole);
+            case Column::Initials: return setData(index, value, Roles::InitialsRole);
+            case Column::Name: return setData(index, value, Roles::NameRole);
         }
 
     } else if (role == Roles::InitialsRole || role == Roles::NameRole) {
@@ -77,9 +77,13 @@ bool PeopleModel::setData(const QModelIndex& index, const QVariant& value, int r
             return true;
         } else {
             if (role == Roles::InitialsRole) {
-                QMessageBox msg;
-                msg.setText("Initials must be unique");
-                msg.exec();
+
+                // THIS CRASHES QML
+//                QMessageBox msg;
+//                msg.setText("Initials must be unique");
+//                msg.exec();
+
+                emit signalError("Initials must be unique.");
             }
         }
     }
@@ -103,8 +107,8 @@ QVariant PeopleModel::headerData(int section, Qt::Orientation orientation, int r
 {
     if (orientation == Qt::Orientation::Horizontal && role == Qt::DisplayRole) {
         switch(section) {
-            case Sections::Initials: return "Initials";
-            case Sections::Name: return "Name";
+            case Column::Initials: return "Initials";
+            case Column::Name: return "Name";
         }
     }
 
@@ -139,16 +143,20 @@ bool PeopleModel::addPerson(QString initials, QString name)
 // TODO: Resize on value change
 int PeopleModel::columnWidth(int c, const QFont* font)
 {
-    if (c < 0 || c >= Sections::COUNT) {
+    //Q_UNUSED(font);
+
+    if (c < 0 || c >= Column::COUNT) {
         return 0;
     }
 
-    QFont hackFont;
-    hackFont.setPointSize(15);
-
     if (!m_columnWidths[c]) {
+
+        // The font is always passed as nullptr, so I am hacking past this
+        QFont hackFont;
+        hackFont.setPointSize(15);
 //        QFontMetrics defaultFontMetrics = QFontMetrics(QGuiApplication::font());
 //        QFontMetrics fm = (font ? QFontMetrics(*font) : defaultFontMetrics);
+
         QFontMetrics fm(hackFont);
         int ret = fm.horizontalAdvance(headerData(c, Qt::Horizontal).toString() + QLatin1String(" ^")) + 8;
 
@@ -160,6 +168,15 @@ int PeopleModel::columnWidth(int c, const QFont* font)
     }
 
     return m_columnWidths[c];
+}
+
+QStringList PeopleModel::getAllPeople() const
+{
+    QStringList ret;
+    for (int i = 0; i < m_data.NumPeople(); ++i) {
+        ret.append(m_data.GetPersonByIndex(i).initials);
+    }
+    return ret;
 }
 
 void PeopleModel::jsonRead(const QJsonObject& json)

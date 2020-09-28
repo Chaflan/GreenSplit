@@ -14,6 +14,11 @@ class BILLSPLITCORE_EXPORT PeopleModel : public QAbstractTableModel
 {
     Q_OBJECT
 
+    // TODO: Consider a notify method for completeness
+    // Property is marked constant as it is meant to be used in a modal window where the people model
+    // cannot be changed.  If used in another way we need a notify signal
+    Q_PROPERTY(QStringList allPeople READ getAllPeople CONSTANT)
+
 public:
     enum Roles
     {
@@ -22,7 +27,7 @@ public:
         NameRole
     };
 
-    enum Sections
+    enum Column
     {
         Initials = 0,
         Name = 1,
@@ -42,10 +47,14 @@ public:
     QHash<int, QByteArray> roleNames() const override;
 
     Q_INVOKABLE bool addPerson(QString initials, QString name);
-    Q_INVOKABLE int columnWidth(int c, const QFont* font);
+    Q_INVOKABLE int columnWidth(int c, const QFont* font = nullptr);
 
+    QStringList getAllPeople() const;
     void jsonRead(const QJsonObject& json);
     void jsonWrite(QJsonObject& json) const;
+
+signals:
+    void signalError(QString pErrorMessage) const;
 
 private:
     bool isIndexValid(const QModelIndex& i) const;

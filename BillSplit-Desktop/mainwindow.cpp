@@ -50,6 +50,8 @@ void MainWindow::closeEvent(QCloseEvent* event)
     QMainWindow::closeEvent(event);
 }
 
+
+// TODO: This needs to be at the model level
 void MainWindow::ReadFromJsonFile()
 {
     QFile file("save.json");

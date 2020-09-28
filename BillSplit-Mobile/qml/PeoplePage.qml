@@ -14,38 +14,6 @@ Page {
         }
     }
 
-
-
-    // TODO: Headers (QT hasn't implemented these yet)
-
-    // TODO: Resize columns based on data in them
-    // TODO: Center the table, not smashed up into the upper right
-    // TODO: Selectable rows
-
-//    ItemSelectionModel {
-//        id: ism
-//        model: peopleModel
-//        onSelectionChanged: console.log("selectionchanged")
-//        onCurrentIndexChanged: console.log("currentindexchanged")
-//        onCurrentColumnChanged: console.log("currentindexchanged")
-//        onCurrentRowChanged: console.log("currentindexchanged")
-////                onCurrentIndexChanged: console.log("currentindexchanged")
-////                onCurrentIndexChanged: console.log("currentindexchanged")
-////                onCurrentIndexChanged: console.log("currentindexchanged")
-////                onCurrentIndexChanged: console.log("currentindexchanged")
-//    }
-
-
-    QtObject {
-        id: theme
-        property font headerFont: Qt.font({
-//            family: 'Encode Sans',
-//            weight: Font.Black,
-//            italic: false,
-            pointSize: 15
-        })
-    }
-
     Row {
         id: tableviewheader
         width: tableview.contentWidth
@@ -57,17 +25,17 @@ Page {
         Repeater {
             model: tableview.model.columnCount()
             Rectangle {
-                width: tableview.model.columnWidth(index, Qt.font({ pointSize: 15 }))
-
-                //width: 200
+                width: tableview.model.columnWidth(index, font)
                 height: parent.height
                 color: "green"
 
                 Text {
                     id: texttt
-                    font: theme.headerFont
+                    font.pixelSize: 15
                     anchors.fill: parent
-                    //anchors.verticalCenter: parent.VerticalCenter
+                    anchors.leftMargin: 10
+                    verticalAlignment: Text.AlignVCenter
+                    //anchors.verticalCenter: parent.verticalCenter
                     x: 4
                     width: parent.width - 4
                     text: tableview.model.headerData(index, Qt.Horizontal)
@@ -80,49 +48,38 @@ Page {
         id: tableview
         model: peopleModel
         focus: true
-        columnWidthProvider: function(column) { return Math.min(600, model.columnWidth(column, theme.headerFont)) }
 
+        columnWidthProvider: function(column, font) { return Math.min(600, model.columnWidth(column, font)) }
         anchors.fill: parent
         anchors.topMargin: tableviewheader.height
         columnSpacing: 5
         rowSpacing: 5
 
-//        delegate: DelegateChooser {
-//            id: chooser
-//            role: "type"
-//            DelegateChoice { roleValue: "InitialsRole"; Text { text: display } }
-//            DelegateChoice { roleValue: "NameRole"; TextField { text: display } }
-//        }
-
         delegate: Rectangle {
-            //implicitWidth: tableview.model.columnWidth(index)
             implicitHeight: 50
             border.color: "black"
 
-//            Text {
-//                id: text
-//                text: model.display
-//            }
-
             TextField {
+                id: textField
                 text: display
-                font: theme.headerFont
+                font.pixelSize: 15
                 anchors.fill: parent
                 width: parent.width
 
                 onAccepted: {
-                    console.log("column=" + column + " row=" + row + " colwidth=" + width)
+                    //console.log("accepted")
+                    //console.log("column=" + column + " row=" + row + " colwidth=" + width)
+                    model.edit = text
                 }
-                //onDataChanged: console.log("datachanged")
+
+                onActiveFocusChanged: {
+                    //console.log(textField.text + " " + (textField.activeFocus ? "has focus" : "doesn't have focus"))
+                    if (!textField.activeFocus) {
+                        text = display
+                    }
+                }
             }
         }
-
-//        MouseArea {
-//            anchors.fill: parent
-//            onClicked: {
-//                tableview.forceLayout()
-//            }
-//        }
     }
 
     PersonInputDialog {
@@ -135,6 +92,55 @@ Page {
         }
         onRejected: {
             console.log("rejected")
+        }
+    }
+
+    // Creat a popup when an error signal is sent from the model
+    Connections {
+        target: tableview.model
+        function onSignalError(pErrorMessage) {
+            errorPopup.errorMessage.text = pErrorMessage// + " paaaaaa aaaa aaa aa aaaaa aaa aadding "
+            errorPopup.open()
+        }
+    }
+    Popup {
+        id: errorPopup
+        modal: true
+        focus: true
+        anchors.centerIn: parent
+        width: 300
+        height: 200
+        closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
+
+        property alias errorMessage: messageText
+
+        Column {
+            anchors.fill: parent
+            Text {
+                id: messageText
+                height: parent.height - circleButton.height
+                width: parent.width
+                font.pointSize: 15
+                anchors.horizontalCenter: parent.horizontalCenter
+                wrapMode: Text.WordWrap
+                verticalAlignment: Text.AlignVCenter
+                horizontalAlignment: Text.AlignHCenter
+            }
+            RoundButton {
+                id: circleButton
+
+                height: 80
+                width: 100
+                anchors.horizontalCenter: parent.horizontalCenter
+
+                text: "OK"
+                font.pointSize: 15
+
+                focus: true
+                onClicked: errorPopup.close()
+                Keys.onEnterPressed:  errorPopup.close()
+                Keys.onReturnPressed: errorPopup.close()
+            }
         }
     }
 }

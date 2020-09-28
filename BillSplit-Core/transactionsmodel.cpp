@@ -1,10 +1,13 @@
 #include "transactionsmodel.h"
 #include <QJsonArray>
 #include <QJsonObject>
+#include <QFont>
+#include <QFontMetrics>
 
 TransactionsModel::TransactionsModel(DataCore& dataCore, QObject* parent) :
     QAbstractListModel(parent),
-    m_data(dataCore)
+    m_data(dataCore),
+    m_columnWidths(Column::COUNT)
 {
 }
 
@@ -195,6 +198,35 @@ std::set<int> TransactionsModel::getPidSetFromInitials(const QStringList& initia
         result.insert(getPidFromInitials(i));
     }
     return result;
+}
+
+int TransactionsModel::columnWidth(int c, const QFont* font)
+{
+        //Q_UNUSED(font);
+
+    if (c < 0 || c >= Column::COUNT) {
+        return 0;
+    }
+
+    if (!m_columnWidths[c]) {
+
+        // The font is always passed as nullptr, so I am hacking past this
+        QFont hackFont;
+        hackFont.setPointSize(15);
+//        QFontMetrics defaultFontMetrics = QFontMetrics(QGuiApplication::font());
+//        QFontMetrics fm = (font ? QFontMetrics(*font) : defaultFontMetrics);
+
+        QFontMetrics fm(hackFont);
+        int ret = fm.horizontalAdvance(headerData(c, Qt::Horizontal).toString() + QLatin1String(" ^")) + 8;
+
+        for (int r = 0; r < rowCount(); ++r) {
+            ret = qMax(ret, fm.horizontalAdvance(data(index(r,c), Qt::DisplayRole).toString()));
+        }
+
+        m_columnWidths[c] = ret;
+    }
+
+    return m_columnWidths[c];
 }
 
 void TransactionsModel::jsonRead(const QJsonObject& json)

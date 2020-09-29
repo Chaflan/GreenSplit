@@ -8,12 +8,18 @@ import "."
 Dialog {
     id: root
     width: 400
-    title: "Add Person"
+    title: "Add Transaction"
     standardButtons: StandardButton.NoButton
 
     property alias payername: comboBoxPayer.currentText
     property alias cost: spinBoxCost.realValue
     property alias description: textFieldDescription.text
+
+    // TODO: Bit of a hack no?  Seems like we could do better here
+    // Maybe a model or a property for this sort of thing?
+    function getNameList() {
+        return peopleModel.getSelectedPeople(listView.checks)
+    }
 
     ColumnLayout {
         id: column
@@ -81,48 +87,25 @@ Dialog {
             Layout.fillHeight: true
             title: qsTr("Covering Whom")
 
+            // TODO: Grid view of some kind?
             ListView {
                 id: listView
                 anchors.fill: parent
-                model: ListModel {
-                    ListElement {
-                        name: "Grey"
-                        colorCode: "grey"
-                    }
+                model: peopleModel.allPeople
 
-                    ListElement {
-                        name: "Red"
-                        colorCode: "red"
-                    }
-
-                    ListElement {
-                        name: "Blue"
-                        colorCode: "blue"
-                    }
-
-                    ListElement {
-                        name: "Green"
-                        colorCode: "green"
+                property bool defaultCheckState: true
+                property var checks: []
+                Component.onCompleted: {
+                    for (var i = 0; i < peopleModel.rowCount(); i++) {
+                        checks[i] = defaultCheckState
                     }
                 }
-                delegate: Item {
-                    x: 5
-                    width: 80
-                    height: 40
-                    Row {
-                        id: row1
-                        Rectangle {
-                            width: 40
-                            height: 40
-                            color: colorCode
-                        }
 
-                        Text {
-                            text: name
-                            anchors.verticalCenter: parent.verticalCenter
-                            font.bold: true
-                        }
-                        spacing: 10
+                delegate: CheckDelegate {
+                    text: modelData
+                    checked: listView.defaultCheckState
+                    onCheckStateChanged: {
+                        listView.checks[index] = checked
                     }
                 }
             }

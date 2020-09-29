@@ -48,6 +48,7 @@ public:
 
     Q_INVOKABLE bool addPerson(QString initials, QString name);
     Q_INVOKABLE int columnWidth(int c, const QFont* font = nullptr);
+    Q_INVOKABLE QStringList getSelectedPeople(QList<bool> selection) const;
 
     QStringList getAllPeople() const;
     void jsonRead(const QJsonObject& json);

@@ -86,13 +86,14 @@ Page {
         id: transactionsInputDialog
         onAccepted: {
             console.log("accepted. PayerName=" + payername + ". Cost=" + cost + ". Description=" + description)
+            console.log("covered=" + getNameList())
 //                bool addTransaction(const QString& payerName,
 //                        double cost,
 //                        const QString& description,
 //                        const QStringList& coveringPids);
-//            if (!tableview.model.addTransaction(initials, name)) {
-//                console.warn("transaction couldn't be added. I=")// + initials + " N=" + name)
-//            }
+            if (!tableview.model.addTransaction(payername, cost, description, getNameList())) {
+                console.warn("transaction couldn't be added. I=")// + initials + " N=" + name)
+            }
         }
         onRejected: {
             console.log("rejected")

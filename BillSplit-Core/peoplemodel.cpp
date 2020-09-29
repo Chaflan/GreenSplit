@@ -170,6 +170,17 @@ int PeopleModel::columnWidth(int c, const QFont* font)
     return m_columnWidths[c];
 }
 
+QStringList PeopleModel::getSelectedPeople(QList<bool> selection) const
+{
+    QStringList ret;
+    for (int i = 0; i < rowCount() && i < selection.count(); ++i) {
+        if (selection[i]) {
+            ret.append(m_data.GetPersonByIndex(i).initials);
+        }
+    }
+    return ret;
+}
+
 QStringList PeopleModel::getAllPeople() const
 {
     QStringList ret;

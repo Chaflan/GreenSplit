@@ -13,7 +13,9 @@ Dialog {
 
     property alias initials: textFieldInitials.text
     property alias name: textFieldName.text
+    property alias buttonDelete: buttonDelete
 
+    // TODO: Change the layout, its better
     Column {
         id: column
         anchors.fill: parent

@@ -40,12 +40,15 @@ public:
     int rowCount(const QModelIndex& parent = QModelIndex()) const override;
     int columnCount(const QModelIndex& parent = QModelIndex()) const override;
     QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
-    bool setData(const QModelIndex& index, const QVariant& value, int role) override;
-    bool removeRows(int row, int count, const QModelIndex& parent = QModelIndex()) override;
+    bool setData(const QModelIndex& index, const QVariant& value, int role = Qt::EditRole) override;
+    Q_INVOKABLE bool removeRows(int row, int count, const QModelIndex& parent = QModelIndex()) override;
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
     Qt::ItemFlags flags(const QModelIndex& index) const override;
     QHash<int, QByteArray> roleNames() const override;
 
+    Q_INVOKABLE int getColumnFromRole(const QString& role) const;
+    Q_INVOKABLE QVariant data(int row, int column, int role = Qt::DisplayRole) const;
+    Q_INVOKABLE bool setData(int row, int column, const QVariant& value, int role = Qt::EditRole);
     Q_INVOKABLE bool addPerson(QString initials, QString name);
     Q_INVOKABLE int columnWidth(int c, const QFont* font = nullptr);
     Q_INVOKABLE QStringList getSelectedPeople(QList<bool> selection) const;

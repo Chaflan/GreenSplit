@@ -82,6 +82,7 @@ bool PeopleModel::setData(const QModelIndex& index, const QVariant& value, int r
 //                QMessageBox msg;
 //                msg.setText("Initials must be unique");
 //                msg.exec();
+                //TODO: Hook widgets into this signal below
 
                 emit signalError("Initials must be unique.");
             }
@@ -124,19 +125,51 @@ Qt::ItemFlags PeopleModel::flags(const QModelIndex& index) const
     return QAbstractItemModel::flags(index) | Qt::ItemIsEditable;
 }
 
+// TODO: Might be able to remove this at the end if you don't use the roles
 QHash<int, QByteArray> PeopleModel::roleNames() const
 {
     QHash<int, QByteArray> roles = QAbstractTableModel::roleNames();
-    roles[Roles::InitialsRole] = "initials";
-    roles[Roles::NameRole] = "name";
+    roles[Roles::InitialsRole] = "initialsRole";
+    roles[Roles::NameRole] = "nameRole";
     return roles;
+}
+
+// TODO: Combine this with the header data
+int PeopleModel::getColumnFromRole(const QString& role) const
+{
+    if (role == "Initials")
+        return Column::Initials;
+    else if (role == "Name")
+        return Column::Name;
+
+    return Column::COUNT;
+}
+
+QVariant PeopleModel::data(int row, int column, int role) const
+{
+    return data(index(row, column), role);
+}
+
+bool PeopleModel::setData(int row, int column, const QVariant& value, int role)
+{
+    return setData(index(row, column), value, role);
 }
 
 bool PeopleModel::addPerson(QString initials, QString name)
 {
+    if (initials.isEmpty()) {
+        emit signalError("Initials cannot be empty.");
+        return false;
+    }
+
     beginInsertRows(QModelIndex(), rowCount(), rowCount());
     bool result = m_data.AddPerson({std::move(initials), std::move(name)});
     endInsertRows();
+
+    if (!result) {
+        emit signalError("Initials must be unique.");
+    }
+
     return result;
 }
 

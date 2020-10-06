@@ -4,8 +4,11 @@ import QtQuick.Layouts 1.3
 
 //-----------------------------------------------------------------------
 // Custom Dialog
+//
+// Bug fix: QML has a bug for me where it will not load dialogs on android.
+// A missing file [put bug link and error msg in here] causes the loading to
+// freeze the app.  To solve the problem I customized a popup.
 //-----------------------------------------------------------------------
-
 Popup {
     modal: true
 
@@ -28,49 +31,27 @@ Popup {
         spacing: 20
 
         Item {
-            Component.onCompleted: console.log("contentItem.IH=" + contentItem.implicitHeight + " IW=" + contentItem.implicitBackgroundWidth)
             id: contentItem
             Layout.fillHeight: true
             Layout.fillWidth: true
 
-//                implicitHeight: columnLayout2.implicitHeight
-//                implicitWidth: columnLayout2.implicitWidth
-
-//                property alias initials: textFieldInitials.text
-//                property alias name: textFieldName.text
-
-//                ColumnLayout {
-//                    id: columnLayout2
-//                    anchors.fill: parent
-//            //        Layout.fillHeight: true
-//            //        Layout.fillWidth: true
-
-//                    GroupBox {
-//                        id: groupBox
-//                        Layout.fillWidth: true
-
-//                        title: qsTr("Initials/ID (3 Char Max)")
-
-//                        TextField {
-//                            id: textFieldInitials
-//                            anchors.fill: parent
-//                            placeholderText: qsTr("J")
-//                        }
-//                    }
-
-//                    GroupBox {
-//                        id: groupBox1
-//                        Layout.fillWidth: true
-
-//                        title: qsTr("Name (Optional)")
-
-//                        TextField {
-//                            id: textFieldName
-//                            anchors.fill: parent
-//                            placeholderText: qsTr("Jane Smith")
-//                        }
-//                    }
-//                }
+            // Bug fix: QML does not automatically do this caulcation which throws off layout sizing
+            implicitHeight: {
+                console.log("iheight calculation")
+                var iheight = 0
+                for (var i = 0; i < contentItem.children.length; i++) {
+                    iheight += contentItem.children[i].implicitHeight
+                }
+                return iheight
+            }
+            implicitWidth: {
+                console.log("iwidth calculation")
+                var iwidth = 0
+                for (var i = 0; i < contentItem.children.length; i++) {
+                    iwidth += contentItem.children[i].implicitWidth
+                }
+                return iwidth
+            }
         }
 
         RowLayout {
@@ -101,8 +82,6 @@ Popup {
     }
 
     onClosed: {
-        console.log("onClosed columnLayout.height" + columnLayout.height)
-
         if (privateProperties.pressResult == 1) {
             deletePressed()
         } else if (privateProperties.pressResult === 2) {

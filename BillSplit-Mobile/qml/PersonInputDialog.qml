@@ -6,24 +6,16 @@ import QtQuick.Window 2.2
 import "."
 
 PopupDialog {
-    id: train
-    Component.onCompleted: console.log("popupDialog.IH=" + train.implicitHeight + " IW=" + train.implicitBackgroundWidth)
-    implicitHeight: columnLayout.implicitHeight
-    implicitWidth: columnLayout.implicitWidth
-
     property alias initials: textFieldInitials.text
     property alias name: textFieldName.text
 
     ColumnLayout {
         id: columnLayout
         anchors.fill: parent
-//        Layout.fillHeight: true
-//        Layout.fillWidth: true
 
         GroupBox {
             id: groupBox
             Layout.fillWidth: true
-
             title: qsTr("Initials/ID (3 Char Max)")
 
             TextField {
@@ -36,7 +28,6 @@ PopupDialog {
         GroupBox {
             id: groupBox1
             Layout.fillWidth: true
-
             title: qsTr("Name (Optional)")
 
             TextField {

@@ -45,16 +45,11 @@ int main(int argc, char *argv[])
     QGuiApplication app(argc, argv);
     QQmlApplicationEngine engine;
 
+    // Give the models generated from the DataCore global context
     DataCore dataCore;
     PeopleModel peopleModel(dataCore);
     TransactionsModel transactionsModel(dataCore);
     ReadFromJsonFile(&peopleModel, &transactionsModel);
-
-    peopleModel.addPerson("C", "Chad");
-    peopleModel.addPerson("J", "Jeremy");
-    peopleModel.addPerson("Lq", "Lucas");
-    peopleModel.addPerson("L", "QQQQQQQQQQQQQQQ");
-
     QQmlContext* context = engine.rootContext();
     context->setContextProperty("peopleModel", &peopleModel);
     context->setContextProperty("transactionsModel", &transactionsModel);

@@ -8,18 +8,6 @@ ApplicationWindow {
     height: 480
     title: qsTr("Tabs")
 
-//    onActiveChanged: {
-//        //if (Qt.platform.os === "windows") {
-//            if (active) {
-//                // ...
-//                if (aboutDialog.visible) {
-//                    aboutDialog.requestActivate()
-//                }
-//                // ...
-//            }
-//        //}
-//    }
-
     SwipeView {
         id: swipeView
         anchors.fill: parent

@@ -2,10 +2,23 @@ import QtQuick 2.12
 import QtQuick.Controls 2.12
 
 ApplicationWindow {
+    id: mainApplicationWindow
     visible: true
     width: 640
     height: 480
     title: qsTr("Tabs")
+
+//    onActiveChanged: {
+//        //if (Qt.platform.os === "windows") {
+//            if (active) {
+//                // ...
+//                if (aboutDialog.visible) {
+//                    aboutDialog.requestActivate()
+//                }
+//                // ...
+//            }
+//        //}
+//    }
 
     SwipeView {
         id: swipeView

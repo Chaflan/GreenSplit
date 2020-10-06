@@ -8,5 +8,6 @@
         <file>qml/PersonInputDialog.qml</file>
         <file>qml/Test.qml</file>
         <file>qml/TransactionsInputDialog.qml</file>
+        <file>qml/PopupDialog.qml</file>
     </qresource>
 </RCC>

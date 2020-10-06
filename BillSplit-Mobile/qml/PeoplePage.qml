@@ -113,29 +113,11 @@ Page {
                 Layout.preferredWidth: parent.buttonDiameter
                 Layout.preferredHeight: parent.buttonDiameter
                 onClicked: {
-                    // TODO: Helper functions that just take row and string if you keep this (same with setdata)
-                    viewPersonDialog.initials = peopleModel.data(tableview.selectedRow, peopleModel.getColumnFromRole("Initials"))
-                    viewPersonDialog.name = peopleModel.data(tableview.selectedRow, peopleModel.getColumnFromRole("Name"))
                     viewPersonDialog.open()
-                }
-
-                PersonInputDialog {
-                    id: viewPersonDialog
-                    onAccepted: {
-                        console.log("accepted view")
-                        peopleModel.setData(tableview.selectedRow, peopleModel.getColumnFromRole("Initials"))
-                        tableview.forceLayout()
-                    }
-                    onRejected: {
-                        // TODO: Can you do this?  Try to overwrite your selection system with this
-                        //peopleModel.selection.select(tablemodel.currentRow)
-                        //myXML.removeRow(tablemodel.currentRow)
-                        //tablemodel.currentRow++;
-
-                        console.log("rejected view. row=" + tableview.selectedRow)
-                        peopleModel.removeRows(tableview.selectedRow, 1)
-                        tableview.forceLayout()
-                    }
+                    // TODO: Helper functions that just take row and string if you keep this (same with setdata)
+//                    viewPersonDialog.initials = peopleModel.data(tableview.selectedRow, peopleModel.getColumnFromRole("Initials"))
+//                    viewPersonDialog.name = peopleModel.data(tableview.selectedRow, peopleModel.getColumnFromRole("Name"))
+//                    viewPersonDialog.open()
                 }
             }
             RoundButton {
@@ -145,25 +127,132 @@ Page {
                 Layout.preferredWidth: parent.buttonDiameter
                 Layout.preferredHeight: parent.buttonDiameter
                 onClicked: {
-                    addPersonDialog.initials = ""
-                    addPersonDialog.name = ""
                     addPersonDialog.open()
-                }
-
-                PersonInputDialog {
-                    id: addPersonDialog
-                    buttonDelete.enabled: false
-                    onAccepted: {
-                        console.log("accepted add")
-                        if (!peopleModel.addPerson(addPersonDialog.initials, addPersonDialog.name)) {
-                            console.warn("person couldn't be added. I=" + initials + " N=" + name)
-                        }
-                        tableview.forceLayout()
-                    }
+//                    addPersonDialog.initials = ""
+//                    addPersonDialog.name = ""
+//                    addPersonDialog.open()
                 }
             }
         }
     }
+
+    //PopupDialog {
+    PersonInputDialog {
+        id: addPersonDialog
+        onSavePressed: {
+            console.log("save pressed")
+        }
+        onDeletePressed: {
+            console.log("delete pressed")
+        }
+        onCancelPressed: {
+            console.log("cancel pressed")
+        }
+    }
+    //PopupDialog {
+    PersonInputDialog {
+        id: viewPersonDialog
+        onSavePressed: {
+            console.log("save pressed")
+        }
+        onDeletePressed: {
+            console.log("delete pressed")
+        }
+        onCancelPressed: {
+            console.log("cancel pressed")
+        }
+    }
+
+    // TODO: Explain this hack and why you need it
+//    property var addPersonDialog
+//    property var viewPersonDialog
+//    Component.onCompleted: {
+//        var componenttt = Qt.createComponent("PersonInputDialog.qml")
+//        if(componenttt.status === Component.Ready) {
+//            addPersonDialog = componenttt.createObject(mainApplicationWindow)
+//            addPersonDialog.deleteButtonEnabled = false
+//            addPersonDialog.onAccepted {
+//                console.log("testing")
+//            }
+
+//            viewPersonDialog = componenttt.createObject(mainApplicationWindow)
+//        } else {
+//            console.error(componenttt.errorString())
+//        }
+//    }
+
+//    PersonInputDialog {
+//        id: viewPersonDialog
+//        //parent: mainApplicationWindow
+//        onAccepted: {
+//            console.log("accepted view")
+//            peopleModel.setData(tableview.selectedRow, peopleModel.getColumnFromRole("Initials"))
+//            tableview.forceLayout()
+//            close()
+//        }
+//        onRejected: {
+//            // TODO: Can you do this?  Try to overwrite your selection system with this
+//            //peopleModel.selection.select(tablemodel.currentRow)
+//            //myXML.removeRow(tablemodel.currentRow)
+//            //tablemodel.currentRow++;
+
+//            console.log("rejected view. row=" + tableview.selectedRow)
+//            peopleModel.removeRows(tableview.selectedRow, 1)
+//            tableview.forceLayout()
+//            close()
+//        }
+//    }
+
+//    PersonInputDialog {
+//        id: addPersonDialog
+//        //parent: mainApplicationWindow
+//        buttonDelete.enabled: false
+//        onAccepted: {
+//              //addPersonDialog.visible = false
+//              //addPersonDialog.destroy()
+//    //                        console.log("accepted add")
+//    //                        if (!peopleModel.addPerson(addPersonDialog.initials, addPersonDialog.name)) {
+//    //                            console.warn("person couldn't be added. I=" + initials + " N=" + name)
+//    //                        }
+//    //                        tableview.forceLayout()
+//        }
+//    }
+
+
+//    PersonInputDialog {
+//        id: viewPersonDialog
+//        //parent: mainApplicationWindow
+//        onAccepted: {
+//            console.log("accepted view")
+//            peopleModel.setData(tableview.selectedRow, peopleModel.getColumnFromRole("Initials"))
+//            tableview.forceLayout()
+//            close()
+//        }
+//        onRejected: {
+//            // TODO: Can you do this?  Try to overwrite your selection system with this
+//            //peopleModel.selection.select(tablemodel.currentRow)
+//            //myXML.removeRow(tablemodel.currentRow)
+//            //tablemodel.currentRow++;
+
+//            console.log("rejected view. row=" + tableview.selectedRow)
+//            peopleModel.removeRows(tableview.selectedRow, 1)
+//            tableview.forceLayout()
+//            close()
+//        }
+//    }
+
+//    PersonInputDialog {
+//        id: addPersonDialog
+//        //parent: mainApplicationWindow
+//        buttonDelete.enabled: false
+//        onAccepted: {
+//    //                        console.log("accepted add")
+//    //                        if (!peopleModel.addPerson(addPersonDialog.initials, addPersonDialog.name)) {
+//    //                            console.warn("person couldn't be added. I=" + initials + " N=" + name)
+//    //                        }
+//    //                        tableview.forceLayout()
+//        }
+//    }
 
     // Creat a popup when an error signal is sent from the model
     Connections {

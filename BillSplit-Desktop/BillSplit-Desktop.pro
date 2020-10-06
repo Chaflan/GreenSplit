@@ -47,9 +47,21 @@ qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
-win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../BillSplit-Core/release/ -lBillSplit-Core
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../BillSplit-Core/debug/ -lBillSplit-Core
-else:unix: LIBS += -L$$OUT_PWD/../BillSplit-Core/ -lBillSplit-Core
+windows {
+    message(WWWWWWWWWWWWWW-WINDOWS DESKTOP-DDDDDDDDDDDDDD)
+    win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../BillSplit-Core/release/ -lBillSplit-Core
+    else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../BillSplit-Core/debug/ -lBillSplit-Core
+    else:unix: LIBS += -L$$OUT_PWD/../BillSplit-Core/ -lBillSplit-Core
+}
+
+android {
+    message(AAAAAAAAAAAAAA-ANDROID DESKTOP-DDDDDDDDDDDDDD)
+    win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../BillSplit-Core/ -lBillSplit-Core_armeabi-v7a
+    else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../BillSplit-Core/ -lBillSplit-Core_armeabi-v7ad
+    else:unix: LIBS += -L$$OUT_PWD/../BillSplit-Core/ -lBillSplit-Core_armeabi-v7a
+}
 
 INCLUDEPATH += $$PWD/../BillSplit-Core
 DEPENDPATH += $$PWD/../BillSplit-Core
+
+#ANDROID_ABIS = armeabi-v7a

@@ -17,7 +17,7 @@ class BILLSPLITCORE_EXPORT PeopleModel : public QAbstractTableModel
     // TODO: Consider a notify method for completeness
     // Property is marked constant as it is meant to be used in a modal window where the people model
     // cannot be changed.  If used in another way we need a notify signal
-    Q_PROPERTY(QStringList allPeople READ getAllPeople CONSTANT)
+    Q_PROPERTY(QStringList allPeople READ getAllPeople NOTIFY allPeopleChanged)
 
 public:
     enum Roles
@@ -48,10 +48,13 @@ public:
 
     Q_INVOKABLE int getColumnFromRole(const QString& role) const;
     Q_INVOKABLE QVariant data(int row, int column, int role = Qt::DisplayRole) const;
+    Q_INVOKABLE QVariant data(int row, const QString& roleString, int role) const;
     Q_INVOKABLE bool setData(int row, int column, const QVariant& value, int role = Qt::EditRole);
+    Q_INVOKABLE bool setDataString(int row, const QString& roleString, const QVariant& value, int role = Qt::EditRole);
     Q_INVOKABLE bool addPerson(QString initials, QString name);
     Q_INVOKABLE int columnWidth(int c, const QFont* font = nullptr);
-    Q_INVOKABLE QStringList getSelectedPeople(QList<bool> selection) const;
+    Q_INVOKABLE QStringList getSelectedPeople(const QList<bool>& selection) const;
+    Q_INVOKABLE QList<bool> getSelectionFromPeople(const QStringList& people) const;
 
     QStringList getAllPeople() const;
     void jsonRead(const QJsonObject& json);
@@ -59,6 +62,7 @@ public:
 
 signals:
     void signalError(QString pErrorMessage) const;
+    void allPeopleChanged() const;
 
 private:
     bool isIndexValid(const QModelIndex& i) const;

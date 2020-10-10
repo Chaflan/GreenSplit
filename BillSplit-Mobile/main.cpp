@@ -5,6 +5,7 @@
 #include "datacore.h"
 #include "peoplemodel.h"
 #include "transactionsmodel.h"
+#include "resultsmodel.h"
 
 #include <QFile>
 #include <QJsonObject>
@@ -49,10 +50,13 @@ int main(int argc, char *argv[])
     DataCore dataCore;
     PeopleModel peopleModel(dataCore);
     TransactionsModel transactionsModel(dataCore);
+    ResultsModel resultsModel(dataCore);
     ReadFromJsonFile(&peopleModel, &transactionsModel);
+    resultsModel.updateCalculations();
     QQmlContext* context = engine.rootContext();
     context->setContextProperty("peopleModel", &peopleModel);
     context->setContextProperty("transactionsModel", &transactionsModel);
+    context->setContextProperty("resultsModel", &resultsModel);
 
     const QUrl url(QStringLiteral("qrc:/qml/main.qml"));
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,

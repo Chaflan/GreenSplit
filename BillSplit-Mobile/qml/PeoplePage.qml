@@ -78,6 +78,7 @@ Page {
                         onEditingFinished: {
                             // model.edit = text here does strange things and requires
                             // a tableview.forceLayout() call.  I call it directly instead
+                            // This also allows use of the return variable
                             if (!tableview.model.setData(row, column, text)) {
                                 text = display
                             }

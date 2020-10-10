@@ -4,8 +4,8 @@ import QtQuick.Controls 2.12
 ApplicationWindow {
     id: mainApplicationWindow
     visible: true
-    width: 640
-    height: 480
+    width: 800
+    height: 600
     title: qsTr("Tabs")
 
     SwipeView {
@@ -20,6 +20,9 @@ ApplicationWindow {
         }
 
         ResultsPage {
+            onFocusChanged: {
+                resultsModel.updateCalculations()
+            }
         }
     }
 

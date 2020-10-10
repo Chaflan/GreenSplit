@@ -5,26 +5,63 @@ import QtQuick.Dialogs 1.2
 import QtQuick.Window 2.2
 import "."
 
-Dialog {
+PopupDialog {
     id: root
     width: 400
-    title: "Add Transaction"
-    standardButtons: StandardButton.NoButton
 
     property alias payername: comboBoxPayer.currentText
-    property alias cost: spinBoxCost.realValue
+    property alias cost: spinBoxCost.text
     property alias description: textFieldDescription.text
 
-    // TODO: Bit of a hack no?  Seems like we could do better here
+    // TODO: Hack.  Seems like we could do better here
     // Maybe a model or a property for this sort of thing?
     function getNameList() {
         return peopleModel.getSelectedPeople(listView.checks)
+    }
+    signal updatedChecks()
+    function setNameList(nameList) {
+        var selection = peopleModel.getSelectionFromPeople(nameList)
+        if (selection.length !== peopleModel.rowCount()) {
+            console.log("oh noooo")
+        }
+        for (var i = 0; i < peopleModel.rowCount(); i++) {
+            listView.checks[i] = selection[i];
+        }
+        //printChecks()
+        //listView.forceLayout()
+        root.updatedChecks()
+    }
+
+    // TODO: Also hacky and janky
+//    function getPayerId() {
+//        console.log("currentValue " + comboBoxPayer.currentValue)
+//        console.log("currentText " + comboBoxPayer.currentText)
+//        console.log("payername: comboBoxPayer.currentText " + payername)
+//        console.log("currentIndex " + comboBoxPayer.currentIndex)
+//        return transactionsModel.getPidFromInitials(payername)
+//    }
+    function setPayerId(initialsString) {
+        comboBoxPayer.currentIndex = 0;
+        for (var i = 0; i < comboBoxPayer.model.length; i++) {
+            if (comboBoxPayer.model[i] === initialsString) {
+                comboBoxPayer.currentIndex = i;
+                break;
+            }
+        }
+    }
+
+    function printChecks() {
+        console.log("checks=")
+        for (var i = 0; i < listView.checks.length; i++) {
+            console.log("\t" + listView.checks[i])
+        }
     }
 
     ColumnLayout {
         id: column
         anchors.fill: parent
         spacing: 5
+        Component.onCompleted: console.log("column implicit height=" + column.implicitHeight)
 
         GroupBox {
             id: groupBoxPayer
@@ -35,40 +72,22 @@ Dialog {
                 id: comboBoxPayer
                 anchors.fill: parent
                 model: peopleModel.allPeople
+
             }
         }
+
         GroupBox {
             id: groupBoxCost
             Layout.fillWidth: true
             title: qsTr("How Much")
 
-            // TODO: Break out into its own item DoubleSpinBox
-            SpinBox {
+            TextField {
                 id: spinBoxCost
-                from: 0
-                value: 0
-                to: 100 * 100
-                stepSize: 100
                 anchors.fill: parent
-                editable: true
-
-                property int decimals: 2
-                property real realValue: value / 100
-
-                validator: DoubleValidator {
-                    bottom: Math.min(spinBoxCost.from, spinBoxCost.to)
-                    top:  Math.max(spinBoxCost.from, spinBoxCost.to)
-                }
-
-                textFromValue: function(value, locale) {
-                    return Number(value / 100).toLocaleString(locale, 'f', spinBoxCost.decimals)
-                }
-
-                valueFromText: function(text, locale) {
-                    return Number.fromLocaleString(locale, text) * 100
-                }
+                onFocusChanged: { if(focus) { selectAll() } } // Select all on click
             }
         }
+
         GroupBox {
             id: groupBoxDescription
             Layout.fillWidth: true
@@ -78,63 +97,62 @@ Dialog {
                 id: textFieldDescription
                 anchors.fill: parent
                 placeholderText: qsTr("Text Field")
+                onFocusChanged: { if(focus) { selectAll() } } // Select all on click
             }
         }
+
         GroupBox {
             id: groupBoxCovering
             height: 100
             Layout.fillWidth: true
             Layout.fillHeight: true
             title: qsTr("Covering Whom")
+            Component.onCompleted: console.log("groupBoxCovering implicit height=" + groupBoxCovering.implicitHeight)
 
-            // TODO: Grid view of some kind?
-            ListView {
+            GridView {
                 id: listView
                 anchors.fill: parent
                 model: peopleModel.allPeople
 
+                // TODO: Temp hack to be able to see contents
+                // What you really need here is a scrollbar and some kind of default
+                implicitHeight: 100
+
                 property bool defaultCheckState: true
                 property var checks: []
+                property bool checksCompleted: false
                 Component.onCompleted: {
                     for (var i = 0; i < peopleModel.rowCount(); i++) {
                         checks[i] = defaultCheckState
                     }
+                    checksCompleted = true
+                    console.log("listView implicit height=" + listView.implicitHeight)
+                    console.log("listView height=" + listView.implicitHeight)
+                    printChecks()
                 }
 
                 delegate: CheckDelegate {
+                    id: checkDelegate
                     text: modelData
-                    checked: listView.defaultCheckState
+                    font.pointSize: 9
+
                     onCheckStateChanged: {
                         listView.checks[index] = checked
                     }
+                    Component.onCompleted: {
+                        if (!listView.checksCompleted) {
+                            checked = listView.defaultCheckState
+                        } else {
+                            checked = listView.checks[index]
+                        }
+                    }
+                    Connections {
+                        target: root
+                        function onUpdatedChecks() {
+                            checked = listView.checks[index]
+                        }
+                    }
                 }
-            }
-        }
-
-        RowLayout {
-            id: row
-            spacing: 50
-            Layout.fillWidth: true
-
-            Button {
-                id: buttonDelete
-                text: qsTr("Delete")
-                Layout.alignment: Qt.AlignLeft
-                onClicked: reject()
-            }
-            Item{ Layout.fillWidth: true }  // Spacer
-            Button {
-                id: buttonSave
-                text: qsTr("Save")
-                Layout.alignment: Qt.AlignHCenter
-                onClicked: accept()
-            }
-            Item{ Layout.fillWidth: true }  // Spacer
-            Button {
-                id: buttonCancel
-                text: qsTr("Cancel")
-                Layout.alignment: Qt.AlignRight
-                onClicked: close()
             }
         }
     }

@@ -54,6 +54,11 @@ QVariant PeopleModel::data(const QModelIndex& index, int role) const
 
 bool PeopleModel::setData(const QModelIndex& index, const QVariant& value, int role)
 {
+    // TODO!!!!
+    // When reimplementing the setData() function, this signal must be emitted explicitly.
+    // https://doc.qt.io/qt-5/qabstractitemmodel.html#dataChanged
+    // THIS IS TRUE OF MANY OF THESE MODEL OVERLOADS
+
     if (!isIndexValid(index)) {
         return false;
     }
@@ -74,6 +79,7 @@ bool PeopleModel::setData(const QModelIndex& index, const QVariant& value, int r
 
         if (m_data.EditPerson(index.row(), personCopy)) {
             emit dataChanged(index, index);
+            emit allPeopleChanged();
             return true;
         } else {
             if (role == Roles::InitialsRole) {
@@ -101,6 +107,11 @@ bool PeopleModel::removeRows(int row, int count, const QModelIndex& parent)
     beginRemoveRows(parent, row, row + count - 1);
     bool result = m_data.DeletePeople(row, count);
     endRemoveRows();
+
+    if (result) {
+        emit allPeopleChanged();
+    }
+
     return result;
 }
 
@@ -150,9 +161,19 @@ QVariant PeopleModel::data(int row, int column, int role) const
     return data(index(row, column), role);
 }
 
+QVariant PeopleModel::data(int row, const QString& roleString, int role) const
+{
+    return data(row, getColumnFromRole(roleString), role);
+}
+
 bool PeopleModel::setData(int row, int column, const QVariant& value, int role)
 {
     return setData(index(row, column), value, role);
+}
+
+bool PeopleModel::setDataString(int row, const QString& roleString, const QVariant& value, int role)
+{
+    return setData(row, getColumnFromRole(roleString), value, role);
 }
 
 bool PeopleModel::addPerson(QString initials, QString name)
@@ -166,7 +187,9 @@ bool PeopleModel::addPerson(QString initials, QString name)
     bool result = m_data.AddPerson({std::move(initials), std::move(name)});
     endInsertRows();
 
-    if (!result) {
+    if (result) {
+        emit allPeopleChanged();
+    } else {
         emit signalError("Initials must be unique.");
     }
 
@@ -203,7 +226,22 @@ int PeopleModel::columnWidth(int c, const QFont* font)
     return m_columnWidths[c];
 }
 
-QStringList PeopleModel::getSelectedPeople(QList<bool> selection) const
+// TODO: This algo is slow with use of contains
+QList<bool> PeopleModel::getSelectionFromPeople(const QStringList& people) const
+{
+    QList<bool> ret;
+    for (int i = 0, trueCount = 0; i < rowCount(); ++i) {
+        if (trueCount == people.size() || !people.contains(m_data.GetPersonByIndex(i).initials)) {
+            ret.append(false);
+        } else {
+            ret.append(true);
+            trueCount++;
+        }
+    }
+    return ret;
+}
+
+QStringList PeopleModel::getSelectedPeople(const QList<bool>& selection) const
 {
     QStringList ret;
     for (int i = 0; i < rowCount() && i < selection.count(); ++i) {

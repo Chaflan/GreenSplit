@@ -9,5 +9,6 @@
         <file>qml/Test.qml</file>
         <file>qml/TransactionsInputDialog.qml</file>
         <file>qml/PopupDialog.qml</file>
+        <file>qml/DoubleSpinBox.qml</file>
     </qresource>
 </RCC>

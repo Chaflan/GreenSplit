@@ -128,6 +128,51 @@ Qt::ItemFlags TransactionsModel::flags(const QModelIndex& index) const
     return QAbstractItemModel::flags(index) | Qt::ItemIsEditable;
 }
 
+QVariant TransactionsModel::data(int row, int column, int role) const
+{
+    return data(index(row, column), role);
+}
+
+QVariant TransactionsModel::data(int row, const QString& roleString, int role) const
+{
+    return data(row, getColumnFromRole(roleString), role);
+}
+
+bool TransactionsModel::setData(int row, int column, const QVariant& value, int role)
+{
+    return setData(index(row, column), value, role);
+}
+
+// Hack.  I fiddled with the double spinbox for a very long time in QML and could not get it to
+// work with floats.  So this function uses proper a proper programming language to do it.
+bool TransactionsModel::setCostFromString(int row, const QString& cost)
+{
+    return setData(row, Column::Cost, cost.toDouble(), Qt::EditRole);
+}
+
+// TODO: Undo this, it works fine
+// Cannt have an overload because QML is not strongly typed enough to recognize int vs QString (using variants for all)
+bool TransactionsModel::setDataString(int row, const QString& roleString, const QVariant& value, int role)
+{
+    int colfromrole = getColumnFromRole(roleString);
+    return setData(row, colfromrole, value, role);
+    //return setData(row, getColumnFromRole(roleString), value, role);
+}
+
+int TransactionsModel::getColumnFromRole(const QString& role) const
+{
+    if (role == "Cost")
+        return Column::Cost;
+    else if (role == "Payer")
+        return Column::Payer;
+    else if (role == "Covering")
+        return Column::Covering;
+    else if (role == "Description")
+        return Column::Description;
+
+    return Column::COUNT;
+}
+
 bool TransactionsModel::addTransaction(const QString& payerName,
                                        double cost,
                                        const QString& description,
@@ -198,6 +243,11 @@ std::set<int> TransactionsModel::getPidSetFromInitials(const QStringList& initia
         result.insert(getPidFromInitials(i));
     }
     return result;
+}
+
+QStringList TransactionsModel::getCoveringStringList(int row) const
+{
+    return getInitialsFromPidSet(m_data.GetTransactionByIndex(row).coveringPids);
 }
 
 int TransactionsModel::columnWidth(int c, const QFont* font)

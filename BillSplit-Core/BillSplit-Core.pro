@@ -1,5 +1,5 @@
 #QT -= gui
-QT       += core gui
+QT += core gui
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -25,6 +25,7 @@ SOURCES += \
     person.cpp \
     resultsmodel.cpp \
     transaction.cpp \
+    transactionmodel.cpp \
     transactionsmodel.cpp
 
 HEADERS += \
@@ -34,6 +35,7 @@ HEADERS += \
     person.h \
     resultsmodel.h \
     transaction.h \
+    transactionmodel.h \
     transactionsmodel.h
 
 # Default rules for deployment.

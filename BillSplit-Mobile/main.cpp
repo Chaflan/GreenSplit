@@ -5,6 +5,7 @@
 #include "datacore.h"
 #include "peoplemodel.h"
 #include "transactionsmodel.h"
+#include "transactionmodel.h"
 #include "resultsmodel.h"
 
 #include <QFile>
@@ -46,16 +47,22 @@ int main(int argc, char *argv[])
     QGuiApplication app(argc, argv);
     QQmlApplicationEngine engine;
 
+    // Type registration
+    qmlRegisterType<TransactionModel>("com.company.core", 1,0, "TransactionModel");
+
     // Give the models generated from the DataCore global context
     DataCore dataCore;
     PeopleModel peopleModel(dataCore);
     TransactionsModel transactionsModel(dataCore);
-    ResultsModel resultsModel(dataCore);
     ReadFromJsonFile(&peopleModel, &transactionsModel);
+    ResultsModel resultsModel(dataCore);
     resultsModel.updateCalculations();
+    //TransactionModel transactionModel(dataCore);
     QQmlContext* context = engine.rootContext();
+    context->setContextProperty("dataCore", &dataCore);
     context->setContextProperty("peopleModel", &peopleModel);
     context->setContextProperty("transactionsModel", &transactionsModel);
+    //context->setContextProperty("transactionModel", &transactionModel);
     context->setContextProperty("resultsModel", &resultsModel);
 
     const QUrl url(QStringLiteral("qrc:/qml/main.qml"));

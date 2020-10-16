@@ -279,6 +279,37 @@ int TransactionsModel::columnWidth(int c, const QFont* font)
     return m_columnWidths[c];
 }
 
+void TransactionsModel::loadToModel(int row, TransactionModel* model) const
+{
+    assert(model);
+    model->load(
+        data(row, "Payer").toString(),
+        data(row, "Cost").toDouble(),
+        data(row, "Description").toString(),
+        data(index(row), Roles::CoveringInitialsRole).toStringList());
+}
+
+bool TransactionsModel::editFromModel(int row, TransactionModel* model)
+{
+    assert(model);
+    bool ret = true;
+    ret &= setDataString(row, "Cost", model->getCost());
+    ret &= setDataString(row, "Payer", model->getPayerName());
+    ret &= setDataString(row, "Covering", model->getCoveringStringList());
+    ret &= setDataString(row, "Description", model->getDescription());
+    return ret;
+}
+
+bool TransactionsModel::addFromModel(TransactionModel* model)
+{
+    assert(model);
+    return addTransaction(
+        model->getPayerName(),
+        model->getCost(),
+        model->getDescription(),
+        model->getCoveringStringList());
+}
+
 void TransactionsModel::jsonRead(const QJsonObject& json)
 {
     beginRemoveRows(QModelIndex(), 0, m_data.NumTransactions() - 1);

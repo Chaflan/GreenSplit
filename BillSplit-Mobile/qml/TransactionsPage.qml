@@ -82,47 +82,44 @@ Page {
                     }
                 }
             }
-
-            }
+        }
 
         RowLayout {
-                property var buttonDiameter: 80
+            property var buttonDiameter: 80
 
-                Layout.preferredHeight: buttonDiameter
-                Layout.fillWidth: true
-                Layout.bottomMargin: 20
-                Layout.rightMargin: 20
-                spacing: 50
+            Layout.preferredHeight: buttonDiameter
+            Layout.fillWidth: true
+            Layout.bottomMargin: 20
+            Layout.rightMargin: 20
+            spacing: 50
 
-                Item { Layout.fillWidth: true } // Spacer
-                RoundButton {
-                    id: viewButton
-                    enabled: false
-                    text: "View\nSelected\nTransaction"
-                    font.pointSize: 10
-                    Layout.preferredWidth: parent.buttonDiameter
-                    Layout.preferredHeight: parent.buttonDiameter
-                    onClicked: {
-                        viewTransactionDialog.cost = tableview.model.data(tableview.selectedRow, "Cost")
-                        viewTransactionDialog.setPayerId(tableview.model.data(tableview.selectedRow, "Payer"))
-                        viewTransactionDialog.description = tableview.model.data(tableview.selectedRow, "Description")
-                        viewTransactionDialog.setNameList(tableview.model.getCoveringStringList(tableview.selectedRow))
-                        viewTransactionDialog.open()
-                    }
-                }
-                RoundButton {
-                    id: addButton
-                    text: "Add\nTransaction"
-                    font.pointSize: 10
-                    Layout.preferredWidth: parent.buttonDiameter
-                    Layout.preferredHeight: parent.buttonDiameter
-                    onClicked: {
-                        addTransactionDialog.cost = 0
-                        addTransactionDialog.description = ""
-                        addTransactionDialog.open()
-                    }
+            Item { Layout.fillWidth: true } // Spacer
+            RoundButton {
+                id: viewButton
+                enabled: false
+                text: "View\nSelected\nTransaction"
+                font.pointSize: 10
+                Layout.preferredWidth: parent.buttonDiameter
+                Layout.preferredHeight: parent.buttonDiameter
+                onClicked: {
+                    transactionsModel.loadToModel(tableview.selectedRow, viewTransactionDialog.transactionModel)
+                    //transactionsModel.loadToModel(tableview.selectedRow, transactionModel)
+                    viewTransactionDialog.open()
                 }
             }
+            RoundButton {
+                id: addButton
+                text: "Add\nTransaction"
+                font.pointSize: 10
+                Layout.preferredWidth: parent.buttonDiameter
+                Layout.preferredHeight: parent.buttonDiameter
+                onClicked: {
+                    viewTransactionDialog.transactionModel.clear()
+                    //transactionModel.clear()
+                    addTransactionDialog.open()
+                }
+            }
+        }
     }
 
     // TODO: rename, singular
@@ -130,7 +127,7 @@ Page {
         id: addTransactionDialog
         anchors.centerIn: parent
         onSavePressed: {
-            if (!tableview.model.addTransaction(payername, cost, description, getNameList())) {
+            if (!tableview.model.addFromModel(transactionModel)) {
                 console.warn("transaction couldn't be added.")
             }
         }
@@ -140,15 +137,16 @@ Page {
         anchors.centerIn: parent
         onSavePressed: {
             console.log("view save")
-            tableview.model.setCostFromString(tableview.selectedRow, viewTransactionDialog.cost)
-            tableview.model.setDataString(tableview.selectedRow, "Payer", viewTransactionDialog.payername)
-            tableview.model.setDataString(tableview.selectedRow, "Description", viewTransactionDialog.description)
-            tableview.model.setDataString(tableview.selectedRow, "Covering", viewTransactionDialog.getNameList())
+            if (!tableview.model.editFromModel(tableview.selectedRow, transactionModel)) {
+                console.warn("transaction couldn't be edited.")
+            }
 
         }
         onDeletePressed: {
             console.log("view delete")
-            tableview.model.removeRows(tableview.selectedRow, 1)
+            if (!tableview.model.removeRows(tableview.selectedRow, 1)) {
+                console.warn("transaction couldn't be deleted")
+            }
         }
     }
 

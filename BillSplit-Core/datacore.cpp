@@ -1,6 +1,6 @@
 #include "datacore.h"
 
-DataCore::DataCore()
+DataCore::DataCore(QObject *parent) : QObject(parent)
 {
 }
 

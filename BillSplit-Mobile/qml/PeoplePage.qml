@@ -74,6 +74,7 @@ Page {
                         font.pixelSize: 15
                         anchors.fill: parent
                         width: parent.width
+                        onFocusChanged: { if(focus) { selectAll() } } // Select all on click
 
                         onEditingFinished: {
                             // model.edit = text here does strange things and requires

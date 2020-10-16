@@ -37,7 +37,6 @@ Popup {
 
             // Bug fix: QML does not automatically do this caulcation which throws off layout sizing
             implicitHeight: {
-                console.log("iheight calculation")
                 var iheight = 0
                 for (var i = 0; i < contentItem.children.length; i++) {
                     iheight += contentItem.children[i].implicitHeight
@@ -45,7 +44,6 @@ Popup {
                 return iheight
             }
             implicitWidth: {
-                console.log("iwidth calculation")
                 var iwidth = 0
                 for (var i = 0; i < contentItem.children.length; i++) {
                     iwidth += contentItem.children[i].implicitWidth

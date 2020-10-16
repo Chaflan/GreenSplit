@@ -13,12 +13,15 @@
 // QT Stuff to remove in the future
 #include <QString>
 #include <QHash>
+#include <QObject>
 //--------------------------------
 
-class BILLSPLITCORE_EXPORT DataCore
+class BILLSPLITCORE_EXPORT DataCore : public QObject
 {
+    Q_OBJECT
 public:
-    DataCore();
+    explicit DataCore(QObject *parent = nullptr);
+    virtual ~DataCore() {};  // to fix vtable error
 
     bool AddPerson(Person person);
     bool DeletePeople(int index, int count = 1);

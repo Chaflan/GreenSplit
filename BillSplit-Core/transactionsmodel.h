@@ -3,6 +3,7 @@
 
 #include "BillSplit-Core_global.h"
 #include "datacore.h"
+#include "transactionmodel.h"
 
 #include <QAbstractListModel>
 
@@ -72,6 +73,10 @@ public:
     // Make some of these private?
 
     Q_INVOKABLE int columnWidth(int c, const QFont* font = nullptr);
+
+    Q_INVOKABLE void loadToModel(int row, TransactionModel* model) const;
+    Q_INVOKABLE bool editFromModel(int row, /*const*/ TransactionModel* model);
+    Q_INVOKABLE bool addFromModel(/*const*/ TransactionModel* model);
 
     void jsonRead(const QJsonObject& json);
     void jsonWrite(QJsonObject& json) const;

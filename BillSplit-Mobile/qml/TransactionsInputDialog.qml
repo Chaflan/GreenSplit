@@ -12,19 +12,9 @@ PopupDialog {
 
     property alias transactionModel: transactionModel
 
-    // TODO: Don't think these are needed anymore
-//    property alias payername: comboBoxPayer.currentText
-//    property alias cost: spinBoxCost.text
-//    property alias description: textFieldDescription.text
-
     TransactionModel {
         id: transactionModel
         Component.onCompleted: initialize(dataCore)
-
-        onPayerIndexChanged: comboBoxPayer.currentIndex = payerIndex
-        onCostChanged: spinBoxCost.text = cost
-        onDescriptionChanged: textFieldDescription.text = description
-        //onCoveringListChanged: listView.model = coveringList
     }
 
     ColumnLayout {
@@ -41,6 +31,7 @@ PopupDialog {
                 id: comboBoxPayer
                 anchors.fill: parent
                 model: transactionModel.allPeople
+                currentIndex: transactionModel.payerIndex
                 onCurrentIndexChanged: transactionModel.payerIndex = currentIndex
             }
         }
@@ -54,6 +45,7 @@ PopupDialog {
                 id: spinBoxCost
                 anchors.fill: parent
                 onFocusChanged: { if(focus) { selectAll() } } // Select all on click
+                text: transactionModel.cost
                 onDisplayTextChanged: transactionModel.cost = text
             }
         }
@@ -67,6 +59,7 @@ PopupDialog {
                 id: textFieldDescription
                 anchors.fill: parent
                 onFocusChanged: { if(focus) { selectAll() } } // Select all on click
+                text: transactionModel.description
                 onDisplayTextChanged: transactionModel.description = text
             }
         }
@@ -92,7 +85,7 @@ PopupDialog {
                     text: modelData.name
                     font.pointSize: 9
                     checked: modelData.checkStatus
-                    //onCheckStateChanged: modelData.checkStatus = checked
+                    onCheckStateChanged: modelData.checkStatus = checked
                 }
             }
         }

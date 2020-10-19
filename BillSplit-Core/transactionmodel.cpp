@@ -14,14 +14,18 @@ PersonCheck::PersonCheck(QString name, bool checkStatus, QObject* parent) :
 
 void PersonCheck::setName(QString name)
 {
-    m_name = std::move(name);
-    emit nameChanged();
+    if (name != m_name) {
+        m_name = std::move(name);
+        emit nameChanged();
+    }
 }
 
 void PersonCheck::setCheckStatus(bool checkStatus)
 {
-    m_checkStatus = checkStatus;
-    emit checkStatusChanged();
+    if (checkStatus != m_checkStatus) {
+        m_checkStatus = checkStatus;
+        emit checkStatusChanged();
+    }
 }
 
 //--------------------------------------------------------
@@ -64,37 +68,45 @@ void TransactionModel::initialize(DataCore* data)
 
 void TransactionModel::setPayerName(QString payerName)
 {
-    for (int i = 0; i < m_data->NumPeople(); ++i) {
-        if (payerName == m_data->GetPersonByIndex(i).initials) {
-            m_payerIndex = i;
-            m_payerName = std::move(payerName);
-            emit payerIndexChanged();
-            emit payerNameChanged();
-            break;
+    if (payerName != m_payerName) {
+        for (int i = 0; i < m_data->NumPeople(); ++i) {
+            if (payerName == m_data->GetPersonByIndex(i).initials) {
+                m_payerIndex = i;
+                m_payerName = std::move(payerName);
+                emit payerIndexChanged();
+                emit payerNameChanged();
+                break;
+            }
         }
     }
 }
 
 void TransactionModel::setPayerIndex(int payerIndex)
 {
-    if (payerIndex >= 0 && payerIndex < m_data->NumPeople()) {
-        m_payerIndex = payerIndex;
-        m_payerName = m_data->GetPersonByIndex(m_payerIndex).initials;
-        emit payerIndexChanged();
-        emit payerNameChanged();
+    if (payerIndex != m_payerIndex) {
+        if (payerIndex >= 0 && payerIndex < m_data->NumPeople()) {
+            m_payerIndex = payerIndex;
+            m_payerName = m_data->GetPersonByIndex(m_payerIndex).initials;
+            emit payerIndexChanged();
+            emit payerNameChanged();
+        }
     }
 }
 
 void TransactionModel::setCost(double cost)
 {
-    m_cost = cost;
-    emit costChanged();
+    if (cost != m_cost) {
+        m_cost = cost;
+        emit costChanged();
+    }
 }
 
 void TransactionModel::setDescription(QString description)
 {
-    m_description = std::move(description);
-    emit descriptionChanged();
+    if (m_description != description) {
+        m_description = std::move(description);
+        emit descriptionChanged();
+    }
 }
 
 void TransactionModel::load(QString payerName, double cost, QString description, const QStringList& covering)
@@ -111,10 +123,17 @@ void TransactionModel::clear()
     setCost(0);
     setDescription("");
 
+    bool coveringListWasChanged = false;
     for (auto& personCheckPtr : m_coveringList) {
-        personCheckPtr->setCheckStatus(true);
+        if (personCheckPtr->getCheckStatus() == false) {
+            personCheckPtr->setCheckStatus(true);
+            coveringListWasChanged = true;
+        }
     }
-    emit coveringListChanged();
+
+    if (coveringListWasChanged) {
+        emit coveringListChanged();
+    }
 }
 
 QStringList TransactionModel::getCoveringStringList() const
@@ -130,10 +149,17 @@ QStringList TransactionModel::getCoveringStringList() const
 
 void TransactionModel::setCoveringStringList(const QStringList& stringList)
 {
+    // TODO: Can use the cache here too
+    bool coveringListWasChanged = false;
     for (int i = 0; i < m_coveringList.length(); ++i) {
-        m_coveringList[i]->setCheckStatus(stringList.contains(m_coveringList[i]->getName()));
+        bool newCheckStatus = stringList.contains(m_coveringList[i]->getName());
+        if (m_coveringList[i]->getCheckStatus() != newCheckStatus) {
+            m_coveringList[i]->setCheckStatus(newCheckStatus);
+            coveringListWasChanged = true;
+        }
     }
-    emit coveringListChanged();
+    if (coveringListWasChanged) {
+        emit coveringListChanged();
+    }
 }
-
 

@@ -37,7 +37,7 @@ class BILLSPLITCORE_EXPORT TransactionModel : public QObject
     Q_PROPERTY(QString payerName READ getPayerName WRITE setPayerName NOTIFY payerNameChanged)
     Q_PROPERTY(int payerIndex READ getPayerIndex WRITE setPayerIndex NOTIFY payerIndexChanged)
     Q_PROPERTY(double cost READ getCost WRITE setCost NOTIFY costChanged)
-    Q_PROPERTY(QString description READ getDescription WRITE setDescription NOTIFY descriptionChanged)
+    Q_PROPERTY(QString description READ getDescription WRITE setDescription NOTIFY descriptionChanged USER true)
 
     // TODO: Readonly?
     Q_PROPERTY(QStringList allPeople READ getAllPeople NOTIFY allPeopleChanged)

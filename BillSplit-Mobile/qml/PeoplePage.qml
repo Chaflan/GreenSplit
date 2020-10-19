@@ -11,7 +11,9 @@ Page {
     ColumnLayout {
         anchors.fill: parent
         spacing: 80
+
         Item {
+            id: entiretable
             Layout.fillWidth: true
             Layout.fillHeight: true
 
@@ -94,42 +96,43 @@ Page {
                     }
                 }
             }
-        }
 
-        RowLayout {
-            property var buttonDiameter: 80
+            RowLayout {
+                id: tableviewfooter
+                width: tableview.contentWidth
+                height: 40
+                x: -tableview.contentX
+                y: -tableview.contentY + tableview.contentHeight + tableviewheader.height + tableview.rowSpacing
 
-            Layout.preferredHeight: buttonDiameter
-            Layout.fillWidth: true
-            Layout.bottomMargin: 20
-            Layout.rightMargin: 20
-            spacing: 50
+                Item { Layout.fillWidth: true } // Spacer
+                Button {
+                    id: viewButton
+                    enabled: false
+                    text: "View\nSelected\nPerson"
+                    font.pointSize: 10
+                    Layout.preferredWidth: tableviewheader.width / 2 - 5
+                    Layout.preferredHeight: tableviewheader.height
+                    Layout.leftMargin: 0
 
-            Item { Layout.fillWidth: true } // Spacer
-            RoundButton {
-                id: viewButton
-                enabled: false
-                text: "View\nSelected\nPerson"
-                font.pointSize: 10
-                Layout.preferredWidth: parent.buttonDiameter
-                Layout.preferredHeight: parent.buttonDiameter
-                onClicked: {
-                    // TODO: Overload with row and string
-                    viewPersonDialog.initials = peopleModel.data(tableview.selectedRow, peopleModel.getColumnFromRole("Initials"))
-                    viewPersonDialog.name = peopleModel.data(tableview.selectedRow, peopleModel.getColumnFromRole("Name"))
-                    viewPersonDialog.open()
+                    onClicked: {
+                        // TODO: Overload with row and string
+                        viewPersonDialog.initials = peopleModel.data(tableview.selectedRow, peopleModel.getColumnFromRole("Initials"))
+                        viewPersonDialog.name = peopleModel.data(tableview.selectedRow, peopleModel.getColumnFromRole("Name"))
+                        viewPersonDialog.open()
+                    }
                 }
-            }
-            RoundButton {
-                id: addButton
-                text: "Add\nPerson"
-                font.pointSize: 10
-                Layout.preferredWidth: parent.buttonDiameter
-                Layout.preferredHeight: parent.buttonDiameter
-                onClicked: {
-                    addPersonDialog.initials = ""
-                    addPersonDialog.name = ""
-                    addPersonDialog.open()
+                Button {
+                    id: addButton
+                    text: "Add\nPerson"
+                    font.pointSize: 10
+                    Layout.preferredWidth: tableviewheader.width / 2 - 5
+                    Layout.preferredHeight: tableviewheader.height
+                    Layout.rightMargin: 0
+                    onClicked: {
+                        addPersonDialog.initials = ""
+                        addPersonDialog.name = ""
+                        addPersonDialog.open()
+                    }
                 }
             }
         }

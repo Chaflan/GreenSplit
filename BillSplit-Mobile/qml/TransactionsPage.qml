@@ -103,7 +103,6 @@ Page {
                 Layout.preferredHeight: parent.buttonDiameter
                 onClicked: {
                     transactionsModel.loadToModel(tableview.selectedRow, viewTransactionDialog.transactionModel)
-                    //transactionsModel.loadToModel(tableview.selectedRow, transactionModel)
                     viewTransactionDialog.open()
                 }
             }
@@ -115,7 +114,6 @@ Page {
                 Layout.preferredHeight: parent.buttonDiameter
                 onClicked: {
                     viewTransactionDialog.transactionModel.clear()
-                    //transactionModel.clear()
                     addTransactionDialog.open()
                 }
             }

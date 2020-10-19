@@ -35,21 +35,6 @@ TransactionModel::TransactionModel(QObject *parent) :
 {
 }
 
-//TransactionModel::TransactionModel(DataCore& dataCore, QObject* parent):
-//    QObject(parent),
-//    m_data(dataCore)
-//{
-//    // TODO: hook all people to people model change emits
-//    for (int i = 0; i < m_data->NumPeople(); ++i) {
-//        m_allPeople.append(m_data->GetPersonByIndex(i).initials);
-//        m_coveringList.append(new PersonCheck(m_allPeople[i], true, this));  // TODO: Is this right?  Qt parent system is weird
-//    }
-//    emit allPeopleChanged();
-//    emit coveringListChanged();
-
-//    clear();
-//}
-
 void TransactionModel::initialize(DataCore* data)
 {
     m_data = data;

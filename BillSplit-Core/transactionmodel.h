@@ -3,7 +3,7 @@
 
 #include <QObject>
 #include "BillSplit-Core_global.h"
-#include "datacore.h"
+#include "datacoreold.h"
 
 class BILLSPLITCORE_EXPORT PersonCheck : public QObject
 {
@@ -47,7 +47,7 @@ public:
     explicit TransactionModel(QObject *parent = nullptr);
     //TransactionModel(DataCore& dataCore, QObject* parent = nullptr);
 
-    Q_INVOKABLE void initialize(DataCore* data);
+    Q_INVOKABLE void initialize(DataCoreOld* data);
 
     QString getPayerName() const                 { return m_payerName; }
     int getPayerIndex() const                    { return m_payerIndex; }
@@ -85,7 +85,7 @@ private:
 
     // TODO: This information can change from the people model, so we really should
     // store models in here, not the raw data core, that is a fix for the future though
-    DataCore* m_data = nullptr;
+    DataCoreOld* m_data = nullptr;
     //DataCore& m_data;
 };
 

@@ -20,7 +20,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-    datacore.cpp \
+    datacoreold.cpp \
     peoplemodel.cpp \
     person.cpp \
     resultsmodel.cpp \
@@ -30,7 +30,7 @@ SOURCES += \
 
 HEADERS += \
     BillSplit-Core_global.h \
-    datacore.h \
+    datacoreold.h \
     peoplemodel.h \
     person.h \
     resultsmodel.h \

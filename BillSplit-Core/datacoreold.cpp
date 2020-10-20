@@ -1,10 +1,10 @@
-#include "datacore.h"
+#include "datacoreold.h"
 
-DataCore::DataCore(QObject *parent) : QObject(parent)
+DataCoreOld::DataCoreOld(QObject *parent) : QObject(parent)
 {
 }
 
-bool DataCore::AddPerson(Person person)
+bool DataCoreOld::AddPerson(Person person)
 {
     if (person.initials.isEmpty() || person.name.isEmpty() ||
             peopleByInitials.find(person.initials) != peopleByInitials.end())
@@ -19,7 +19,7 @@ bool DataCore::AddPerson(Person person)
     return true;
 }
 
-bool DataCore::DeletePeople(int index, int count)
+bool DataCoreOld::DeletePeople(int index, int count)
 {
     const int firstIndex = index;
     const int lastIndex = firstIndex + count - 1;
@@ -39,7 +39,7 @@ bool DataCore::DeletePeople(int index, int count)
     return true;
 }
 
-bool DataCore::EditPerson(int index, const Person& newPerson)
+bool DataCoreOld::EditPerson(int index, const Person& newPerson)
 {
     if (index < 0 || index >= NumPeople() ||
             newPerson.initials.isEmpty() || newPerson.name.isEmpty())
@@ -65,27 +65,27 @@ bool DataCore::EditPerson(int index, const Person& newPerson)
     return true;
 }
 
-const Person& DataCore::GetPersonByIndex(int index) const
+const Person& DataCoreOld::GetPersonByIndex(int index) const
 {
     return *peopleByIndex[index];
 }
 
-const Person& DataCore::GetPersonByInitials(const QString& initials) const
+const Person& DataCoreOld::GetPersonByInitials(const QString& initials) const
 {
     return *peopleByInitials.find(initials)->second;
 }
 
-const Person& DataCore::GetPersonById(int id) const
+const Person& DataCoreOld::GetPersonById(int id) const
 {
     return *peopleById.find(id)->second;
 }
 
-int DataCore::NumPeople() const
+int DataCoreOld::NumPeople() const
 {
     return static_cast<int>(peopleByIndex.size());
 }
 
-bool DataCore::AddTransaction(Transaction transaction)
+bool DataCoreOld::AddTransaction(Transaction transaction)
 {
     if (!HasValidPids(transaction))
     {
@@ -98,7 +98,7 @@ bool DataCore::AddTransaction(Transaction transaction)
     return true;
 }
 
-bool DataCore::DeleteTransactions(int index, int count)
+bool DataCoreOld::DeleteTransactions(int index, int count)
 {
     const int firstIndex = index;
     const int lastIndex = firstIndex + count - 1;
@@ -117,7 +117,7 @@ bool DataCore::DeleteTransactions(int index, int count)
     return true;
 }
 
-bool DataCore::EditTransaction(int index, const Transaction& newTransaction)
+bool DataCoreOld::EditTransaction(int index, const Transaction& newTransaction)
 {
     if (index < 0 || index >= NumTransactions() ||
             !HasValidPids(newTransaction) || newTransaction.description.isEmpty())
@@ -129,22 +129,22 @@ bool DataCore::EditTransaction(int index, const Transaction& newTransaction)
     return true;
 }
 
-const Transaction& DataCore::GetTransactionByIndex(int index) const
+const Transaction& DataCoreOld::GetTransactionByIndex(int index) const
 {
     return *transactionsByIndex[index];
 }
 
-const Transaction& DataCore::GetTransactionById(int id) const
+const Transaction& DataCoreOld::GetTransactionById(int id) const
 {
     return *transactionsById.find(id)->second;
 }
 
-int DataCore::NumTransactions() const
+int DataCoreOld::NumTransactions() const
 {
     return static_cast<int>(transactionsByIndex.size());
 }
 
-void DataCore::ClearPeople()
+void DataCoreOld::ClearPeople()
 {
     peopleByIndex.clear();
     peopleById.clear();
@@ -157,13 +157,13 @@ void DataCore::ClearPeople()
     }
 }
 
-void DataCore::ClearTransactions()
+void DataCoreOld::ClearTransactions()
 {
     transactionsByIndex.clear();
     transactionsById.clear();
 }
 
-void DataCore::Clear()
+void DataCoreOld::Clear()
 {
     peopleByIndex.clear();
     peopleById.clear();
@@ -172,7 +172,7 @@ void DataCore::Clear()
     transactionsById.clear();
 }
 
-std::vector<Transaction> DataCore::Calculate()
+std::vector<Transaction> DataCoreOld::Calculate()
 {
     std::vector<Transaction> result;
 
@@ -259,7 +259,7 @@ std::vector<Transaction> DataCore::Calculate()
     return result;
 }
 
-bool DataCore::HasValidPids(const Transaction& transaction) const
+bool DataCoreOld::HasValidPids(const Transaction& transaction) const
 {
     if (peopleById.find(transaction.payerPid) == peopleById.end())
     {

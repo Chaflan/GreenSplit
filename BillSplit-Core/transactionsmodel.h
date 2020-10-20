@@ -2,7 +2,7 @@
 #define TRANSACTIONSMODEL_H
 
 #include "BillSplit-Core_global.h"
-#include "datacore.h"
+#include "datacoreold.h"
 #include "transactionmodel.h"
 
 #include <QAbstractListModel>
@@ -38,7 +38,7 @@ public:
     };
 
 public:
-    TransactionsModel(DataCore& dataCore, QObject* parent = nullptr);
+    TransactionsModel(DataCoreOld& dataCore, QObject* parent = nullptr);
 
     // TODO: Isn't this numRows in the other one?
     int rowCount(const QModelIndex& parent = QModelIndex()) const override;
@@ -86,7 +86,7 @@ private:
     bool isIndexValid(const QModelIndex& i) const;
 
 private:
-    DataCore& m_data;
+    DataCoreOld& m_data;
     QVector<int> m_columnWidths;  // <- mutable!
 };
 

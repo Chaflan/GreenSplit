@@ -2,7 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include "datacore.h"
+#include "datacoreold.h"
 
 // -Hide implementation
 // -Some kind of inheritance for the transaction and people widgets.  They
@@ -34,7 +34,7 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
-    DataCore m_data;
+    DataCoreOld m_data;
     PeopleModel* mPeopleModel;
     TransactionsModel* mTransactionsModel;
     ResultsModel* mResultsModel;

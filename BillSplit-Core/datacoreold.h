@@ -16,12 +16,12 @@
 #include <QObject>
 //--------------------------------
 
-class BILLSPLITCORE_EXPORT DataCore : public QObject
+class BILLSPLITCORE_EXPORT DataCoreOld : public QObject
 {
     Q_OBJECT
 public:
-    explicit DataCore(QObject *parent = nullptr);
-    virtual ~DataCore() {};  // to fix vtable error
+    explicit DataCoreOld(QObject *parent = nullptr);
+    virtual ~DataCoreOld() {};  // to fix vtable error
 
     bool AddPerson(Person person);
     bool DeletePeople(int index, int count = 1);

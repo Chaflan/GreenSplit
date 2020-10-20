@@ -2,7 +2,7 @@
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 
-#include "datacore.h"
+#include "datacoreold.h"
 #include "peoplemodel.h"
 #include "transactionsmodel.h"
 #include "transactionmodel.h"
@@ -51,7 +51,7 @@ int main(int argc, char *argv[])
     qmlRegisterType<TransactionModel>("com.company.core", 1,0, "TransactionModel");
 
     // Give the models generated from the DataCore global context
-    DataCore dataCore;
+    DataCoreOld dataCore;
     PeopleModel peopleModel(dataCore);
     TransactionsModel transactionsModel(dataCore);
     ReadFromJsonFile(&peopleModel, &transactionsModel);

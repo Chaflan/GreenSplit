@@ -2,7 +2,7 @@
 #define PEOPLEMODEL_H
 
 #include "BillSplit-Core_global.h"
-#include "datacore.h"
+#include "datacoreold.h"
 
 #include <QAbstractListModel>
 
@@ -35,7 +35,7 @@ public:
     };
 
 public:
-    PeopleModel(DataCore& dataCore, QObject* parent = nullptr);
+    PeopleModel(DataCoreOld& dataCore, QObject* parent = nullptr);
 
     int rowCount(const QModelIndex& parent = QModelIndex()) const override;
     int columnCount(const QModelIndex& parent = QModelIndex()) const override;
@@ -68,7 +68,7 @@ private:
     bool isIndexValid(const QModelIndex& i) const;
 
 private:
-    DataCore& m_data;
+    DataCoreOld& m_data;
     QVector<int> m_columnWidths;
 };
 

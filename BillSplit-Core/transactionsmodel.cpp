@@ -4,7 +4,7 @@
 #include <QFont>
 #include <QFontMetrics>
 
-TransactionsModel::TransactionsModel(DataCore& dataCore, QObject* parent) :
+TransactionsModel::TransactionsModel(DataCoreOld& dataCore, QObject* parent) :
     QAbstractListModel(parent),
     m_data(dataCore),
     m_columnWidths(Column::COUNT)
@@ -252,7 +252,7 @@ QStringList TransactionsModel::getCoveringStringList(int row) const
 
 int TransactionsModel::columnWidth(int c, const QFont* font)
 {
-        //Q_UNUSED(font);
+    Q_UNUSED(font);
 
     if (c < 0 || c >= Column::COUNT) {
         return 0;

@@ -35,7 +35,7 @@ TransactionModel::TransactionModel(QObject *parent) :
 {
 }
 
-void TransactionModel::initialize(DataCore* data)
+void TransactionModel::initialize(DataCoreOld* data)
 {
     m_data = data;
     assert(m_data);

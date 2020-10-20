@@ -4,7 +4,7 @@
 #include <QFont>
 #include <QFontMetrics>
 
-ResultsModel::ResultsModel(DataCore& dataCore, QObject* parent) :
+ResultsModel::ResultsModel(DataCoreOld& dataCore, QObject* parent) :
     QAbstractListModel(parent),
     m_data(dataCore),
     m_columnWidths(1)
@@ -45,7 +45,7 @@ QVariant ResultsModel::headerData(int section, Qt::Orientation orientation, int 
 
 int ResultsModel::columnWidth(int c, const QFont* font)
 {
-            //Q_UNUSED(font);
+    Q_UNUSED(font);
 
     if (c != 0) {
         return 0;

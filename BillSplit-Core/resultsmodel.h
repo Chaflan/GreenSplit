@@ -2,7 +2,7 @@
 #define RESULTSMODEL_H
 
 #include "BillSplit-Core_global.h"
-#include "datacore.h"
+#include "datacoreold.h"
 
 #include <QAbstractListModel>
 #include <vector>
@@ -13,7 +13,7 @@ class BILLSPLITCORE_EXPORT ResultsModel : public QAbstractListModel
     Q_OBJECT
 
 public:
-    ResultsModel(DataCore& dataCore, QObject* parent = nullptr);
+    ResultsModel(DataCoreOld& dataCore, QObject* parent = nullptr);
 
     int rowCount(const QModelIndex& parent = QModelIndex()) const override;
     QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
@@ -29,7 +29,7 @@ private:
     bool isIndexValid(const QModelIndex& i) const;
 
 private:
-    DataCore& m_data;
+    DataCoreOld& m_data;
     std::vector<Transaction> m_results;
     QVector<int> m_columnWidths;
 };

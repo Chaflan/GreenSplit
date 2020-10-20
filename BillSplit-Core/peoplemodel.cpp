@@ -5,7 +5,7 @@
 #include <QGuiApplication>
 #include <QtGlobal>
 
-PeopleModel::PeopleModel(DataCore& dataCore, QObject* parent) :
+PeopleModel::PeopleModel(DataCoreOld& dataCore, QObject* parent) :
     QAbstractTableModel(parent),
     m_data(dataCore),
     m_columnWidths(Column::COUNT)
@@ -199,7 +199,7 @@ bool PeopleModel::addPerson(QString initials, QString name)
 // TODO: Resize on value change
 int PeopleModel::columnWidth(int c, const QFont* font)
 {
-    //Q_UNUSED(font);
+    Q_UNUSED(font);
 
     if (c < 0 || c >= Column::COUNT) {
         return 0;

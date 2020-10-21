@@ -5,14 +5,14 @@
 #include <QString>
 #include <set>
 
-class BILLSPLITCORE_EXPORT Transaction
+class BILLSPLITCORE_EXPORT TransactionOld
 {
 public:
     // Rule of 5
-    Transaction();
-    Transaction(int payer, QString descr, double cost, std::set<int> covering);
-    Transaction(const Transaction& other);
-    const Transaction& operator= (const Transaction& other);
+    TransactionOld();
+    TransactionOld(int payer, QString descr, double cost, std::set<int> covering);
+    TransactionOld(const TransactionOld& other);
+    const TransactionOld& operator= (const TransactionOld& other);
 
     const int id;
     int payerPid;
@@ -21,7 +21,7 @@ public:
     std::set<int> coveringPids;
 
 private:
-    void Copy(const Transaction& other);
+    void Copy(const TransactionOld& other);
 
     static int nextId;
 };

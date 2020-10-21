@@ -60,7 +60,7 @@ public:
                         const QString& description,
                         const QStringList& coveringPids);
 
-    bool addTransaction(Transaction transaction);
+    bool addTransaction(TransactionOld transaction);
 
     // TODO: These methods are ugly, people should be id'ed by initials
     // Maybe consider making the data core not care about anything but initials and use a wrapper

@@ -85,14 +85,14 @@ int DataCoreOld::NumPeople() const
     return static_cast<int>(peopleByIndex.size());
 }
 
-bool DataCoreOld::AddTransaction(Transaction transaction)
+bool DataCoreOld::AddTransaction(TransactionOld transaction)
 {
     if (!HasValidPids(transaction))
     {
         return false;
     }
 
-    auto newTransaction = std::make_shared<Transaction>(std::move(transaction));
+    auto newTransaction = std::make_shared<TransactionOld>(std::move(transaction));
     transactionsByIndex.push_back(newTransaction);
     transactionsById[newTransaction->id] = newTransaction;
     return true;
@@ -117,7 +117,7 @@ bool DataCoreOld::DeleteTransactions(int index, int count)
     return true;
 }
 
-bool DataCoreOld::EditTransaction(int index, const Transaction& newTransaction)
+bool DataCoreOld::EditTransaction(int index, const TransactionOld& newTransaction)
 {
     if (index < 0 || index >= NumTransactions() ||
             !HasValidPids(newTransaction) || newTransaction.description.isEmpty())
@@ -129,12 +129,12 @@ bool DataCoreOld::EditTransaction(int index, const Transaction& newTransaction)
     return true;
 }
 
-const Transaction& DataCoreOld::GetTransactionByIndex(int index) const
+const TransactionOld& DataCoreOld::GetTransactionByIndex(int index) const
 {
     return *transactionsByIndex[index];
 }
 
-const Transaction& DataCoreOld::GetTransactionById(int id) const
+const TransactionOld& DataCoreOld::GetTransactionById(int id) const
 {
     return *transactionsById.find(id)->second;
 }
@@ -172,9 +172,9 @@ void DataCoreOld::Clear()
     transactionsById.clear();
 }
 
-std::vector<Transaction> DataCoreOld::Calculate()
+std::vector<TransactionOld> DataCoreOld::Calculate()
 {
-    std::vector<Transaction> result;
+    std::vector<TransactionOld> result;
 
     // First build a running cost map.  This is a mapping
     // from personid -> debt owed.  Positive means you are owed
@@ -243,7 +243,7 @@ std::vector<Transaction> DataCoreOld::Calculate()
         }
         assert(gPid != lPid && gCost > 0 && lCost < 0);
 
-        Transaction debtPayment;
+        TransactionOld debtPayment;
         debtPayment.cost = std::min(gCost, lCost * -1);
         debtPayment.payerPid = lPid;
         debtPayment.coveringPids.insert(gPid);
@@ -259,7 +259,7 @@ std::vector<Transaction> DataCoreOld::Calculate()
     return result;
 }
 
-bool DataCoreOld::HasValidPids(const Transaction& transaction) const
+bool DataCoreOld::HasValidPids(const TransactionOld& transaction) const
 {
     if (peopleById.find(transaction.payerPid) == peopleById.end())
     {

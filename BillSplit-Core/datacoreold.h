@@ -3,7 +3,7 @@
 
 #include "BillSplit-Core_global.h"
 #include "person.h"
-#include "transaction.h"
+#include "transactionold.h"
 
 #include <memory>
 #include <vector>
@@ -31,29 +31,29 @@ public:
     const Person& GetPersonById(int id) const;
     int NumPeople() const;
 
-    bool AddTransaction(Transaction transaction);
+    bool AddTransaction(TransactionOld transaction);
     bool DeleteTransactions(int index, int count = 1);
-    bool EditTransaction(int index, const Transaction& newTransaction);
-    const Transaction& GetTransactionByIndex(int index) const;
-    const Transaction& GetTransactionById(int id) const;
+    bool EditTransaction(int index, const TransactionOld& newTransaction);
+    const TransactionOld& GetTransactionByIndex(int index) const;
+    const TransactionOld& GetTransactionById(int id) const;
     int NumTransactions() const;
 
     void ClearPeople();
     void ClearTransactions();
     void Clear();
 
-    std::vector<Transaction> Calculate();
+    std::vector<TransactionOld> Calculate();
 
 private:
-    bool HasValidPids(const Transaction& transaction) const;
+    bool HasValidPids(const TransactionOld& transaction) const;
 
 private:
     std::vector<std::shared_ptr<Person> > peopleByIndex;
     std::unordered_map<QString, std::shared_ptr<Person> > peopleByInitials;
     std::unordered_map<int, std::shared_ptr<Person> > peopleById;
 
-    std::vector<std::shared_ptr<Transaction> > transactionsByIndex;
-    std::unordered_map<int, std::shared_ptr<Transaction> > transactionsById;
+    std::vector<std::shared_ptr<TransactionOld> > transactionsByIndex;
+    std::unordered_map<int, std::shared_ptr<TransactionOld> > transactionsById;
 };
 
 #endif // DATACORE_H

@@ -1,13 +1,13 @@
-#include "transaction.h"
+#include "transactionold.h"
 
-int Transaction::nextId = 0;
+int TransactionOld::nextId = 0;
 
-Transaction::Transaction() :
+TransactionOld::TransactionOld() :
     id(nextId++)
 {
 }
 
-Transaction::Transaction(int payer, QString descr, double cost, std::set<int> covering) :
+TransactionOld::TransactionOld(int payer, QString descr, double cost, std::set<int> covering) :
     id(nextId++),
     payerPid(payer),
     description(std::move(descr)),
@@ -16,19 +16,19 @@ Transaction::Transaction(int payer, QString descr, double cost, std::set<int> co
 {
 }
 
-Transaction::Transaction(const Transaction& other) :
+TransactionOld::TransactionOld(const TransactionOld& other) :
     id(nextId++)
 {
     Copy(other);
 }
 
-const Transaction& Transaction::operator=(const Transaction& other)
+const TransactionOld& TransactionOld::operator=(const TransactionOld& other)
 {
     Copy(other);
     return *this;
 }
 
-void Transaction::Copy(const Transaction& other)
+void TransactionOld::Copy(const TransactionOld& other)
 {
     payerPid = other.payerPid;
     description = other.description;

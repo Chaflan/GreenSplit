@@ -30,7 +30,7 @@ private:
 
 private:
     DataCoreOld& m_data;
-    std::vector<Transaction> m_results;
+    std::vector<TransactionOld> m_results;
     QVector<int> m_columnWidths;
 };
 

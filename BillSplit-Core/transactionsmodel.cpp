@@ -88,7 +88,7 @@ bool TransactionsModel::setData(const QModelIndex& index, const QVariant& value,
         return false;
     }
 
-    Transaction transactionCopy(m_data.GetTransactionByIndex(index.row()));
+    TransactionOld transactionCopy(m_data.GetTransactionByIndex(index.row()));
 
     switch (role)
     {
@@ -178,7 +178,7 @@ bool TransactionsModel::addTransaction(const QString& payerName,
                                        const QString& description,
                                        const QStringList& coveringPids)
 {
-    Transaction newTransaction;
+    TransactionOld newTransaction;
     newTransaction.payerPid = getPidFromInitials(payerName);
     newTransaction.cost = cost;
     newTransaction. description = description;
@@ -186,7 +186,7 @@ bool TransactionsModel::addTransaction(const QString& payerName,
     return addTransaction(std::move(newTransaction));
 }
 
-bool TransactionsModel::addTransaction(Transaction transaction)
+bool TransactionsModel::addTransaction(TransactionOld transaction)
 {
     beginInsertRows(QModelIndex(), rowCount(), rowCount());
     bool result = m_data.AddTransaction(std::move(transaction));
@@ -321,7 +321,7 @@ void TransactionsModel::jsonRead(const QJsonObject& json)
     for (const auto& element : transactionArray)
     {
         QJsonObject transactionObj = element.toObject();
-        Transaction t;
+        TransactionOld t;
         t.payerPid = transactionObj["payerpid"].toInt();
         t.description = transactionObj["description"].toString();
         t.cost = transactionObj["cost"].toDouble();

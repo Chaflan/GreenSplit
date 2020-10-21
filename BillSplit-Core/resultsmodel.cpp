@@ -23,7 +23,7 @@ QVariant ResultsModel::data(const QModelIndex& index, int role) const
 
     if (role == Qt::DisplayRole && isIndexValid(index))
     {
-        const Transaction& t = m_results[index.row()];
+        const TransactionOld& t = m_results[index.row()];
 
         return QString("%1 \t %2 -> %3")
                 .arg(QString::number(t.cost, 'f', 2))

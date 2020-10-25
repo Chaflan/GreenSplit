@@ -70,7 +70,6 @@ Page {
                 }
 
 
-
                 delegate: Rectangle {
                     implicitHeight: 50
                     border.color: "black"

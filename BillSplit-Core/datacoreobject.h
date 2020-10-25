@@ -4,13 +4,15 @@
 #include <QObject>
 #include "datacore.h"
 
+// TODO: Standardize use of name vs identifier
+// TODO: QDebug lines
+// TODO: Upper Lower case method name confusion
+
 class BILLSPLITCORE_EXPORT DataCoreObject : public QObject
 {
     Q_OBJECT
 public:
     explicit DataCoreObject(QObject *parent = nullptr);
-
-    // TODO: Upper Lower case method name confusion
 
     // DataCore wrapper methods
     void AddTransaction(const QString& payer, double cost, const QStringList& covering);
@@ -19,11 +21,12 @@ public:
     bool EditTransactionCost(int index, double newCost);
     bool EditTransactionCovering(int index, const QStringList& newCovering);
     bool EditPerson(const QString& oldName, const QString& newName);
-    bool PersonExists(const QString& person) const;
     void Clear();
 
     // DataCore extending methods
     int NumPeople() const;
+    bool PersonExists(const QString& identifier) const;
+    bool PersonInTransactions(const QString& identifier) const;
     bool AddPerson(QString identifier, QString name);
     bool RemovePeople(int index, int count);
     QString GetPersonIdentifier(int index) const;
@@ -38,8 +41,9 @@ public:
     virtual ~DataCoreObject();
 
 signals:
-    void identifierListChanged();
-    void nameListChanged();
+    void signalError(QString error) const;
+    void identifierListChanged() const;
+    void nameListChanged() const;
 
 private:
     QStringList m_identifierList;

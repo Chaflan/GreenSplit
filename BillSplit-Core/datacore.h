@@ -35,6 +35,7 @@ public:
     bool EditTransactionCost(int index, double newCost);
     bool EditTransactionCovering(int index, std::set<std::string> newCovering);
     bool EditPerson(const std::string& oldName, std::string newName);
+    bool PersonExists(const std::string& name) const;  // necessary?
     std::vector<Transaction> Calculate();
     void Clear();
 

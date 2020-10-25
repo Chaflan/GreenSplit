@@ -2,43 +2,46 @@
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 
-#include "datacoreold.h"
-#include "peoplemodel.h"
-#include "transactionsmodel.h"
-#include "transactionmodel.h"
-#include "resultsmodel.h"
+#include "datacoreobject.h"
+#include "peopletablemodel.h"
 
-#include <QFile>
-#include <QJsonObject>
-#include <QJsonDocument>
+//#include "datacoreold.h"
+//#include "peoplemodel.h"
+//#include "transactionsmodel.h"
+//#include "transactionmodel.h"
+//#include "resultsmodel.h"
+
+//#include <QFile>
+//#include <QJsonObject>
+//#include <QJsonDocument>
 
 // TODO: Dynamically resize the columns
 
 // TODO: Put these at the model level or controller perhaps
-void ReadFromJsonFile(PeopleModel* mPeopleModel, TransactionsModel* mTransactionsModel)
-{
-    QFile file("save.json");
-    if (file.open(QIODevice::ReadOnly))
-    {
-        QJsonDocument jsonDoc(QJsonDocument::fromJson(file.readAll()));
-        QJsonObject jsonObj = jsonDoc.object();
-        mPeopleModel->jsonRead(jsonObj);
-        mTransactionsModel->jsonRead(jsonObj);
-    }
-}
+//void ReadFromJsonFile(PeopleModel* mPeopleModel, TransactionsModel* mTransactionsModel)
+//{
+//    QFile file("save.json");
+//    if (file.open(QIODevice::ReadOnly))
+//    {
+//        QJsonDocument jsonDoc(QJsonDocument::fromJson(file.readAll()));
+//        QJsonObject jsonObj = jsonDoc.object();
+//        mPeopleModel->jsonRead(jsonObj);
+//        mTransactionsModel->jsonRead(jsonObj);
+//    }
+//}
 
-void WriteJson(PeopleModel* mPeopleModel, TransactionsModel* mTransactionsModel)
-{
-    QFile file("save.json");
-    if (file.open(QIODevice::WriteOnly))
-    {
-        QJsonObject json;
-        mPeopleModel->jsonWrite(json);
-        mTransactionsModel->jsonWrite(json);
-        QJsonDocument saveDoc(json);
-        file.write(saveDoc.toJson());
-    }
-}
+//void WriteJson(PeopleModel* mPeopleModel, TransactionsModel* mTransactionsModel)
+//{
+//    QFile file("save.json");
+//    if (file.open(QIODevice::WriteOnly))
+//    {
+//        QJsonObject json;
+//        mPeopleModel->jsonWrite(json);
+//        mTransactionsModel->jsonWrite(json);
+//        QJsonDocument saveDoc(json);
+//        file.write(saveDoc.toJson());
+//    }
+//}
 
 int main(int argc, char *argv[])
 {
@@ -48,22 +51,23 @@ int main(int argc, char *argv[])
     QQmlApplicationEngine engine;
 
     // Type registration
-    qmlRegisterType<TransactionModel>("com.company.core", 1,0, "TransactionModel");
+    qmlRegisterType<DataCoreObject>("com.company.core", 1,0, "DataCore");
+    qmlRegisterType<PeopleTableModel>("com.company.core", 1,0, "PeopleTableModel");
 
     // Give the models generated from the DataCore global context
-    DataCoreOld dataCore;
-    PeopleModel peopleModel(dataCore);
-    TransactionsModel transactionsModel(dataCore);
-    ReadFromJsonFile(&peopleModel, &transactionsModel);
-    ResultsModel resultsModel(dataCore);
-    resultsModel.updateCalculations();
+    //DataCoreOld dataCore;
+    //PeopleModel peopleModel(dataCore);
+    //TransactionsModel transactionsModel(dataCore);
+    //ReadFromJsonFile(&peopleModel, &transactionsModel);
+    //ResultsModel resultsModel(dataCore);
+    //resultsModel.updateCalculations();
     //TransactionModel transactionModel(dataCore);
-    QQmlContext* context = engine.rootContext();
-    context->setContextProperty("dataCore", &dataCore);
-    context->setContextProperty("peopleModel", &peopleModel);
-    context->setContextProperty("transactionsModel", &transactionsModel);
+    //QQmlContext* context = engine.rootContext();
+    //context->setContextProperty("dataCore", &dataCore);
+    //context->setContextProperty("peopleModel", &peopleModel);
+    //context->setContextProperty("transactionsModel", &transactionsModel);
     //context->setContextProperty("transactionModel", &transactionModel);
-    context->setContextProperty("resultsModel", &resultsModel);
+    //context->setContextProperty("resultsModel", &resultsModel);
 
     const QUrl url(QStringLiteral("qrc:/qml/main.qml"));
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,
@@ -74,6 +78,6 @@ int main(int argc, char *argv[])
     engine.load(url);
 
     auto ret = app.exec();
-    WriteJson(&peopleModel, &transactionsModel);
+    //WriteJson(&peopleModel, &transactionsModel);
     return ret;
 }

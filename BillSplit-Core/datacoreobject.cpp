@@ -1,4 +1,5 @@
 #include "datacoreobject.h"
+#include <QDebug>
 
 // TODO: Future remove includes
 #include <QJsonObject>
@@ -12,13 +13,6 @@ DataCoreObject::DataCoreObject(QObject *parent) :
     JsonRead();
 }
 
-bool DataCoreObject::PersonExists(const QString& person) const
-{
-    // TODO: Stub
-    Q_UNUSED(person);
-    return false;
-}
-
 void DataCoreObject::Clear()
 {
     // TODO: m_data.Clear();
@@ -29,6 +23,22 @@ void DataCoreObject::Clear()
 int DataCoreObject::NumPeople() const
 {
     return static_cast<int>(m_identifierList.size());
+}
+
+// Returns true if the person shows up in the identifier list.
+// If this is true, PersonInTransactions will also be true, but not
+// vice versa.  You can have a person where PersonExists==true but
+// PersonInTransactions==false.
+bool DataCoreObject::PersonExists(const QString& identifier) const
+{
+    return m_identifierList.contains(identifier);
+}
+
+// Returns true if the datacore has knowledge of the person, meaning
+// they are involved in one or more transactions
+bool DataCoreObject::PersonInTransactions(const QString& identifier) const
+{
+    return m_data.PersonExists(identifier.toStdString());
 }
 
 bool DataCoreObject::AddPerson(QString identifier, QString name)
@@ -46,10 +56,37 @@ bool DataCoreObject::AddPerson(QString identifier, QString name)
 
 bool DataCoreObject::RemovePeople(int index, int count)
 {
-    // TODO: Stub
-    Q_UNUSED(index);
-    Q_UNUSED(count);
-    return false;
+    const int lastIndex = index + count - 1;
+    if (index < 0 || count < 1 || lastIndex >= NumPeople()) {
+        qDebug() << "Error - DataCoreObject::RemovePeople - Invalid parameters.  index = "
+            << index << " count = " << count << " NumPeople = " << NumPeople();
+        return false;
+    }
+
+    QVector<int> indicesToDelete;
+    for (int i = lastIndex; i >= index; --i) {
+        const QString& currentPerson = m_identifierList[i];
+        if (PersonInTransactions(currentPerson)) {
+            // TODO: emit signalError("Person is involved in one or more transactions, cannot remove them");
+        } else {
+            indicesToDelete.append(i);
+        }
+    }
+
+    if (indicesToDelete.length() == count) {
+        // Bulk delete if none are being left behind (faster)
+        m_identifierList.erase(m_identifierList.begin() + index, m_identifierList.begin() + lastIndex + 1);
+        m_nameList.erase(m_nameList.begin() + index, m_nameList.begin() + lastIndex + 1);
+    } else {
+        // Individual delete otherwise (slower)
+        for (int i : indicesToDelete) {
+            m_identifierList.removeAt(i);
+            m_nameList.removeAt(i);
+        }
+    }
+
+    // Signal here
+    return true;
 }
 
 QString DataCoreObject::GetPersonIdentifier(int index) const
@@ -76,11 +113,23 @@ bool DataCoreObject::EditPersonIdentifier(int index, const QString& newIdentifie
         return false;
     }
 
-    if (PersonExists(newIdentifier)) {
-        // TODO: Signal error here
+    // Editing to what it already is, nothing to do
+    if (m_identifierList[index] == newIdentifier) {
+        return true;
+    }
+
+    if (newIdentifier.isEmpty()) {
+        emit signalError("Attempting to change identifier to be empty.  Identifiers cannot be empty.");
         return false;
     }
 
+    if (PersonExists(newIdentifier)) {
+        emit signalError("Attempting to change identifier to one that already exists.  Identifiers must be unique.");
+        return false;
+    }
+
+    // TODO:
+    // m_data.EditPerson(m_identifierList[index].toStdString(), newIdentifier.toStdString());
     m_identifierList[index] = std::move(newIdentifier);
     // Signal people changed
     return true;
@@ -90,6 +139,11 @@ bool DataCoreObject::EditPersonName(int index, QString newName)
 {
     if (index < 0 || index >= NumPeople())
         return false;
+
+    // Editing to what it already is, nothing to do.
+    if (m_nameList[index] == newName) {
+        return true;
+    }
 
     m_nameList[index] = std::move(newName);
     // Signal people changed

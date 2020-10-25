@@ -1,5 +1,6 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
+import com.company.core 1.0
 
 ApplicationWindow {
     id: mainApplicationWindow
@@ -7,6 +8,16 @@ ApplicationWindow {
     width: 800
     height: 600
     title: qsTr("Tabs")
+
+    // TODO: Private?
+    DataCore {
+        id: dataCore
+    }
+
+    PeopleTableModel {
+        id: peopleTableModel
+        data: dataCore
+    }
 
     SwipeView {
         id: swipeView
@@ -16,14 +27,14 @@ ApplicationWindow {
         PeoplePage {
         }
 
-        TransactionsPage {
-        }
+//        TransactionsPage {
+//        }
 
-        ResultsPage {
-            onFocusChanged: {
-                resultsModel.updateCalculations()
-            }
-        }
+//        ResultsPage {
+//            onFocusChanged: {
+//                resultsModel.updateCalculations()
+//            }
+//        }
     }
 
     footer: TabBar {

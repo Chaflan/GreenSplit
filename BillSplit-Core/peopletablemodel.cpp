@@ -1,7 +1,6 @@
 #include "peopletablemodel.h"
 #include "datacoreobject.h"
-
-
+#include <QDebug>
 
 PeopleTableModel::PeopleTableModel(QObject *parent) :
     QAbstractTableModel(parent)
@@ -44,9 +43,20 @@ bool PeopleTableModel::setData(const QModelIndex& index, const QVariant& value, 
 
     switch(index.column()) {
         case Column::Identifier: {
+
             if (!m_data->EditPersonIdentifier(index.row(), value.toString())) {
-                // TODO: Signal should come from datacore and propagate up, try that
-                emit signalError("Invalid index in people table model");
+
+                // TODO: Signals should be lower probably, do a signal analysis, could just connect these
+                QString newIdentifier = value.toString();
+                if (newIdentifier.isEmpty()) {
+                    emit signalError("Attempting to change identifier to be empty.  Identifiers cannot be empty.");
+                    return false;
+                }
+                if (m_data->PersonExists(newIdentifier)) {
+                    emit signalError("Attempting to change identifier to one that already exists.  Identifiers must be unique.");
+                    return false;
+                }
+
                 return false;
             }
             break;
@@ -67,7 +77,7 @@ bool PeopleTableModel::removeRows(int row, int count, const QModelIndex& parent)
         return false;
     }
 
-    if (m_data->PersonExists(m_data->GetPersonIdentifier(row))) {
+    if (m_data->PersonInTransactions(m_data->GetPersonIdentifier(row))) {
         // TODO: Signal should come from datacore and propagate up, try that
         emit signalError("Person is involved in one or more transactions, cannot remove them");
         return false;
@@ -82,10 +92,7 @@ bool PeopleTableModel::removeRows(int row, int count, const QModelIndex& parent)
 QVariant PeopleTableModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
     if (orientation == Qt::Orientation::Horizontal && role == Qt::DisplayRole) {
-        switch(section) {
-            case Column::Identifier: return "Identifier";
-            case Column::FullName: return "Name";
-        }
+        return columnIndexToString(section);
     }
 
     return QAbstractItemModel::headerData(section, orientation, role);
@@ -100,15 +107,35 @@ Qt::ItemFlags PeopleTableModel::flags(const QModelIndex& index) const
     return QAbstractItemModel::flags(index) | Qt::ItemIsEditable;
 }
 
+QVariant PeopleTableModel::getData(int row, int column, int role) const
+{
+    return data(index(row, column), role);
+}
+
+QVariant PeopleTableModel::getData(int row, const QString& roleString, int role) const
+{
+    return getData(row, stringToColumnIndex(roleString), role);
+}
+
+bool PeopleTableModel::setData(int row, int column, const QVariant& value, int role)
+{
+    return setData(index(row, column), value, role);
+}
+
+bool PeopleTableModel::setData(int row, const QString& roleString, const QVariant& value, int role)
+{
+    return setData(row, stringToColumnIndex(roleString), value, role);
+}
+
 bool PeopleTableModel::addPerson(QString initials, QString name)
 {
     if (initials.isEmpty()) {
-        emit signalError("Initials cannot be empty.");
+        emit signalError("Identifier cannot be empty.");
         return false;
     }
 
     if (m_data->PersonExists(initials)) {
-        emit signalError("Initials must be unique.");
+        emit signalError("Identifier must be unique.");
         return false;
     }
 
@@ -122,10 +149,57 @@ int PeopleTableModel::columnWidth(int col)
 {
     // TODO: Implment; this is a stub
     Q_UNUSED(col);
-    return 50;
+    return 150;
 }
 
 bool PeopleTableModel::isIndexValid(const QModelIndex& index) const
 {
-    return index.isValid() && index.row() < rowCount() && index.column() < columnCount();
+    if (!index.isValid() || index.row() >= rowCount() || index.column() >= columnCount()) {
+        qDebug() << "Error - PeopleTableModel::isIndexValid - index invalid: ";
+        qDebug() << "\tindex.isValid() == " << index.isValid();
+        if (index.isValid()) {
+            qDebug() << "\trow = " << index.row() << " column = " << index.column();
+        }
+        return false;
+    }
+
+    return true;
+}
+
+int PeopleTableModel::stringToColumnIndex(const QString& columnRole) const
+{
+    const static QMap<QString, int> stringToColumn {
+        { columnIndexToString(Column::Identifier), Column::Identifier },
+        { columnIndexToString(Column::FullName), Column::FullName }
+    };
+
+    auto findResult = stringToColumn.find(columnRole);
+    if (findResult == stringToColumn.end()) {
+        qDebug() << "Error - PeopleTableModel::stringToColumnIndex - columnRole not in map: " << columnRole;
+        return 0;
+    }
+
+    return findResult == stringToColumn.end() ? 0 : findResult.value();
+}
+
+QString PeopleTableModel::columnIndexToString(int columnIndex) const
+{
+    // TODO: Figure out how to do this instead, it doesn't compile
+    //
+    //static constexpr std::array<QStringView, 2> columnRoles {
+    //    "Identifier",
+    //    "Name"
+    //};
+
+    const static QString columnToString[Column::COUNT] {
+        "Identifier",
+        "Name"
+    };
+
+    if (columnIndex < 0 || columnIndex >= Column::COUNT) {
+        qDebug() << "Error - PeopleTableModel::columnIndexToString - invalid columnIndex: " << columnIndex;
+        return QString();
+    }
+
+    return columnToString[columnIndex];
 }

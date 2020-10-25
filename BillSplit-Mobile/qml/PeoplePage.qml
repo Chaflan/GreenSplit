@@ -49,7 +49,7 @@ Page {
 
             TableView {
                 id: tableview
-                model: peopleModel
+                model: peopleTableModel
                 focus: true
 
                 columnWidthProvider: function(column, font) { return Math.min(600, model.columnWidth(column, font)) }
@@ -79,9 +79,7 @@ Page {
                         onFocusChanged: { if(focus) { selectAll() } } // Select all on click
 
                         onEditingFinished: {
-                            // model.edit = text here does strange things and requires
-                            // a tableview.forceLayout() call.  I call it directly instead
-                            // This also allows use of the return variable
+                            // "model.edit = text" has problems
                             if (!tableview.model.setData(row, column, text)) {
                                 text = display
                             }
@@ -115,9 +113,8 @@ Page {
                     Layout.leftMargin: 0
 
                     onClicked: {
-                        // TODO: Overload with row and string
-                        viewPersonDialog.initials = peopleModel.data(tableview.selectedRow, peopleModel.getColumnFromRole("Initials"))
-                        viewPersonDialog.name = peopleModel.data(tableview.selectedRow, peopleModel.getColumnFromRole("Name"))
+                        viewPersonDialog.initials = tableview.model.getData(tableview.selectedRow, "Identifier")
+                        viewPersonDialog.name = tableview.model.getData(tableview.selectedRow, "Name")
                         viewPersonDialog.open()
                     }
                 }
@@ -142,9 +139,10 @@ Page {
         id: addPersonDialog
         anchors.centerIn: parent
         onSavePressed: {
-            console.log("add save")
-            if (!peopleModel.addPerson(addPersonDialog.initials, addPersonDialog.name)) {
+            if (!tableview.model.addPerson(addPersonDialog.initials, addPersonDialog.name)) {
                 console.warn("person couldn't be added. I=" + initials + " N=" + name)
+            } else {
+                tableview.forceLayout() // contentHeight won't update without this as it is loaded on demand
             }
         }
     }
@@ -152,13 +150,12 @@ Page {
         id: viewPersonDialog
         anchors.centerIn: parent
         onSavePressed: {
-            console.log("view save")
-            peopleModel.setData(tableview.selectedRow, peopleModel.getColumnFromRole("Initials"), viewPersonDialog.initials)
-            peopleModel.setData(tableview.selectedRow, peopleModel.getColumnFromRole("Name"), viewPersonDialog.name)
+            tableview.model.setData(tableview.selectedRow, "Identifier", viewPersonDialog.initials)
+            tableview.model.setData(tableview.selectedRow, "Name", viewPersonDialog.name)
         }
         onDeletePressed: {
-            console.log("view delete")
-            peopleModel.removeRows(tableview.selectedRow, 1)
+            tableview.model.removeRows(tableview.selectedRow, 1)
+            tableview.forceLayout() // contentHeight won't update without this as it is loaded on demand
         }
     }
 

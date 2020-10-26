@@ -28,7 +28,7 @@ Page {
                 Repeater {
                     model: tableview.model.columnCount()
                     Rectangle {
-                        width: tableview.model.columnWidth(index, font)
+                        width: tableview.model.columnWidth(index, mainApplicationWindow.width)
                         height: parent.height
                         color: "green"
 
@@ -43,6 +43,10 @@ Page {
                             width: parent.width - 4
                             text: tableview.model.headerData(index, Qt.Horizontal)
                         }
+
+                        // Hack to get tableview to resize on window resize
+                        // columnWidthProvider not getting called properly
+                        onWidthChanged: tableview.forceLayout()
                     }
                 }
             }
@@ -52,7 +56,10 @@ Page {
                 model: peopleTableModel
                 focus: true
 
-                columnWidthProvider: function(column, font) { return Math.min(600, model.columnWidth(column, font)) }
+                columnWidthProvider: function(column) {
+                    return model.columnWidth(column, mainApplicationWindow.width);
+                }
+
                 anchors.fill: parent
                 anchors.topMargin: tableviewheader.height
                 anchors.bottomMargin: tableviewfooter.height
@@ -68,8 +75,6 @@ Page {
                 onActiveFocusChanged: {
                     viewButton.enabled = tableview.activeFocus || (viewButton.enabled && viewButton.activeFocus)
                 }
-
-
 
                 delegate: Rectangle {
                     implicitHeight: 50
@@ -102,18 +107,17 @@ Page {
 
             RowLayout {
                 id: tableviewfooter
-                width: tableview.contentWidth
+                width: tableview.width
                 height: 40
                 x: -tableview.contentX
                 y: -tableview.contentY + tableview.contentHeight + tableviewheader.height + tableview.rowSpacing
 
-                Item { Layout.fillWidth: true } // Spacer
                 Button {
                     id: viewButton
                     enabled: false
-                    text: "View\nSelected\nPerson"
+                    text: "View"
                     font.pointSize: 10
-                    Layout.preferredWidth: tableviewheader.width / 2 - 5
+                    Layout.preferredWidth: 100
                     Layout.preferredHeight: tableviewheader.height
                     Layout.leftMargin: 0
 
@@ -123,11 +127,12 @@ Page {
                         viewPersonDialog.open()
                     }
                 }
+                Item { Layout.fillWidth: true } // Spacer
                 Button {
                     id: addButton
-                    text: "Add\nPerson"
+                    text: "Add"
                     font.pointSize: 10
-                    Layout.preferredWidth: tableviewheader.width / 2 - 5
+                    Layout.preferredWidth: 100
                     Layout.preferredHeight: tableviewheader.height
                     Layout.rightMargin: 0
                     onClicked: {

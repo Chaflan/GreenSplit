@@ -5,6 +5,9 @@
 PeopleTableModel::PeopleTableModel(QObject *parent) :
     QAbstractTableModel(parent)
 {
+    for (int i = 0; i < Column::COUNT; ++i) {
+        m_columnWidths.append(0);
+    }
 }
 
 int PeopleTableModel::rowCount(const QModelIndex& parent) const
@@ -145,11 +148,16 @@ bool PeopleTableModel::addPerson(QString initials, QString name)
     return result;
 }
 
-int PeopleTableModel::columnWidth(int col)
+int PeopleTableModel::columnWidth(int columnIndex, int windowWidth)
 {
-    // TODO: Implment; this is a stub
-    Q_UNUSED(col);
-    return 150;
+    qDebug() << "columnWidth called with columnIndex=" << columnIndex << " windowWidth=" << windowWidth;
+
+    switch (columnIndex) {
+        case Column::Identifier: return 150;
+        case Column::FullName: return windowWidth - 150;
+    }
+
+    return 0;
 }
 
 bool PeopleTableModel::isIndexValid(const QModelIndex& index) const

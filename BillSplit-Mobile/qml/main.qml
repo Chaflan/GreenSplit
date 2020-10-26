@@ -9,6 +9,8 @@ ApplicationWindow {
     height: 600
     title: qsTr("Tabs")
 
+    //onWidthChanged: console.log("titties")
+
     // TODO: Private?
     DataCore {
         id: dataCore

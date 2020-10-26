@@ -8,142 +8,139 @@ import QtQuick.Layouts 1.3
 // TODO: standardize the use of parent vs id
 
 Page {
-    ColumnLayout {
+    Item {
+        id: entiretable
         anchors.fill: parent
-        spacing: 80
+        anchors.leftMargin: 5
+        anchors.rightMargin: 5
 
-        Item {
-            id: entiretable
-            Layout.fillWidth: true
-            Layout.fillHeight: true
+        Row {
+            id: tableviewheader
+            width: tableview.contentWidth
+            height: 40
+            x: -tableview.contentX
+            z: 1
+            spacing: 5
 
-            Row {
-                id: tableviewheader
-                width: tableview.contentWidth
-                height: 40
-                x: -tableview.contentX
-                z: 1
-                spacing: 5
+            Repeater {
+                model: tableview.model.columnCount()
+                Rectangle {
+                    width: tableview.model.columnWidth(index, tableviewheader.spacing, entiretable.width)
+                    height: parent.height
+                    color: "green"
 
-                Repeater {
-                    model: tableview.model.columnCount()
-                    Rectangle {
-                        width: tableview.model.columnWidth(index, mainApplicationWindow.width)
-                        height: parent.height
-                        color: "green"
-
-                        Text {
-                            id: texttt
-                            font.pixelSize: 15
-                            anchors.fill: parent
-                            anchors.leftMargin: 10
-                            verticalAlignment: Text.AlignVCenter
-                            //anchors.verticalCenter: parent.verticalCenter
-                            x: 4
-                            width: parent.width - 4
-                            text: tableview.model.headerData(index, Qt.Horizontal)
-                        }
-
-                        // Hack to get tableview to resize on window resize
-                        // columnWidthProvider not getting called properly
-                        onWidthChanged: tableview.forceLayout()
-                    }
-                }
-            }
-
-            TableView {
-                id: tableview
-                model: peopleTableModel
-                focus: true
-
-                columnWidthProvider: function(column) {
-                    return model.columnWidth(column, mainApplicationWindow.width);
-                }
-
-                anchors.fill: parent
-                anchors.topMargin: tableviewheader.height
-                anchors.bottomMargin: tableviewfooter.height
-                columnSpacing: 5
-                rowSpacing: 5
-
-                ScrollBar.vertical: ScrollBar { }
-
-                property var selectedRow: 0
-                property var selectedColumn: 0
-
-                // Enable the view button only when a table cell is selected
-                onActiveFocusChanged: {
-                    viewButton.enabled = tableview.activeFocus || (viewButton.enabled && viewButton.activeFocus)
-                }
-
-                delegate: Rectangle {
-                    implicitHeight: 50
-                    border.color: "black"
-
-                    TextField {
-                        id: textField
-                        text: display
+                    Text {
+                        id: texttt
                         font.pixelSize: 15
                         anchors.fill: parent
-                        width: parent.width
-                        onFocusChanged: { if(focus) { selectAll() } } // Select all on click
-
-                        onEditingFinished: {
-                            // "model.edit = text" has problems
-                            if (!tableview.model.setData(row, column, text)) {
-                                text = display
-                            }
-                        }
-
-                        onActiveFocusChanged: {
-                            if (textField.activeFocus) {
-                                tableview.selectedRow = row
-                                tableview.selectedColumn = column
-                            }
-                        }
+                        anchors.leftMargin: 10
+                        verticalAlignment: Text.AlignVCenter
+                        //anchors.verticalCenter: parent.verticalCenter
+                        x: 4
+                        width: parent.width - 4
+                        text: tableview.model.headerData(index, Qt.Horizontal)
                     }
+
+                    // Hack to get tableview to resize on window resize
+                    // columnWidthProvider not getting called properly
+                    onWidthChanged: tableview.forceLayout()
                 }
             }
+        }
 
-            RowLayout {
-                id: tableviewfooter
-                width: tableview.width
-                height: 40
-                x: -tableview.contentX
-                y: -tableview.contentY + tableview.contentHeight + tableviewheader.height + tableview.rowSpacing
+        TableView {
+            id: tableview
+            model: peopleTableModel
+            focus: true
 
-                Button {
-                    id: viewButton
-                    enabled: false
-                    text: "View"
-                    font.pointSize: 10
-                    Layout.preferredWidth: 100
-                    Layout.preferredHeight: tableviewheader.height
-                    Layout.leftMargin: 0
+            columnWidthProvider: function(column) {
+                return model.columnWidth(column, columnSpacing, entiretable.width);
+            }
 
-                    onClicked: {
-                        viewPersonDialog.initials = tableview.model.getData(tableview.selectedRow, "Identifier")
-                        viewPersonDialog.name = tableview.model.getData(tableview.selectedRow, "Name")
-                        viewPersonDialog.open()
+            anchors.fill: parent
+            anchors.topMargin: tableviewheader.height + 5
+            anchors.bottomMargin: tableviewfooter.height + 5
+            columnSpacing: 5
+            rowSpacing: 5
+
+            ScrollBar.vertical: ScrollBar { }
+
+            property var selectedRow: 0
+            property var selectedColumn: 0
+
+            // Enable the view button only when a table cell is selected
+            onActiveFocusChanged: {
+                viewButton.enabled = tableview.activeFocus || (viewButton.enabled && viewButton.activeFocus)
+            }
+
+            delegate: Rectangle {
+                implicitHeight: 50
+                border.color: "black"
+
+                TextField {
+                    id: textField
+                    text: display
+                    font.pixelSize: 15
+                    anchors.fill: parent
+                    width: parent.width
+                    onFocusChanged: { if(focus) { selectAll() } } // Select all on click
+
+                    onEditingFinished: {
+                        // "model.edit = text" has problems
+                        if (!tableview.model.setData(row, column, text)) {
+                            text = display
+                        }
                     }
-                }
-                Item { Layout.fillWidth: true } // Spacer
-                Button {
-                    id: addButton
-                    text: "Add"
-                    font.pointSize: 10
-                    Layout.preferredWidth: 100
-                    Layout.preferredHeight: tableviewheader.height
-                    Layout.rightMargin: 0
-                    onClicked: {
-                        addPersonDialog.initials = ""
-                        addPersonDialog.name = ""
-                        addPersonDialog.open()
+
+                    onActiveFocusChanged: {
+                        if (textField.activeFocus) {
+                            tableview.selectedRow = row
+                            tableview.selectedColumn = column
+                        }
                     }
                 }
             }
         }
+
+        RowLayout {
+            id: tableviewfooter
+            width: tableview.width
+            height: 40
+            x: -tableview.contentX
+            y: -tableview.contentY + tableview.contentHeight + tableviewheader.height + tableview.rowSpacing + 5
+
+            Button {
+                id: viewButton
+                enabled: false
+                text: "View"
+                font.pointSize: 10
+                Layout.preferredWidth: 100
+                Layout.preferredHeight: tableviewheader.height
+                Layout.leftMargin: 0
+
+                onClicked: {
+                    viewPersonDialog.initials = tableview.model.getData(tableview.selectedRow, "Identifier")
+                    viewPersonDialog.name = tableview.model.getData(tableview.selectedRow, "Name")
+                    viewPersonDialog.open()
+                }
+            }
+            Item { Layout.fillWidth: true } // Spacer
+            Button {
+                id: addButton
+                text: "Add"
+                font.pointSize: 10
+                Layout.preferredWidth: 100
+                Layout.preferredHeight: tableviewheader.height
+                Layout.rightMargin: 0
+                onClicked: {
+                    addPersonDialog.initials = ""
+                    addPersonDialog.name = ""
+                    addPersonDialog.open()
+                }
+            }
+        }
     }
+
 
     PersonInputDialog {
         id: addPersonDialog

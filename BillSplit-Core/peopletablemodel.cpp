@@ -148,13 +148,11 @@ bool PeopleTableModel::addPerson(QString initials, QString name)
     return result;
 }
 
-int PeopleTableModel::columnWidth(int columnIndex, int windowWidth)
+int PeopleTableModel::columnWidth(int columnIndex, int columnSpacing, int totalWidth)
 {
-    qDebug() << "columnWidth called with columnIndex=" << columnIndex << " windowWidth=" << windowWidth;
-
     switch (columnIndex) {
         case Column::Identifier: return 150;
-        case Column::FullName: return windowWidth - 150;
+        case Column::FullName: return totalWidth - columnSpacing * (Column::COUNT - 1) - 150;
     }
 
     return 0;

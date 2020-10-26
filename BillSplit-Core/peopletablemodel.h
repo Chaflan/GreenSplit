@@ -40,7 +40,7 @@ public:
     Q_INVOKABLE bool setData(int row, const QString& roleString, const QVariant& value, int role = Qt::EditRole);
 
     Q_INVOKABLE bool addPerson(QString initials, QString name);
-    Q_INVOKABLE int columnWidth(int columnIndex, int windowWidth);
+    Q_INVOKABLE int columnWidth(int columnIndex, int columnSpacing, int totalWidth);
 
 signals:
     void signalError(QString message) const;

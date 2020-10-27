@@ -29,8 +29,8 @@ public:
     bool PersonInTransactions(const QString& identifier) const;
     bool AddPerson(QString identifier, QString name);
     bool RemovePeople(int index, int count);
-    QString GetPersonIdentifier(int index) const; // TODO: Const ref with error
-    QString GetPersonName(int index) const; // TODO: Const ref with error
+    const QString& GetPersonIdentifier(int index) const; // TODO: Const ref with error
+    const QString& GetPersonName(int index) const; // TODO: Const ref with error
     bool EditPersonIdentifier(int index, const QString& newIdentifier);
     bool EditPersonName(int index, QString newName);
 

@@ -9,18 +9,7 @@ ApplicationWindow {
     height: 600
     title: qsTr("Tabs")
 
-    //onWidthChanged: console.log("titties")
-
-    // TODO: Private?
-    DataCore {
-        id: dataCore
-    }
-
-    PeopleTableModel {
-        id: peopleTableModel
-        data: dataCore
-    }
-
+    // View
     SwipeView {
         id: swipeView
         anchors.fill: parent
@@ -51,6 +40,74 @@ ApplicationWindow {
         }
         TabButton {
             text: qsTr("Results")
+        }
+    }
+
+    // Models
+    QtObject {
+        id: privateProperties
+
+        DataCore {
+            id: dataCore
+        }
+    }
+
+    PeopleTableModel {
+        id: peopleTableModel
+        data: privateProperties.dataCore
+    }
+
+    // Creat a popup when an error signal is sent from the models
+    Connections {
+        target: privateProperties.dataCore
+        function onSignalError(errorMessage) { popupMessage(errorMessage) }
+    }
+    Connections {
+        target: peopleTableModel
+        function onSignalError(errorMessage) { popupMessage(errorMessage) }
+    }
+    function popupMessage(messageText) {
+        errorPopup.errorMessage.text = messageText// + " paaaaaa aaaa aaa aa aaaaa aaa aadding "
+        errorPopup.open()
+    }
+    Popup {
+        id: errorPopup
+        modal: true
+        focus: true
+        anchors.centerIn: parent
+        width: 300
+        height: 200
+        closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
+
+        property alias errorMessage: messageText
+
+        Column {
+            anchors.fill: parent
+            Text {
+                id: messageText
+                height: parent.height - circleButton.height
+                width: parent.width
+                font.pointSize: 15
+                anchors.horizontalCenter: parent.horizontalCenter
+                wrapMode: Text.WordWrap
+                verticalAlignment: Text.AlignVCenter
+                horizontalAlignment: Text.AlignHCenter
+            }
+            RoundButton {
+                id: circleButton
+
+                height: 80
+                width: 100
+                anchors.horizontalCenter: parent.horizontalCenter
+
+                text: "OK"
+                font.pointSize: 15
+
+                focus: true
+                onClicked: { errorPopup.close() }
+                Keys.onEnterPressed: { errorPopup.close() }
+                Keys.onReturnPressed: { errorPopup.close() }
+            }
         }
     }
 }

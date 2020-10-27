@@ -35,7 +35,6 @@ Page {
                         anchors.fill: parent
                         anchors.leftMargin: 10
                         verticalAlignment: Text.AlignVCenter
-                        //anchors.verticalCenter: parent.verticalCenter
                         x: 4
                         width: parent.width - 4
                         text: tableview.model.headerData(index, Qt.Horizontal)
@@ -163,56 +162,6 @@ Page {
         onDeletePressed: {
             tableview.model.removeRows(tableview.selectedRow, 1)
             tableview.forceLayout() // contentHeight won't update without this as it is loaded on demand
-        }
-    }
-
-    // TODO: Make a file for this
-    // Creat a popup when an error signal is sent from the model
-    Connections {
-        target: tableview.model
-        function onSignalError(pErrorMessage) {
-            errorPopup.errorMessage.text = pErrorMessage// + " paaaaaa aaaa aaa aa aaaaa aaa aadding "
-            errorPopup.open()
-        }
-    }
-    Popup {
-        id: errorPopup
-        modal: true
-        focus: true
-        anchors.centerIn: parent
-        width: 300
-        height: 200
-        closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
-
-        property alias errorMessage: messageText
-
-        Column {
-            anchors.fill: parent
-            Text {
-                id: messageText
-                height: parent.height - circleButton.height
-                width: parent.width
-                font.pointSize: 15
-                anchors.horizontalCenter: parent.horizontalCenter
-                wrapMode: Text.WordWrap
-                verticalAlignment: Text.AlignVCenter
-                horizontalAlignment: Text.AlignHCenter
-            }
-            RoundButton {
-                id: circleButton
-
-                height: 80
-                width: 100
-                anchors.horizontalCenter: parent.horizontalCenter
-
-                text: "OK"
-                font.pointSize: 15
-
-                focus: true
-                onClicked: { errorPopup.close() }
-                Keys.onEnterPressed: { errorPopup.close() }
-                Keys.onReturnPressed: { errorPopup.close() }
-            }
         }
     }
 }

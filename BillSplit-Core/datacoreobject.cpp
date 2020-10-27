@@ -44,7 +44,7 @@ bool DataCoreObject::PersonInTransactions(const QString& identifier) const
 bool DataCoreObject::AddPerson(QString identifier, QString name)
 {
     if (PersonExists(identifier)) {
-        // Signal error here
+        emit signalError("Identifier \"" + identifier + "\" already exists. Identifiers must be unique.");
         return false;
     }
 
@@ -67,7 +67,7 @@ bool DataCoreObject::RemovePeople(int index, int count)
     for (int i = lastIndex; i >= index; --i) {
         const QString& currentPerson = m_identifierList[i];
         if (PersonInTransactions(currentPerson)) {
-            // TODO: emit signalError("Person is involved in one or more transactions, cannot remove them");
+            emit signalError("Identifier \"" + currentPerson + "\" is involved in one or more transactions. They cannot be deleted.");
         } else {
             indicesToDelete.append(i);
         }
@@ -89,19 +89,23 @@ bool DataCoreObject::RemovePeople(int index, int count)
     return true;
 }
 
-QString DataCoreObject::GetPersonIdentifier(int index) const
+const QString& DataCoreObject::GetPersonIdentifier(int index) const
 {
     if (index < 0 || index >= NumPeople()) {
-        return QString();
+        qDebug() << "Error - DataCoreObject::GetPersonIdentifier - Invalid index:" << index;
+        const static QString errorString = "";
+        return errorString;
     }
 
     return m_identifierList[index];
 }
 
-QString DataCoreObject::GetPersonName(int index) const
+const QString& DataCoreObject::GetPersonName(int index) const
 {
     if (index < 0 || index >= NumPeople()) {
-        return QString();
+        qDebug() << "Error - DataCoreObject::GetPersonName - Invalid index:" << index;
+        const static QString errorString = "";
+        return errorString;
     }
 
     return m_nameList[index];
@@ -110,6 +114,7 @@ QString DataCoreObject::GetPersonName(int index) const
 bool DataCoreObject::EditPersonIdentifier(int index, const QString& newIdentifier)
 {
     if (index < 0 || index >= NumPeople()) {
+        qDebug() << "Error - DataCoreObject::EditPersonIdentifier - Invalid index:" << index;
         return false;
     }
 
@@ -123,6 +128,7 @@ bool DataCoreObject::EditPersonIdentifier(int index, const QString& newIdentifie
         return false;
     }
 
+    // TODO: Remove this after you implement the m_data.EditPerson method.  It should throw this error.
     if (PersonExists(newIdentifier)) {
         emit signalError("Attempting to change identifier to one that already exists.  Identifiers must be unique.");
         return false;

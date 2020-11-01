@@ -5,9 +5,6 @@
 PeopleTableModel::PeopleTableModel(QObject *parent) :
     QAbstractTableModel(parent)
 {
-    for (int i = 0; i < Column::COUNT; ++i) {
-        m_columnWidths.append(0);
-    }
 }
 
 int PeopleTableModel::rowCount(const QModelIndex& parent) const
@@ -34,6 +31,7 @@ QVariant PeopleTableModel::data(const QModelIndex& index, int role) const
     return QVariant();
 }
 
+// TODO: Make this look like transactionstablemodel setdata
 bool PeopleTableModel::setData(const QModelIndex& index, const QVariant& value, int role)
 {
     if (!isIndexValid(index)) {

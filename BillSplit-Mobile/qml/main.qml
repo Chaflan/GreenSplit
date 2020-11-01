@@ -18,8 +18,8 @@ ApplicationWindow {
         PeoplePage {
         }
 
-//        TransactionsPage {
-//        }
+        TransactionsPage {
+        }
 
 //        ResultsPage {
 //            onFocusChanged: {
@@ -43,18 +43,18 @@ ApplicationWindow {
         }
     }
 
+    // TODO: Put these in the scopes in which they belong
     // Models
-    QtObject {
-        id: privateProperties
-
-        DataCore {
-            id: dataCore
-        }
+    DataCore {
+        id: dataCore
     }
-
     PeopleTableModel {
         id: peopleTableModel
-        data: privateProperties.dataCore
+        data: dataCore
+    }
+    TransactionsTableModel {
+        id: transactionsTableModel
+        data: dataCore
     }
 
     // Creat a popup when an error signal is sent from the models

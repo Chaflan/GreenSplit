@@ -7,7 +7,7 @@ namespace Ui {
 class TransactionsWidget;
 }
 
-class TransactionsModel;
+class TransactionsTableModel;
 
 class TransactionsWidget : public QWidget
 {
@@ -17,7 +17,7 @@ public:
     explicit TransactionsWidget(QWidget *parent = nullptr);
     ~TransactionsWidget();
 
-    void SetTransactionsModel(TransactionsModel* transactionsModel);
+    void SetTransactionsTableModel(TransactionsTableModel* TransactionsTableModel);
     void ViewSelected(const QModelIndex& index);
 
 private slots:
@@ -26,7 +26,7 @@ private slots:
 
 private:
     Ui::TransactionsWidget *ui;
-    TransactionsModel* model;
+    TransactionsTableModel* model;
 };
 
 #endif // TRANSACTIONSWIDGET_H

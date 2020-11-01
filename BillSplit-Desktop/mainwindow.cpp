@@ -2,7 +2,7 @@
 #include "ui_mainwindow.h"
 
 #include "peoplemodel.h"
-#include "transactionsmodel.h"
+#include "transactionstablemodel.h"
 #include "resultsmodel.h"
 #include <QFile>
 #include <QJsonDocument>
@@ -16,7 +16,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
 
     mPeopleModel = new PeopleModel(m_data, this);
-    mTransactionsModel = new TransactionsModel(m_data, this);
+    mTransactionsModel = new TransactionsTableModel(this);
     mResultsModel = new ResultsModel(m_data, this);
 
     ReadFromJsonFile();

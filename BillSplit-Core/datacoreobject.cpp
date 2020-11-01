@@ -7,10 +7,121 @@
 #include <QFile>
 #include <QJsonDocument>
 
+// TODO: Disallow blank payer name?
+
 DataCoreObject::DataCoreObject(QObject *parent) :
     QObject(parent)
 {
     JsonRead();
+}
+
+int DataCoreObject::NumTransactions() const
+{
+    return static_cast<int>(m_data.NumTransactions());
+}
+
+bool DataCoreObject::AddTransaction(double cost, const QString& payer, const QStringList& covering, QString description)
+{
+    try {
+        m_data.AddTransaction(payer.toStdString(), cost, stringListToStdSet(covering));
+    } catch (const std::exception& ex) {
+        qDebug() << "Error - DataCoreObject::AddTransaction - " << ex.what();
+        return false;
+    }
+
+    m_descriptionsList.append(std::move(description));
+    return true;
+}
+
+bool DataCoreObject::DeleteTransactions(int index, int count)
+{
+    try {
+        m_data.DeleteTransactions(index, count);
+        return true;
+    } catch (const std::exception& ex) {
+        qDebug() << "Error - DataCoreObject::DeleteTransactions - " << ex.what();
+    }
+
+    return false;
+}
+
+bool DataCoreObject::EditTransactionPayer(int index, const QString& newPayer)
+{
+    try {
+        m_data.EditTransactionPayer(index, newPayer.toStdString());
+        return true;
+    } catch (const std::exception& ex) {
+        qDebug() << "Error - DataCoreObject::GetTransactionPayer - " << ex.what();
+    }
+
+    return false;
+}
+
+bool DataCoreObject::EditTransactionCost(int index, double newCost)
+{
+    try {
+        m_data.EditTransactionCost(index, newCost);
+        return true;
+    } catch (const std::exception& ex) {
+        qDebug() << "Error - DataCoreObject::GetTransactionPayer - " << ex.what();
+    }
+
+    return false;
+}
+
+bool DataCoreObject::EditTransactionCovering(int index, const QStringList& newCovering)
+{
+    if (newCovering.isEmpty()) {
+        emit signalError("A transaction must cover one or more person");
+        return false;
+    }
+
+    try {
+        m_data.EditTransactionCovering(index, stringListToStdSet(newCovering));
+        return true;
+    } catch (const std::exception& ex) {
+        qDebug() << "Error - DataCoreObject::GetTransactionPayer - " << ex.what();
+    }
+
+    return false;
+}
+
+QString DataCoreObject::GetTransactionPayer(int index) const
+{
+    try {
+        return QString::fromStdString(m_data.GetTransactionPayer(index));
+    } catch (const std::exception& ex) {
+        qDebug() << "Error - DataCoreObject::GetTransactionPayer - " << ex.what();
+    }
+
+    return QString();
+}
+
+double DataCoreObject::GetTransactionCost(int index) const
+{
+    try {
+        return m_data.GetTransactionCost(index);
+    } catch (const std::exception& ex) {
+        qDebug() << "Error - DataCoreObject::GetTransactionCost - " << ex.what();
+    }
+
+    return 0;
+}
+
+QStringList DataCoreObject::GetTransactionCovering(int index) const
+{
+    QStringList result;
+    try {
+        std::set<std::string> coveringSet = m_data.GetTransactionCovering(index);
+        for (const std::string& str : coveringSet) {
+            result.append(QString::fromStdString(str));
+        }
+    } catch (const std::exception& ex) {
+        qDebug() << "Error - DataCoreObject::GetTransactionCovering - " << ex.what();
+        result.clear();
+    }
+
+    return result;
 }
 
 void DataCoreObject::Clear()
@@ -49,8 +160,8 @@ bool DataCoreObject::AddPerson(QString identifier, QString name)
     }
 
     m_identifierList.append(std::move(identifier));
+    emit identifierListChanged();
     m_nameList.append(std::move(name));
-    // Signal people changed
     return true;
 }
 
@@ -73,19 +184,22 @@ bool DataCoreObject::RemovePeople(int index, int count)
         }
     }
 
-    if (indicesToDelete.length() == count) {
-        // Bulk delete if none are being left behind (faster)
-        m_identifierList.erase(m_identifierList.begin() + index, m_identifierList.begin() + lastIndex + 1);
-        m_nameList.erase(m_nameList.begin() + index, m_nameList.begin() + lastIndex + 1);
-    } else {
-        // Individual delete otherwise (slower)
-        for (int i : indicesToDelete) {
-            m_identifierList.removeAt(i);
-            m_nameList.removeAt(i);
+    if (indicesToDelete.length() > 0) {
+        if (indicesToDelete.length() == count) {
+            // Bulk delete if none are being left behind (faster)
+            m_identifierList.erase(m_identifierList.begin() + index, m_identifierList.begin() + lastIndex + 1);
+            m_nameList.erase(m_nameList.begin() + index, m_nameList.begin() + lastIndex + 1);
+        } else {
+            // Individual delete otherwise (slower)
+            for (int i : indicesToDelete) {
+                m_identifierList.removeAt(i);
+                m_nameList.removeAt(i);
+            }
         }
+
+        emit identifierListChanged();
     }
 
-    // Signal here
     return true;
 }
 
@@ -111,6 +225,34 @@ const QString& DataCoreObject::GetPersonName(int index) const
     return m_nameList[index];
 }
 
+const QString& DataCoreObject::GetTransactionDescription(int index) const
+{
+    if (index < 0 || index >= NumTransactions()) {
+        qDebug() << "Error - DataCoreObject::GetTransactionDescription - Invalid index:" << index;
+        const static QString errorString = "";
+        return errorString;
+    }
+
+    return m_descriptionsList[index];
+}
+
+bool DataCoreObject::EditTransactionDescription(int index, QString newDescription)
+{
+    if (index < 0 || index >= NumPeople()) {
+        qDebug() << "Error - DataCoreObject::EditTransactionDescription - Invalid index:" << index;
+        return false;
+    }
+
+    // Editing to what it already is, nothing to do.
+    if (m_descriptionsList[index] == newDescription) {
+        return true;
+    }
+
+    m_descriptionsList[index] = std::move(newDescription);
+    // Signal people changed
+    return true;
+}
+
 bool DataCoreObject::EditPersonIdentifier(int index, const QString& newIdentifier)
 {
     if (index < 0 || index >= NumPeople()) {
@@ -134,17 +276,18 @@ bool DataCoreObject::EditPersonIdentifier(int index, const QString& newIdentifie
         return false;
     }
 
-    // TODO:
-    // m_data.EditPerson(m_identifierList[index].toStdString(), newIdentifier.toStdString());
+    // TODO: m_data.EditPerson(m_identifierList[index].toStdString(), newIdentifier.toStdString());
     m_identifierList[index] = std::move(newIdentifier);
-    // Signal people changed
+    emit identifierListChanged();
     return true;
 }
 
 bool DataCoreObject::EditPersonName(int index, QString newName)
 {
-    if (index < 0 || index >= NumPeople())
+    if (index < 0 || index >= NumPeople()) {
+        qDebug() << "Error - DataCoreObject::EditPersonName - Invalid index:" << index;
         return false;
+    }
 
     // Editing to what it already is, nothing to do.
     if (m_nameList[index] == newName) {
@@ -152,8 +295,12 @@ bool DataCoreObject::EditPersonName(int index, QString newName)
     }
 
     m_nameList[index] = std::move(newName);
-    // Signal people changed
     return true;
+}
+
+const QStringList& DataCoreObject::GetIdentifierList() const
+{
+    return m_identifierList;
 }
 
 void DataCoreObject::JsonRead()
@@ -203,4 +350,15 @@ void DataCoreObject::JsonWrite() const
 DataCoreObject::~DataCoreObject()
 {
     JsonWrite();
+}
+
+std::set<std::string> DataCoreObject::stringListToStdSet(const QStringList& stringList)
+{
+    std::set<std::string> ret;
+    for (const QString& str : stringList) {
+        if (ret.insert(str.toStdString()).second == false) {
+            qDebug() << "Error - DataCoreObject::stringListToStdSet - Inserting duplicate covering name:" << str;
+        }
+    }
+    return ret;
 }

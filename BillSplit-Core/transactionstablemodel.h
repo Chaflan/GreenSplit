@@ -1,15 +1,14 @@
-#ifndef PEOPLETABLEMODEL_H
-#define PEOPLETABLEMODEL_H
+#ifndef TRANSACTIONSTABLEMODEL_H
+#define TRANSACTIONSTABLEMODEL_H
 
 #include <QAbstractTableModel>
 #include "BillSplit-Core_global.h"
 #include "datacoreobject.h"
+#include "transactionmodel.h"
 
-#include <QLatin1String>
+// TODO: m_data assertions?
 
-//class DataCoreObject;
-
-class BILLSPLITCORE_EXPORT PeopleTableModel : public QAbstractTableModel
+class BILLSPLITCORE_EXPORT TransactionsTableModel : public QAbstractTableModel
 {
     Q_OBJECT
     Q_PROPERTY(DataCoreObject* data MEMBER m_data NOTIFY dataSet)
@@ -17,12 +16,14 @@ class BILLSPLITCORE_EXPORT PeopleTableModel : public QAbstractTableModel
 public:
     enum Column
     {
-        Identifier = 0,
-        FullName = 1,
-        COUNT = 2
+        Cost = 0,
+        Payer = 1,
+        Covering = 2,
+        Description = 3,
+        COUNT
     };
 
-    explicit PeopleTableModel(QObject *parent = nullptr);
+    explicit TransactionsTableModel(QObject *parent = nullptr);
 
     // QAbstractTableModel overrides
     int rowCount(const QModelIndex& parent = QModelIndex()) const override;
@@ -31,7 +32,6 @@ public:
     Q_INVOKABLE bool setData(const QModelIndex& index, const QVariant& value, int role = Qt::EditRole) override;
     Q_INVOKABLE bool removeRows(int row, int count, const QModelIndex& parent = QModelIndex()) override;
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
-    Qt::ItemFlags flags(const QModelIndex& index) const override;
 
     // data and setData overloads for easier direct calling.  data name must be changed to avoid property conflict
     Q_INVOKABLE QVariant getData(int row, int column, int role = Qt::DisplayRole) const;
@@ -39,8 +39,10 @@ public:
     Q_INVOKABLE bool setData(int row, int column, const QVariant& value, int role = Qt::EditRole);
     Q_INVOKABLE bool setData(int row, const QString& roleString, const QVariant& value, int role = Qt::EditRole);
 
-    Q_INVOKABLE bool addPerson(QString initials, QString name);
     Q_INVOKABLE int columnWidth(int columnIndex, int columnSpacing, int totalWidth);
+    Q_INVOKABLE void loadToModel(int row, TransactionModel* model) const;
+    Q_INVOKABLE bool editFromModel(int row, /*const*/ TransactionModel* model);
+    Q_INVOKABLE bool addFromModel(/*const*/ TransactionModel* model);
 
 signals:
     void signalError(QString message) const;
@@ -55,4 +57,4 @@ private:
     DataCoreObject* m_data = nullptr;
 };
 
-#endif // PEOPLETABLEMODEL_H
+#endif // TRANSACTIONSTABLEMODEL_H

@@ -3,7 +3,10 @@
 
 #include <QObject>
 #include "BillSplit-Core_global.h"
-#include "datacoreold.h"
+#include "datacoreobject.h"
+
+// TODO: Consistent order cost payer covering description
+// TODO: const signals in all classes
 
 class BILLSPLITCORE_EXPORT PersonCheck : public QObject
 {
@@ -33,6 +36,8 @@ private:
 class BILLSPLITCORE_EXPORT TransactionModel : public QObject
 {
     Q_OBJECT
+    Q_PROPERTY(DataCoreObject* data READ getData WRITE setData NOTIFY dataChanged)
+
     // TODO: Try MEMBER with a NOTIFY only called by non-setters
     Q_PROPERTY(QString payerName READ getPayerName WRITE setPayerName NOTIFY payerNameChanged)
     Q_PROPERTY(int payerIndex READ getPayerIndex WRITE setPayerIndex NOTIFY payerIndexChanged)
@@ -47,26 +52,29 @@ public:
     explicit TransactionModel(QObject *parent = nullptr);
     //TransactionModel(DataCore& dataCore, QObject* parent = nullptr);
 
-    Q_INVOKABLE void initialize(DataCoreOld* data);
+    //Q_INVOKABLE void initialize(DataCoreOld* data);
 
+    DataCoreObject* getData() const              { return m_data; }
     QString getPayerName() const                 { return m_payerName; }
     int getPayerIndex() const                    { return m_payerIndex; }
     double getCost() const                       { return m_cost; }
     QString getDescription() const               { return m_description; }
-    QStringList getAllPeople() const             { return m_allPeople; }
     QList<PersonCheck*> getCoveringList() const  { return m_coveringList; }
+    QStringList getAllPeople() const;
 
+    void setData(DataCoreObject* data);
     void setPayerName(QString payerName);
     void setPayerIndex(int payerIndex);
     void setCost(double cost);
     void setDescription(QString description);
 
-    Q_INVOKABLE void load(QString name, double cost, QString description, const QStringList& covering);
+    Q_INVOKABLE void load(double cost, QString payer, const QStringList& covering, QString description);
     Q_INVOKABLE void clear();
     QStringList getCoveringStringList() const;
     void setCoveringStringList(const QStringList& stringList);
 
 signals:
+    void dataChanged() const;
     void payerNameChanged() const;
     void payerIndexChanged() const;
     void costChanged() const;
@@ -80,13 +88,11 @@ private:
     int m_payerIndex;
     double m_cost;
     QString m_description;
-    QStringList m_allPeople;
     QList<PersonCheck*> m_coveringList;
 
     // TODO: This information can change from the people model, so we really should
     // store models in here, not the raw data core, that is a fix for the future though
-    DataCoreOld* m_data = nullptr;
-    //DataCore& m_data;
+    DataCoreObject* m_data = nullptr;
 };
 
 #endif // TRANSACTIONMODEL_H

@@ -1,10 +1,15 @@
 #include "comboboxitemdelegate.h"
-#include "transactionsmodel.h"
+//#include "transactionsmodel.h"
 #include <QComboBox>
 
-ComboBoxItemDelegate::ComboBoxItemDelegate(TransactionsModel* model, QObject *parent) :
-    QStyledItemDelegate(parent),
-    m_model(model)
+//ComboBoxItemDelegate::ComboBoxItemDelegate(TransactionsModel* model, QObject *parent) :
+//    QStyledItemDelegate(parent),
+//    m_model(model)
+//{
+//}
+
+ComboBoxItemDelegate::ComboBoxItemDelegate(QObject *parent) :
+    QStyledItemDelegate(parent)
 {
 }
 
@@ -19,17 +24,19 @@ QWidget *ComboBoxItemDelegate::createEditor(QWidget* parent, const QStyleOptionV
 
     // Create the combobox and populate it
     QComboBox* cb = new QComboBox(parent);
-    cb->addItems(m_model->getAllInitials());
+    //cb->addItems(m_model->getAllInitials());
     return cb;
 }
 
 void ComboBoxItemDelegate::setEditorData(QWidget* editor, const QModelIndex& index) const
 {
+    Q_UNUSED(index);
+
     QComboBox *cb = qobject_cast<QComboBox *>(editor);
     Q_ASSERT(cb);
 
     // get the index of the text in the combobox that matches the current value of the item
-    const QString currentText = m_model->data(index, Qt::DisplayRole).toString();
+    const QString currentText;// = m_model->data(index, Qt::DisplayRole).toString();
     const int cbIndex = cb->findText(currentText);
 
     // if it is valid, adjust the combobox

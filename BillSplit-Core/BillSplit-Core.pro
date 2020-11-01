@@ -29,7 +29,7 @@ SOURCES += \
     resultsmodel.cpp \
     transactionmodel.cpp \
     transactionold.cpp \
-    transactionsmodel.cpp
+    transactionstablemodel.cpp
 
 HEADERS += \
     BillSplit-Core_global.h \
@@ -42,7 +42,7 @@ HEADERS += \
     resultsmodel.h \
     transactionmodel.h \
     transactionold.h \
-    transactionsmodel.h
+    transactionstablemodel.h
 
 # Default rules for deployment.
 unix {

@@ -5,79 +5,82 @@ import Qt.labs.qmlmodels 1.0
 import QtQuick.Layouts 1.3
 
 Page {
-    ColumnLayout {
-        anchors.fill: parent
-        spacing: 80
-        Item {
-            Layout.fillWidth: true
-            Layout.fillHeight: true
+    Item {
+        id: table
+        anchors.fill:parent
+        anchors.leftMargin: 5
+        anchors.rightMargin: 5
 
-            Row {
-                id: tableviewheader
-                width: tableview.contentWidth
-                height: 40
-                x: -tableview.contentX
-                z: 1
-                spacing: 5
+        Row {
+            id: tableheader
+            width: tableview.contentWidth
+            height: 40
+            x: -tableview.contentX
+            z: 1
+            spacing: 5
 
-                Repeater {
-                    model: tableview.model.columnCount()
-                    Rectangle {
-                        width: tableview.model.columnWidth(index, font)
-                        height: parent.height
-                        color: "green"
+            Repeater {
+                model: tableview.model.columnCount()
+                Rectangle {
+                    width: tableview.model.columnWidth(index, tableheader.spacing, table.width)
+                    height: parent.height
+                    color: "green"
 
-                        Text {
-                            id: texttt
-                            font.pixelSize: 15
-                            anchors.fill: parent
-                            anchors.leftMargin: 10
-                            verticalAlignment: Text.AlignVCenter
-                            //anchors.verticalCenter: parent.verticalCenter
-                            x: 4
-                            width: parent.width - 4
-                            text: tableview.model.headerData(index, Qt.Horizontal)
-                        }
+                    Text {
+                        id: texttt
+                        font.pixelSize: 15
+                        anchors.fill: parent
+                        anchors.leftMargin: 10
+                        verticalAlignment: Text.AlignVCenter
+                        x: 4
+                        width: parent.width - 4
+                        text: tableview.model.headerData(index, Qt.Horizontal)
                     }
                 }
             }
+        }
 
-            TableView {
-                id: tableview
-                model: transactionsModel
-                focus: true
+        TableView {
+            id: tableview
+            model: transactionsTableModel
+            focus: true
 
-                columnWidthProvider: function(column, font) { return Math.min(600, model.columnWidth(column, font)) }
-                anchors.fill: parent
-                anchors.topMargin: tableviewheader.height
-                columnSpacing: 5
-                rowSpacing: 5
+            columnWidthProvider: function(column) {
+                return model.columnWidth(column, columnSpacing, table.width);
+            }
 
-                property var selectedRow: 0
-                property var selectedColumn: 0
+            anchors.fill: parent
+            anchors.topMargin: tableheader.height + 5
+            anchors.bottomMargin: tablefooter.height + 5
+            columnSpacing: 5
+            rowSpacing: 5
 
-                // Enable the view button only when a table cell is selected
-                onActiveFocusChanged: {
-                    viewButton.enabled = tableview.activeFocus || (viewButton.enabled && viewButton.activeFocus)
-                }
+            ScrollBar.vertical: ScrollBar { }
 
-                delegate: Rectangle {
-                    implicitHeight: 50
-                    border.color: "black"
+            property var selectedRow: 0
+            property var selectedColumn: 0
 
-                    TextField {
-                        id: textField
-                        text: display
-                        font.pixelSize: 15
-                        anchors.fill: parent
-                        width: parent.width
-                        readOnly: true
+            // Enable the view button only when a table cell is selected
+            onActiveFocusChanged: {
+                viewButton.enabled = tableview.activeFocus || (viewButton.enabled && viewButton.activeFocus)
+            }
 
-                        onActiveFocusChanged: {
-                            if (textField.activeFocus) {
-                                tableview.selectedRow = row
-                                tableview.selectedColumn = column
-                            }
+            delegate: Rectangle {
+                implicitHeight: 50
+                border.color: "black"
+
+                TextField {
+                    id: textField
+                    text: display
+                    font.pixelSize: 15
+                    anchors.fill: parent
+                    width: parent.width
+                    readOnly: true
+
+                    onActiveFocusChanged: {
+                        if (textField.activeFocus) {
+                            tableview.selectedRow = row
+                            tableview.selectedColumn = column
                         }
                     }
                 }
@@ -85,33 +88,35 @@ Page {
         }
 
         RowLayout {
-            property var buttonDiameter: 80
+            id: tablefooter
+            width: tableview.width
+            height: 40
+            x: -tableview.contentX
+            y: -tableview.contentY + tableview.contentHeight + tableheader.height + tableview.rowSpacing + 5
 
-            Layout.preferredHeight: buttonDiameter
-            Layout.fillWidth: true
-            Layout.bottomMargin: 20
-            Layout.rightMargin: 20
-            spacing: 50
-
-            Item { Layout.fillWidth: true } // Spacer
             RoundButton {
                 id: viewButton
                 enabled: false
-                text: "View\nSelected\nTransaction"
+                text: "View"
                 font.pointSize: 10
-                Layout.preferredWidth: parent.buttonDiameter
-                Layout.preferredHeight: parent.buttonDiameter
+                Layout.preferredWidth: 100
+                Layout.preferredHeight: tableheader.height
+                Layout.leftMargin: 0
+
                 onClicked: {
-                    transactionsModel.loadToModel(tableview.selectedRow, viewTransactionDialog.transactionModel)
+                    tableview.model.loadToModel(tableview.selectedRow, viewTransactionDialog.transactionModel)
                     viewTransactionDialog.open()
                 }
             }
+            Item { Layout.fillWidth: true } // Spacer
             RoundButton {
                 id: addButton
-                text: "Add\nTransaction"
+                text: "Add"
                 font.pointSize: 10
-                Layout.preferredWidth: parent.buttonDiameter
-                Layout.preferredHeight: parent.buttonDiameter
+                Layout.preferredWidth: 100
+                Layout.preferredHeight: tableheader.height
+                Layout.rightMargin: 0
+
                 onClicked: {
                     viewTransactionDialog.transactionModel.clear()
                     addTransactionDialog.open()
@@ -134,14 +139,12 @@ Page {
         id: viewTransactionDialog
         anchors.centerIn: parent
         onSavePressed: {
-            console.log("view save")
             if (!tableview.model.editFromModel(tableview.selectedRow, transactionModel)) {
                 console.warn("transaction couldn't be edited.")
             }
 
         }
         onDeletePressed: {
-            console.log("view delete")
             if (!tableview.model.removeRows(tableview.selectedRow, 1)) {
                 console.warn("transaction couldn't be deleted")
             }

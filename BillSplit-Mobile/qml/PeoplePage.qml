@@ -6,6 +6,7 @@ import QtQuick.Layouts 1.3
 
 // TODO: standardize use of table.model and peoplemodel
 // TODO: standardize the use of parent vs id
+// TODO: texttt
 
 Page {
     Item {
@@ -131,6 +132,7 @@ Page {
                 Layout.preferredWidth: 100
                 Layout.preferredHeight: tableheader.height
                 Layout.rightMargin: 0
+
                 onClicked: {
                     addPersonDialog.initials = ""
                     addPersonDialog.name = ""

@@ -35,27 +35,42 @@ TransactionModel::TransactionModel(QObject *parent) :
 {
 }
 
-void TransactionModel::initialize(DataCoreOld* data)
+QStringList TransactionModel::getAllPeople() const
 {
-    m_data = data;
-    assert(m_data);
-
-    // TODO: hook all people to people model change emits
-    for (int i = 0; i < m_data->NumPeople(); ++i) {
-        m_allPeople.append(m_data->GetPersonByIndex(i).initials);
-        m_coveringList.append(new PersonCheck(m_allPeople[i], true, this));  // TODO: Is this right?  Qt parent system is weird
+    if (m_data) {
+        return m_data->GetIdentifierList();
     }
-    emit allPeopleChanged();
-    emit coveringListChanged();
 
-    clear();
+    return QStringList();
+}
+
+void TransactionModel::setData(DataCoreObject* data)
+{
+    if (data != m_data) {
+        m_data = data;
+        assert(m_data);
+        emit dataChanged();
+
+        // TODO: Try to connect this directly, no call to connect
+        QObject::connect(m_data, &DataCoreObject::identifierListChanged, this, &TransactionModel::allPeopleChanged);
+
+        // TODO: Is this call necessary?
+        emit allPeopleChanged();
+
+        for (int i = 0; i < m_data->NumPeople(); ++i) {
+            m_coveringList.append(new PersonCheck(m_data->GetPersonIdentifier(i), true, this));  // TODO: Is this right?  Qt parent system is weird
+        }
+        emit coveringListChanged();
+
+        clear();
+    }
 }
 
 void TransactionModel::setPayerName(QString payerName)
 {
     if (payerName != m_payerName) {
         for (int i = 0; i < m_data->NumPeople(); ++i) {
-            if (payerName == m_data->GetPersonByIndex(i).initials) {
+            if (payerName == m_data->GetPersonIdentifier(i)) {
                 m_payerIndex = i;
                 m_payerName = std::move(payerName);
                 emit payerIndexChanged();
@@ -69,12 +84,10 @@ void TransactionModel::setPayerName(QString payerName)
 void TransactionModel::setPayerIndex(int payerIndex)
 {
     if (payerIndex != m_payerIndex) {
-        if (payerIndex >= 0 && payerIndex < m_data->NumPeople()) {
-            m_payerIndex = payerIndex;
-            m_payerName = m_data->GetPersonByIndex(m_payerIndex).initials;
-            emit payerIndexChanged();
-            emit payerNameChanged();
-        }
+        m_payerIndex = payerIndex;
+        m_payerName = m_data->GetPersonIdentifier(m_payerIndex);
+        emit payerIndexChanged();
+        emit payerNameChanged();
     }
 }
 
@@ -94,9 +107,9 @@ void TransactionModel::setDescription(QString description)
     }
 }
 
-void TransactionModel::load(QString payerName, double cost, QString description, const QStringList& covering)
+void TransactionModel::load(double cost, QString payer, const QStringList& covering, QString description)
 {
-    setPayerName(std::move(payerName));
+    setPayerName(std::move(payer));
     setCost(cost);
     setDescription(std::move(description));
     setCoveringStringList(covering);

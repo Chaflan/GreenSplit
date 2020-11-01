@@ -13,7 +13,7 @@ namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
 
 class PeopleModel;
-class TransactionsModel;
+class TransactionsTableModel;
 class ResultsModel;
 
 class MainWindow : public QMainWindow
@@ -36,7 +36,7 @@ private:
     Ui::MainWindow *ui;
     DataCoreOld m_data;
     PeopleModel* mPeopleModel;
-    TransactionsModel* mTransactionsModel;
+    TransactionsTableModel* mTransactionsModel;
     ResultsModel* mResultsModel;
 };
 #endif // MAINWINDOW_H

@@ -14,7 +14,7 @@ PopupDialog {
 
     TransactionModel {
         id: transactionModel
-        Component.onCompleted: initialize(dataCore)
+        data: dataCore
     }
 
     ColumnLayout {

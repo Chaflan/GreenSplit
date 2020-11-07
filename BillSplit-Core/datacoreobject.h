@@ -4,9 +4,10 @@
 #include <QObject>
 #include "datacore.h"
 
+// TODO: rename billsplitcore_global to be lowercaswe
 // TODO: Standardize use of name vs identifier
 // TODO: QDebug lines
-// TODO: Upper Lower case method name confusion
+// TODO: Upper Lower case method name confusion (all lower in any qobject for qinvokableness)
 // TODO: Return whole list in some cases?
 // TODO: Currently there is nothing preventing the front end from adding a transaction with nonexistant people
 // TODO: Standardize name vs identifier
@@ -31,7 +32,7 @@ public:
     void Clear();
 
     // DataCore extending methods
-    int NumPeople() const;
+    Q_INVOKABLE int numPeople() const;
     bool PersonExists(const QString& identifier) const;
     bool PersonInTransactions(const QString& identifier) const;
     bool AddPerson(QString identifier, QString name);

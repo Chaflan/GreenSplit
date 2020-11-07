@@ -48,7 +48,7 @@ private:
     void ReviseLedger(int fromIndex);
 
     std::vector<Transaction> m_transactions;
-    std::vector<std::unordered_map<std::string, Entry> > m_ledger;
+    std::vector<std::unordered_map<std::string, double> > m_ledger;
 };
 
 #endif // DATACORE_H

@@ -118,8 +118,12 @@ Page {
                 Layout.rightMargin: 0
 
                 onClicked: {
-                    viewTransactionDialog.transactionModel.clear()
-                    addTransactionDialog.open()
+                    if (dataCore.numPeople() < 1) {
+                        popupMessage("Add at least one person to begin adding transactions")
+                    } else {
+                        viewTransactionDialog.transactionModel.clear()
+                        addTransactionDialog.open()
+                    }
                 }
             }
         }
@@ -132,6 +136,8 @@ Page {
         onSavePressed: {
             if (!tableview.model.addFromModel(transactionModel)) {
                 console.warn("transaction couldn't be added.")
+            } else {
+                tableview.forceLayout() // contentHeight won't update without this as it is loaded on demand
             }
         }
     }
@@ -142,63 +148,16 @@ Page {
             if (!tableview.model.editFromModel(tableview.selectedRow, transactionModel)) {
                 console.warn("transaction couldn't be edited.")
             }
-
         }
         onDeletePressed: {
             if (!tableview.model.removeRows(tableview.selectedRow, 1)) {
                 console.warn("transaction couldn't be deleted")
+            } else {
+                tableview.forceLayout() // contentHeight won't update without this as it is loaded on demand
             }
         }
+        onClosed: {
+            viewButton.enabled = false
+        }
     }
-
-
-
-    // Creat a popup when an error signal is sent from the model
-//    Connections {
-//        target: tableview.model
-//        function onSignalError(pErrorMessage) {
-//            errorPopup.errorMessage.text = pErrorMessage// + " paaaaaa aaaa aaa aa aaaaa aaa aadding "
-//            errorPopup.open()
-//        }
-//    }
-//    Popup {
-//        id: errorPopup
-//        modal: true
-//        focus: true
-//        anchors.centerIn: parent
-//        width: 300
-//        height: 200
-//        closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
-
-//        property alias errorMessage: messageText
-
-//        Column {
-//            anchors.fill: parent
-//            Text {
-//                id: messageText
-//                height: parent.height - circleButton.height
-//                width: parent.width
-//                font.pointSize: 15
-//                anchors.horizontalCenter: parent.horizontalCenter
-//                wrapMode: Text.WordWrap
-//                verticalAlignment: Text.AlignVCenter
-//                horizontalAlignment: Text.AlignHCenter
-//            }
-//            RoundButton {
-//                id: circleButton
-
-//                height: 80
-//                width: 100
-//                anchors.horizontalCenter: parent.horizontalCenter
-
-//                text: "OK"
-//                font.pointSize: 15
-
-//                focus: true
-//                onClicked: errorPopup.close()
-//                Keys.onEnterPressed:  errorPopup.close()
-//                Keys.onReturnPressed: errorPopup.close()
-//            }
-//        }
-//    }
 }

@@ -66,7 +66,7 @@ PopupDialog {
 
         GroupBox {
             id: groupBoxCovering
-            height: 100
+            //height: 100
             Layout.fillWidth: true
             Layout.fillHeight: true
             title: qsTr("Covering Whom")
@@ -78,7 +78,9 @@ PopupDialog {
 
                 // TODO: Temp hack to be able to see contents
                 // What you really need here is a scrollbar and some kind of default
-                implicitHeight: 100
+                //implicitHeight: 100
+                //implicitHeight: height
+                implicitHeight: 80
 
                 delegate: CheckDelegate {
                     id: checkDelegate

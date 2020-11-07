@@ -25,7 +25,19 @@ QVariant TransactionsTableModel::data(const QModelIndex& index, int role) const
         switch (index.column()) {
             case Column::Cost: return m_data->GetTransactionCost(index.row());
             case Column::Payer: return m_data->GetTransactionPayer(index.row());
-            case Column::Covering: return m_data->GetTransactionCovering(index.row());
+            case Column::Covering: {
+                QString coveringListStr;
+                bool needsComma = false;
+                for (const auto& str : m_data->GetTransactionCovering(index.row())) {
+                    if (needsComma) {
+                        coveringListStr += ',';
+                    } else {
+                        needsComma = true;
+                    }
+                    coveringListStr += str;
+                }
+                return coveringListStr;
+            }
             case Column::Description: return m_data->GetTransactionDescription(index.row());
         }
     }
@@ -81,6 +93,7 @@ QVariant TransactionsTableModel::headerData(int section, Qt::Orientation orienta
     return QAbstractItemModel::headerData(section, orientation, role);
 }
 
+// TODO: Are these used anymore?
 QVariant TransactionsTableModel::getData(int row, int column, int role) const
 {
     return data(index(row, column), role);
@@ -103,6 +116,7 @@ bool TransactionsTableModel::setData(int row, const QString& roleString, const Q
 
 int TransactionsTableModel::columnWidth(int columnIndex, int columnSpacing, int totalWidth)
 {
+    // TODO: Static constexpr sum formula here
     switch (columnIndex) {
         case Column::Cost: return 100;
         case Column::Payer: return 100;
@@ -117,10 +131,10 @@ void TransactionsTableModel::loadToModel(int row, TransactionModel* model) const
 {
     assert(model);
     model->load(
-        getData(row, Column::Cost).toDouble(),
-        getData(row, Column::Payer).toString(),
-        getData(row, Column::Covering).toStringList(),
-        getData(row, Column::Description).toString());
+        m_data->GetTransactionCost(row),
+        m_data->GetTransactionPayer(row),
+        m_data->GetTransactionCovering(row),
+        m_data->GetTransactionDescription(row));
 }
 
 bool TransactionsTableModel::editFromModel(int row, TransactionModel* model)
@@ -137,11 +151,16 @@ bool TransactionsTableModel::editFromModel(int row, TransactionModel* model)
 bool TransactionsTableModel::addFromModel(TransactionModel* model)
 {
     assert(model);
-    return m_data->AddTransaction(
+    beginInsertRows(QModelIndex(), rowCount(), rowCount());
+
+    bool result = m_data->AddTransaction(
         model->getCost(),
         model->getPayerName(),
         model->getCoveringStringList(),
         model->getDescription());
+
+    endInsertRows();
+    return result;
 }
 
 bool TransactionsTableModel::isIndexValid(const QModelIndex& index) const

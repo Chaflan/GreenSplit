@@ -59,7 +59,7 @@ ApplicationWindow {
 
     // Creat a popup when an error signal is sent from the models
     Connections {
-        target: privateProperties.dataCore
+        target: dataCore
         function onSignalError(errorMessage) { popupMessage(errorMessage) }
     }
     Connections {

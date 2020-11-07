@@ -1,4 +1,5 @@
 #include "transactionmodel.h"
+#include <QDebug>
 
 PersonCheck::PersonCheck(QObject* parent) :
     QObject(parent)
@@ -51,13 +52,12 @@ void TransactionModel::setData(DataCoreObject* data)
         assert(m_data);
         emit dataChanged();
 
-        // TODO: Try to connect this directly, no call to connect
-        QObject::connect(m_data, &DataCoreObject::identifierListChanged, this, &TransactionModel::allPeopleChanged);
+        QObject::connect(m_data, &DataCoreObject::identifierListChanged, this, &TransactionModel::identifierListChanged);
 
         // TODO: Is this call necessary?
         emit allPeopleChanged();
 
-        for (int i = 0; i < m_data->NumPeople(); ++i) {
+        for (int i = 0; i < m_data->numPeople(); ++i) {
             m_coveringList.append(new PersonCheck(m_data->GetPersonIdentifier(i), true, this));  // TODO: Is this right?  Qt parent system is weird
         }
         emit coveringListChanged();
@@ -68,8 +68,8 @@ void TransactionModel::setData(DataCoreObject* data)
 
 void TransactionModel::setPayerName(QString payerName)
 {
-    if (payerName != m_payerName) {
-        for (int i = 0; i < m_data->NumPeople(); ++i) {
+    if (m_data && payerName != m_payerName) {
+        for (int i = 0; i < m_data->numPeople(); ++i) {
             if (payerName == m_data->GetPersonIdentifier(i)) {
                 m_payerIndex = i;
                 m_payerName = std::move(payerName);
@@ -83,9 +83,9 @@ void TransactionModel::setPayerName(QString payerName)
 
 void TransactionModel::setPayerIndex(int payerIndex)
 {
-    if (payerIndex != m_payerIndex) {
+    if (m_data && payerIndex != m_payerIndex) {
         m_payerIndex = payerIndex;
-        m_payerName = m_data->GetPersonIdentifier(m_payerIndex);
+        m_payerName = payerIndex == -1 ? "" : m_data->GetPersonIdentifier(m_payerIndex);
         emit payerIndexChanged();
         emit payerNameChanged();
     }
@@ -93,7 +93,7 @@ void TransactionModel::setPayerIndex(int payerIndex)
 
 void TransactionModel::setCost(double cost)
 {
-    if (cost != m_cost) {
+    if (m_data && cost != m_cost) {
         m_cost = cost;
         emit costChanged();
     }
@@ -101,7 +101,7 @@ void TransactionModel::setCost(double cost)
 
 void TransactionModel::setDescription(QString description)
 {
-    if (m_description != description) {
+    if (m_data && m_description != description) {
         m_description = std::move(description);
         emit descriptionChanged();
     }
@@ -109,6 +109,7 @@ void TransactionModel::setDescription(QString description)
 
 void TransactionModel::load(double cost, QString payer, const QStringList& covering, QString description)
 {
+    assert(m_data);
     setPayerName(std::move(payer));
     setCost(cost);
     setDescription(std::move(description));
@@ -117,7 +118,8 @@ void TransactionModel::load(double cost, QString payer, const QStringList& cover
 
 void TransactionModel::clear()
 {
-    setPayerIndex(0);
+    assert(m_data);
+    setDefaultPayer();
     setCost(0);
     setDescription("");
 
@@ -136,6 +138,7 @@ void TransactionModel::clear()
 
 QStringList TransactionModel::getCoveringStringList() const
 {
+    assert(m_data);
     // TODO: Cache this
     QStringList ret;
     for (int i = 0; i < m_coveringList.length(); ++i) {
@@ -147,6 +150,7 @@ QStringList TransactionModel::getCoveringStringList() const
 
 void TransactionModel::setCoveringStringList(const QStringList& stringList)
 {
+    assert(m_data);
     // TODO: Can use the cache here too
     bool coveringListWasChanged = false;
     for (int i = 0; i < m_coveringList.length(); ++i) {
@@ -158,6 +162,56 @@ void TransactionModel::setCoveringStringList(const QStringList& stringList)
     }
     if (coveringListWasChanged) {
         emit coveringListChanged();
+    }
+}
+
+void TransactionModel::identifierListChanged()
+{
+    // Update covering list.  Assumes same order, which is true in this design
+    bool coveringListWasChanged = false;
+    for (int i = 0; i < m_data->numPeople(); ++i) {
+        if (i >= m_coveringList.size()) {
+            m_coveringList.insert(i, new PersonCheck(m_data->GetPersonIdentifier(i), true, this));
+            coveringListWasChanged = true;
+            continue;
+        }
+
+        if (m_data->GetPersonIdentifier(i) == m_coveringList[i]->getName()) {
+            continue;
+        }
+
+        bool found = false;
+        for (int j = i + 1; j < m_coveringList.size(); ++j) {
+            if (m_data->GetPersonIdentifier(i) == m_coveringList[j]->getName()) {
+                m_coveringList.erase(m_coveringList.begin() + i, m_coveringList.begin() + j);  // TODO: does this delete?
+                if (i <= m_payerIndex && m_payerIndex < j) {
+                    setDefaultPayer();
+                }
+                coveringListWasChanged = true;
+                found = true;
+                break;
+            }
+        }
+
+        if (!found) {
+            m_coveringList.insert(i, new PersonCheck(m_data->GetPersonIdentifier(i), true, this));
+            coveringListWasChanged = true;
+        }
+    }
+
+    if (coveringListWasChanged) {
+        emit coveringListChanged();
+    }
+
+    emit allPeopleChanged();
+}
+
+void TransactionModel::setDefaultPayer()
+{
+    if (m_data->numPeople() > 0) {
+        setPayerIndex(0);
+    } else {
+        setPayerIndex(-1);
     }
 }
 

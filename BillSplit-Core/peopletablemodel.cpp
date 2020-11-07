@@ -9,7 +9,7 @@ PeopleTableModel::PeopleTableModel(QObject *parent) :
 
 int PeopleTableModel::rowCount(const QModelIndex& parent) const
 {
-    return parent.isValid() ? 0 : m_data->NumPeople();
+    return parent.isValid() ? 0 : m_data->numPeople();
 }
 
 int PeopleTableModel::columnCount(const QModelIndex& parent) const

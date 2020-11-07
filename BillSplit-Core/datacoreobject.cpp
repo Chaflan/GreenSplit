@@ -131,7 +131,7 @@ void DataCoreObject::Clear()
     m_nameList.clear();
 }
 
-int DataCoreObject::NumPeople() const
+int DataCoreObject::numPeople() const
 {
     return static_cast<int>(m_identifierList.size());
 }
@@ -168,9 +168,9 @@ bool DataCoreObject::AddPerson(QString identifier, QString name)
 bool DataCoreObject::RemovePeople(int index, int count)
 {
     const int lastIndex = index + count - 1;
-    if (index < 0 || count < 1 || lastIndex >= NumPeople()) {
+    if (index < 0 || count < 1 || lastIndex >= numPeople()) {
         qDebug() << "Error - DataCoreObject::RemovePeople - Invalid parameters.  index = "
-            << index << " count = " << count << " NumPeople = " << NumPeople();
+            << index << " count = " << count << " NumPeople = " << numPeople();
         return false;
     }
 
@@ -205,7 +205,7 @@ bool DataCoreObject::RemovePeople(int index, int count)
 
 const QString& DataCoreObject::GetPersonIdentifier(int index) const
 {
-    if (index < 0 || index >= NumPeople()) {
+    if (index < 0 || index >= numPeople()) {
         qDebug() << "Error - DataCoreObject::GetPersonIdentifier - Invalid index:" << index;
         const static QString errorString = "";
         return errorString;
@@ -216,7 +216,7 @@ const QString& DataCoreObject::GetPersonIdentifier(int index) const
 
 const QString& DataCoreObject::GetPersonName(int index) const
 {
-    if (index < 0 || index >= NumPeople()) {
+    if (index < 0 || index >= numPeople()) {
         qDebug() << "Error - DataCoreObject::GetPersonName - Invalid index:" << index;
         const static QString errorString = "";
         return errorString;
@@ -238,7 +238,7 @@ const QString& DataCoreObject::GetTransactionDescription(int index) const
 
 bool DataCoreObject::EditTransactionDescription(int index, QString newDescription)
 {
-    if (index < 0 || index >= NumPeople()) {
+    if (index < 0 || index >= numPeople()) {
         qDebug() << "Error - DataCoreObject::EditTransactionDescription - Invalid index:" << index;
         return false;
     }
@@ -255,7 +255,7 @@ bool DataCoreObject::EditTransactionDescription(int index, QString newDescriptio
 
 bool DataCoreObject::EditPersonIdentifier(int index, const QString& newIdentifier)
 {
-    if (index < 0 || index >= NumPeople()) {
+    if (index < 0 || index >= numPeople()) {
         qDebug() << "Error - DataCoreObject::EditPersonIdentifier - Invalid index:" << index;
         return false;
     }
@@ -284,7 +284,7 @@ bool DataCoreObject::EditPersonIdentifier(int index, const QString& newIdentifie
 
 bool DataCoreObject::EditPersonName(int index, QString newName)
 {
-    if (index < 0 || index >= NumPeople()) {
+    if (index < 0 || index >= numPeople()) {
         qDebug() << "Error - DataCoreObject::EditPersonName - Invalid index:" << index;
         return false;
     }
@@ -306,7 +306,7 @@ const QStringList& DataCoreObject::GetIdentifierList() const
 void DataCoreObject::JsonRead()
 {
     // TODO: Model reset signals
-    // TODO: Initials -> identifier
+    // TODO: Debug lines for not openable, do this for JsonWrite too
 
     QFile file("save.json");
     if (file.open(QIODevice::ReadOnly))
@@ -319,28 +319,63 @@ void DataCoreObject::JsonRead()
         for (const auto& element : peopleArray)
         {
             QJsonObject personObj = element.toObject();
-            AddPerson(personObj["initials"].toString(), personObj["name"].toString());
+            AddPerson(personObj["identifier"].toString(), personObj["name"].toString());
+        }
+
+        QJsonArray transactionArray = jsonObj["transaction"].toArray();
+        for (const auto& element : transactionArray)
+        {
+            QJsonObject transactionObj = element.toObject();
+            QJsonArray transactionArray = transactionObj["covering"].toArray();
+
+            QStringList coveringStringList;
+            for (const auto& name : transactionArray) {
+                coveringStringList.append(name.toString());
+            }
+
+            AddTransaction(
+                transactionObj["cost"].toDouble(),
+                transactionObj["payer"].toString(),
+                std::move(coveringStringList),
+                transactionObj["description"].toString());
         }
     }
 }
 
 void DataCoreObject::JsonWrite() const
 {
-    // TODO: Initials -> identifier
-
     QFile file("save.json");
     if (file.open(QIODevice::WriteOnly))
     {
         QJsonObject jsonObj;
+
         QJsonArray peopleArray;
-        for(int i = 0; i < NumPeople(); ++i)
+        for(int i = 0; i < numPeople(); ++i)
         {
             QJsonObject curr;
-            curr["initials"] = m_identifierList[i];
+            curr["identifier"] = m_identifierList[i];
             curr["name"] = m_nameList[i];
             peopleArray.append(curr);
         }
         jsonObj["people"] = peopleArray;
+
+        QJsonArray transactionArray;
+        for(int i = 0; i < static_cast<int>(m_data.NumTransactions()); ++i)
+        {
+            QJsonObject curr;
+            curr["cost"] = GetTransactionCost(i);
+            curr["payer"] = GetTransactionPayer(i);
+
+            QJsonArray coveringArray;
+            for (const auto& name : GetTransactionCovering(i)) {
+                coveringArray.append(name);
+            }
+            curr["covering"] = coveringArray;
+            curr["description"] = GetTransactionDescription(i);
+
+            transactionArray.append(curr);
+        }
+        jsonObj["transaction"] = transactionArray;
 
         QJsonDocument saveDoc(jsonObj);
         file.write(saveDoc.toJson());

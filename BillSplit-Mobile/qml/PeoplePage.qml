@@ -109,7 +109,7 @@ Page {
             x: -tableview.contentX
             y: -tableview.contentY + tableview.contentHeight + tableheader.height + tableview.rowSpacing + 5
 
-            Button {
+            RoundButton {
                 id: viewButton
                 enabled: false
                 text: "View"
@@ -125,7 +125,7 @@ Page {
                 }
             }
             Item { Layout.fillWidth: true } // Spacer
-            Button {
+            RoundButton {
                 id: addButton
                 text: "Add"
                 font.pointSize: 10
@@ -141,7 +141,6 @@ Page {
             }
         }
     }
-
 
     PersonInputDialog {
         id: addPersonDialog
@@ -164,6 +163,9 @@ Page {
         onDeletePressed: {
             tableview.model.removeRows(tableview.selectedRow, 1)
             tableview.forceLayout() // contentHeight won't update without this as it is loaded on demand
+        }
+        onClosed: {
+            viewButton.enabled = false
         }
     }
 }

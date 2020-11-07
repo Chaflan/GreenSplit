@@ -83,9 +83,13 @@ signals:
     void coveringListChanged() const;
 
 private:
+    void identifierListChanged();
+    void setDefaultPayer();
+
+private:
     // TODO: Some of this data is in the people model, do we want to hook them together?
     QString m_payerName;
-    int m_payerIndex;
+    int m_payerIndex = -1;
     double m_cost;
     QString m_description;
     QList<PersonCheck*> m_coveringList;

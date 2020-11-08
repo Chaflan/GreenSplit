@@ -8,6 +8,7 @@ import "."
 
 PopupDialog {
     id: root
+    height: 500
     width: 400
 
     property alias transactionModel: transactionModel
@@ -65,8 +66,8 @@ PopupDialog {
         }
 
         GroupBox {
+
             id: groupBoxCovering
-            //height: 100
             Layout.fillWidth: true
             Layout.fillHeight: true
             title: qsTr("Covering Whom")
@@ -75,12 +76,11 @@ PopupDialog {
                 id: listView
                 anchors.fill: parent
                 model: transactionModel.coveringList
+                clip: true
+                cellWidth: 90
+                cellHeight: 30
 
-                // TODO: Temp hack to be able to see contents
-                // What you really need here is a scrollbar and some kind of default
-                //implicitHeight: 100
-                //implicitHeight: height
-                implicitHeight: 80
+                Component.onCompleted: console.log("cellWidth=" + cellWidth)
 
                 delegate: CheckDelegate {
                     id: checkDelegate

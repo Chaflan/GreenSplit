@@ -7,6 +7,7 @@
 
 // TODO: Consistent order cost payer covering description
 // TODO: const signals in all classes
+// TODO: dataSet name?  dataChaned has already been used
 
 class BILLSPLITCORE_EXPORT PersonCheck : public QObject
 {
@@ -36,7 +37,7 @@ private:
 class BILLSPLITCORE_EXPORT TransactionModel : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(DataCoreObject* data READ getData WRITE setData NOTIFY dataChanged)
+    Q_PROPERTY(DataCoreObject* data READ getDataCore WRITE setDataCore NOTIFY dataSet)
 
     // TODO: Try MEMBER with a NOTIFY only called by non-setters
     Q_PROPERTY(QString payerName READ getPayerName WRITE setPayerName NOTIFY payerNameChanged)
@@ -54,7 +55,7 @@ public:
 
     //Q_INVOKABLE void initialize(DataCoreOld* data);
 
-    DataCoreObject* getData() const              { return m_data; }
+    DataCoreObject* getDataCore() const          { return m_data; }
     QString getPayerName() const                 { return m_payerName; }
     int getPayerIndex() const                    { return m_payerIndex; }
     double getCost() const                       { return m_cost; }
@@ -62,7 +63,7 @@ public:
     QList<PersonCheck*> getCoveringList() const  { return m_coveringList; }
     QStringList getAllPeople() const;
 
-    void setData(DataCoreObject* data);
+    void setDataCore(DataCoreObject* data);
     void setPayerName(QString payerName);
     void setPayerIndex(int payerIndex);
     void setCost(double cost);
@@ -74,7 +75,7 @@ public:
     void setCoveringStringList(const QStringList& stringList);
 
 signals:
-    void dataChanged() const;
+    void dataSet() const;
     void payerNameChanged() const;
     void payerIndexChanged() const;
     void costChanged() const;

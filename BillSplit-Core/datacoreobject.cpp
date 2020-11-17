@@ -12,7 +12,7 @@
 DataCoreObject::DataCoreObject(QObject *parent) :
     QObject(parent)
 {
-    JsonRead();
+    jsonRead();
 }
 
 int DataCoreObject::NumTransactions() const
@@ -30,6 +30,7 @@ bool DataCoreObject::AddTransaction(double cost, const QString& payer, const QSt
     }
 
     m_descriptionsList.append(std::move(description));
+    emit resultsChanged();
     return true;
 }
 
@@ -37,6 +38,7 @@ bool DataCoreObject::DeleteTransactions(int index, int count)
 {
     try {
         m_data.DeleteTransactions(index, count);
+        emit resultsChanged();
         return true;
     } catch (const std::exception& ex) {
         qDebug() << "Error - DataCoreObject::DeleteTransactions - " << ex.what();
@@ -49,6 +51,7 @@ bool DataCoreObject::EditTransactionPayer(int index, const QString& newPayer)
 {
     try {
         m_data.EditTransactionPayer(index, newPayer.toStdString());
+        emit resultsChanged();  // TODO: Not always
         return true;
     } catch (const std::exception& ex) {
         qDebug() << "Error - DataCoreObject::GetTransactionPayer - " << ex.what();
@@ -61,6 +64,7 @@ bool DataCoreObject::EditTransactionCost(int index, double newCost)
 {
     try {
         m_data.EditTransactionCost(index, newCost);
+        emit resultsChanged();  // TODO: Not always
         return true;
     } catch (const std::exception& ex) {
         qDebug() << "Error - DataCoreObject::GetTransactionPayer - " << ex.what();
@@ -78,6 +82,7 @@ bool DataCoreObject::EditTransactionCovering(int index, const QStringList& newCo
 
     try {
         m_data.EditTransactionCovering(index, stringListToStdSet(newCovering));
+        emit resultsChanged();  // TODO: Not always
         return true;
     } catch (const std::exception& ex) {
         qDebug() << "Error - DataCoreObject::GetTransactionPayer - " << ex.what();
@@ -126,9 +131,10 @@ QStringList DataCoreObject::GetTransactionCovering(int index) const
 
 void DataCoreObject::Clear()
 {
-    // TODO: m_data.Clear();
+    m_data.Clear();
     m_identifierList.clear();
     m_nameList.clear();
+    m_descriptionsList.clear();
 }
 
 int DataCoreObject::numPeople() const
@@ -236,6 +242,43 @@ const QString& DataCoreObject::GetTransactionDescription(int index) const
     return m_descriptionsList[index];
 }
 
+QString DataCoreObject::GetResultDebtor(int index) const
+{
+    if (index < 0 || index >= NumResults()) {
+        qDebug() << "Error - DataCoreObject::GetResultDebtor - Invalid index:" << index;
+        const static QString errorString = "";
+        return errorString;
+    }
+
+    return QString::fromStdString(std::get<0>(m_data.GetResults()[index]));
+}
+
+QString DataCoreObject::GetResultCreditor(int index) const
+{
+    if (index < 0 || index >= NumResults()) {
+        qDebug() << "Error - DataCoreObject::GetResultCreditor - Invalid index:" << index;
+        const static QString errorString = "";
+        return errorString;
+    }
+
+    return QString::fromStdString(std::get<1>(m_data.GetResults()[index]));
+}
+
+double DataCoreObject::GetResultCost(int index) const
+{
+    if (index < 0 || index >= NumResults()) {
+        qDebug() << "Error - DataCoreObject::GetResultCost - Invalid index:" << index;
+        return 0;
+    }
+
+    return std::get<2>(m_data.GetResults()[index]);
+}
+
+int DataCoreObject::NumResults() const
+{
+    return static_cast<int>(m_data.GetResults().size());
+}
+
 bool DataCoreObject::EditTransactionDescription(int index, QString newDescription)
 {
     if (index < 0 || index >= numPeople()) {
@@ -303,88 +346,117 @@ const QStringList& DataCoreObject::GetIdentifierList() const
     return m_identifierList;
 }
 
-void DataCoreObject::JsonRead()
+void DataCoreObject::jsonRead(const QString& filePath)
 {
-    // TODO: Model reset signals
-    // TODO: Debug lines for not openable, do this for JsonWrite too
+    // TODO: Model reset signals.
+        // currently these are not needed as you go through AddPeople and AddTransaction
+        // but you really need a clean way to add a bunch without ledger updates
+        // and without all these signals going bananas
 
-    QFile file("save.json");
-    if (file.open(QIODevice::ReadOnly))
-    {
+    jsonRead(QUrl::fromLocalFile(filePath));
+}
+
+void DataCoreObject::jsonWrite(const QString& filePath) const
+{
+    jsonWrite(QUrl::fromLocalFile(filePath));
+}
+
+void DataCoreObject::jsonRead(const QUrl& filePath)
+{
+    QString fileString(filePath.toLocalFile());
+    QFile file(fileString);
+    // TODO: Clean up this error code
+    if (!file.open(QIODevice::ReadOnly)) {
+        qDebug() << "Could not open file for reading: " + fileString;
+        qDebug() << "Code: " << file.error() << "Reason: " << file.errorString();
+        emit signalError("Could not open file for reading: " + fileString);
+    } else {
         QJsonDocument jsonDoc(QJsonDocument::fromJson(file.readAll()));
         QJsonObject jsonObj = jsonDoc.object();
-
-        Clear();
-        QJsonArray peopleArray = jsonObj["people"].toArray();
-        for (const auto& element : peopleArray)
-        {
-            QJsonObject personObj = element.toObject();
-            AddPerson(personObj["identifier"].toString(), personObj["name"].toString());
-        }
-
-        QJsonArray transactionArray = jsonObj["transaction"].toArray();
-        for (const auto& element : transactionArray)
-        {
-            QJsonObject transactionObj = element.toObject();
-            QJsonArray transactionArray = transactionObj["covering"].toArray();
-
-            QStringList coveringStringList;
-            for (const auto& name : transactionArray) {
-                coveringStringList.append(name.toString());
-            }
-
-            AddTransaction(
-                transactionObj["cost"].toDouble(),
-                transactionObj["payer"].toString(),
-                std::move(coveringStringList),
-                transactionObj["description"].toString());
-        }
+        jsonRead(jsonObj);
     }
 }
 
-void DataCoreObject::JsonWrite() const
+void DataCoreObject::jsonWrite(const QUrl& filePath) const
 {
-    QFile file("save.json");
-    if (file.open(QIODevice::WriteOnly))
-    {
+    QString fileString(filePath.toLocalFile());
+    QFile file(fileString);
+    // TODO: Clean up this error code
+    if (!file.open(QIODevice::WriteOnly)) {
+        qDebug() << "Could not open file for writing: " + fileString;
+        qDebug() << "Code: " << file.error() << "Reason: " << file.errorString();
+        emit signalError("Could not open file for writing: " + fileString);
+    } else {
         QJsonObject jsonObj;
-
-        QJsonArray peopleArray;
-        for(int i = 0; i < numPeople(); ++i)
-        {
-            QJsonObject curr;
-            curr["identifier"] = m_identifierList[i];
-            curr["name"] = m_nameList[i];
-            peopleArray.append(curr);
-        }
-        jsonObj["people"] = peopleArray;
-
-        QJsonArray transactionArray;
-        for(int i = 0; i < static_cast<int>(m_data.NumTransactions()); ++i)
-        {
-            QJsonObject curr;
-            curr["cost"] = GetTransactionCost(i);
-            curr["payer"] = GetTransactionPayer(i);
-
-            QJsonArray coveringArray;
-            for (const auto& name : GetTransactionCovering(i)) {
-                coveringArray.append(name);
-            }
-            curr["covering"] = coveringArray;
-            curr["description"] = GetTransactionDescription(i);
-
-            transactionArray.append(curr);
-        }
-        jsonObj["transaction"] = transactionArray;
-
+        jsonWrite(jsonObj);
         QJsonDocument saveDoc(jsonObj);
         file.write(saveDoc.toJson());
     }
 }
 
+void DataCoreObject::jsonRead(const QJsonObject& jsonObj)
+{
+    Clear();
+    QJsonArray peopleArray = jsonObj["people"].toArray();
+    for (const auto& element : peopleArray)
+    {
+        QJsonObject personObj = element.toObject();
+        AddPerson(personObj["identifier"].toString(), personObj["name"].toString());
+    }
+
+    QJsonArray transactionArray = jsonObj["transaction"].toArray();
+    for (const auto& element : transactionArray)
+    {
+        QJsonObject transactionObj = element.toObject();
+        QJsonArray transactionArray = transactionObj["covering"].toArray();
+
+        QStringList coveringStringList;
+        for (const auto& name : transactionArray) {
+            coveringStringList.append(name.toString());
+        }
+
+        AddTransaction(
+            transactionObj["cost"].toDouble(),
+            transactionObj["payer"].toString(),
+            std::move(coveringStringList),
+            transactionObj["description"].toString());
+    }
+}
+
+void DataCoreObject::jsonWrite(QJsonObject& jsonObj) const
+{
+    QJsonArray peopleArray;
+    for(int i = 0; i < numPeople(); ++i)
+    {
+        QJsonObject curr;
+        curr["identifier"] = m_identifierList[i];
+        curr["name"] = m_nameList[i];
+        peopleArray.append(curr);
+    }
+    jsonObj["people"] = peopleArray;
+
+    QJsonArray transactionArray;
+    for(int i = 0; i < static_cast<int>(m_data.NumTransactions()); ++i)
+    {
+        QJsonObject curr;
+        curr["cost"] = GetTransactionCost(i);
+        curr["payer"] = GetTransactionPayer(i);
+
+        QJsonArray coveringArray;
+        for (const auto& name : GetTransactionCovering(i)) {
+            coveringArray.append(name);
+        }
+        curr["covering"] = coveringArray;
+        curr["description"] = GetTransactionDescription(i);
+
+        transactionArray.append(curr);
+    }
+    jsonObj["transaction"] = transactionArray;
+}
+
 DataCoreObject::~DataCoreObject()
 {
-    JsonWrite();
+    jsonWrite();
 }
 
 std::set<std::string> DataCoreObject::stringListToStdSet(const QStringList& stringList)

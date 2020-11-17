@@ -12,6 +12,9 @@
 // TODO: Currently there is nothing preventing the front end from adding a transaction with nonexistant people
 // TODO: Standardize name vs identifier
 
+// TODO: Remove
+//#include <QUrl>
+
 class BILLSPLITCORE_EXPORT DataCoreObject : public QObject
 {
     Q_OBJECT
@@ -40,6 +43,10 @@ public:
     const QString& GetPersonIdentifier(int index) const;
     const QString& GetPersonName(int index) const;
     const QString& GetTransactionDescription(int index) const;
+    QString GetResultDebtor(int index) const;
+    QString GetResultCreditor(int index) const;
+    double GetResultCost(int index) const;
+    int NumResults() const;
     bool EditTransactionDescription(int index, QString newDescription);   // It might be that the fail case is more common meaning we want const ref here
     bool EditPersonIdentifier(int index, const QString& newIdentifier);
     bool EditPersonName(int index, QString newName);
@@ -47,14 +54,21 @@ public:
 
     // Save and Load methods.
     // TODO: Move these to their own class, or use a database
-    void JsonRead();
-    void JsonWrite() const;
+    // Can probably do some smart overloading here to cut down on num decls
+    void jsonRead(const QString& filePath = "save.json");
+    void jsonWrite(const QString& filePath = "save.json") const;
+    Q_INVOKABLE void jsonRead(const QUrl& filePath);
+    Q_INVOKABLE void jsonWrite(const QUrl& filePath) const;
+    void jsonRead(const QJsonObject& jsonObj);
+    void jsonWrite(QJsonObject& jsonObj) const;
+
     virtual ~DataCoreObject();
 
 signals:
     void signalError(QString error) const;
     void identifierListChanged() const;
     void nameListChanged() const;
+    void resultsChanged() const;
 
 private:
     std::set<std::string> stringListToStdSet(const QStringList& stringList);

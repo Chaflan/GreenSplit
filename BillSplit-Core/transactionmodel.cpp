@@ -45,12 +45,12 @@ QStringList TransactionModel::getAllPeople() const
     return QStringList();
 }
 
-void TransactionModel::setData(DataCoreObject* data)
+void TransactionModel::setDataCore(DataCoreObject* data)
 {
     if (data != m_data) {
         m_data = data;
         assert(m_data);
-        emit dataChanged();
+        emit dataSet();
 
         QObject::connect(m_data, &DataCoreObject::identifierListChanged, this, &TransactionModel::identifierListChanged);
 

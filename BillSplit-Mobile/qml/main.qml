@@ -1,5 +1,7 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
+import QtQuick.Layouts 1.3
+import QtQuick.Dialogs 1.2
 import com.company.core 1.0
 
 ApplicationWindow {
@@ -9,7 +11,55 @@ ApplicationWindow {
     height: 600
     title: qsTr("Tabs")
 
-    // View
+    header: RowLayout {
+        height: 50
+        Item { Layout.fillWidth: true } // Spacer
+        RoundButton {
+            id: menuButton
+            text: "Menu"
+            Layout.rightMargin: 5
+            onClicked: menu.open()
+
+            Menu {
+                id: menu
+                //y: fileButton.height
+
+                MenuItem {
+                    text: "Open..."
+                    onClicked: {
+                        fileDialogOpen.open()
+                    }
+                }
+                MenuItem {
+                    text: "Save As..."
+                    onClicked: {
+                        fileDialogSave.open()
+                    }
+                }
+            }
+
+            FileDialog {
+                id: fileDialogOpen
+                title: "Choose a file to open"
+                selectMultiple: false
+                onAccepted: {
+                    console.log("You chose: " + fileDialogOpen.fileUrl)
+                    dataCore.jsonRead(fileDialogOpen.fileUrl)
+                }
+            }
+            FileDialog {
+                id: fileDialogSave
+                title: "Choose a file to save"
+                selectExisting: false
+                selectMultiple: false
+                onAccepted: {
+                    console.log("You chose: " + fileDialogSave.fileUrl)
+                    dataCore.jsonWrite(fileDialogOpen.fileUrl)
+                }
+            }
+        }
+    }
+
     SwipeView {
         id: swipeView
         anchors.fill: parent
@@ -21,11 +71,11 @@ ApplicationWindow {
         TransactionsPage {
         }
 
-//        ResultsPage {
+        ResultsPage {
 //            onFocusChanged: {
 //                resultsModel.updateCalculations()
 //            }
-//        }
+        }
     }
 
     footer: TabBar {
@@ -43,7 +93,7 @@ ApplicationWindow {
         }
     }
 
-    // TODO: Put these in the scopes in which they belong
+    // TODO: Put these in the scopes to which they belong?
     // Models
     DataCore {
         id: dataCore
@@ -56,6 +106,10 @@ ApplicationWindow {
         id: transactionsTableModel
         data: dataCore
     }
+    ResultsModel {
+        id: resultsModel
+        data: dataCore
+    }
 
     // Creat a popup when an error signal is sent from the models
     Connections {
@@ -64,6 +118,10 @@ ApplicationWindow {
     }
     Connections {
         target: peopleTableModel
+        function onSignalError(errorMessage) { popupMessage(errorMessage) }
+    }
+    Connections {
+        target: transactionsTableModel
         function onSignalError(errorMessage) { popupMessage(errorMessage) }
     }
     function popupMessage(messageText) {

@@ -2,7 +2,7 @@
 #define RESULTSMODEL_H
 
 #include "BillSplit-Core_global.h"
-#include "datacoreold.h"
+#include "datacoreobject.h"
 
 #include <QAbstractListModel>
 #include <vector>
@@ -11,27 +11,27 @@
 class BILLSPLITCORE_EXPORT ResultsModel : public QAbstractListModel
 {
     Q_OBJECT
+    Q_PROPERTY(DataCoreObject* data READ getDataCore WRITE setDataCore NOTIFY dataSet)
 
 public:
-    ResultsModel(DataCoreOld& dataCore, QObject* parent = nullptr);
+    ResultsModel(QObject* parent = nullptr);
 
     int rowCount(const QModelIndex& parent = QModelIndex()) const override;
     QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
-    //bool setData(const QModelIndex& index, const QVariant& value, int role) override;
-    //bool removeRows(int row, int count, const QModelIndex& parent) override;
 
-    Q_INVOKABLE int columnWidth(int c, const QFont* font = nullptr);
+    void UpdateResults();
+    DataCoreObject* getDataCore() const              { return m_data; }
+    void setDataCore(DataCoreObject* data);
 
-    Q_INVOKABLE void updateCalculations();
+signals:
+    void dataSet() const;
 
 private:
     bool isIndexValid(const QModelIndex& i) const;
 
 private:
-    DataCoreOld& m_data;
-    std::vector<TransactionOld> m_results;
-    QVector<int> m_columnWidths;
+    DataCoreObject* m_data = nullptr;
 };
 
 #endif // RESULTSMODEL_H

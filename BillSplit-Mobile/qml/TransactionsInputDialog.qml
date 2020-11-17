@@ -80,8 +80,6 @@ PopupDialog {
                 cellWidth: 90
                 cellHeight: 30
 
-                Component.onCompleted: console.log("cellWidth=" + cellWidth)
-
                 delegate: CheckDelegate {
                     id: checkDelegate
                     text: modelData.name

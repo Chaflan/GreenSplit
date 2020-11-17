@@ -5,6 +5,7 @@
 #include <string>
 #include <set>
 #include <vector>
+#include <map>
 #include <unordered_map>
 
 // TODO: Analyze use of set vs uset for names
@@ -15,6 +16,7 @@
 
 struct BILLSPLITCORE_EXPORT Entry
 {
+    // TODO: I don't think you use this anymore
     double debt;
     double credit;
 };
@@ -38,17 +40,64 @@ public:
     const std::string& GetTransactionPayer(int index) const;
     double GetTransactionCost(int index) const;
     const std::set<std::string> GetTransactionCovering(int index) const;
+    const std::vector<std::tuple<std::string, std::string, double> >& GetResults() const;
     bool EditPerson(const std::string& oldName, std::string newName);
     bool PersonExists(const std::string& name) const;  // necessary?
-    std::vector<Transaction> Calculate();
     void Clear();
 
 private:
     void VerifyTransactionIndex(int index) const;
-    void ReviseLedger(int fromIndex);
 
     std::vector<Transaction> m_transactions;
     std::vector<std::unordered_map<std::string, double> > m_ledger;
+    std::vector<std::tuple<std::string, std::string, double> > m_results;
+
+    // Main Algorithms
+    void ReviseLedger(int fromIndex);
+    static bool DebtsCanBeSettled(std::unordered_map<std::string, double> debts);
+    void DebugOutputLedgerData() const;
+    std::vector<std::tuple<std::string, std::string, double> > Calculate() const;
+
+    // SettleMinMax Algorithm
+    //
+    // Greedy algorithm, fast but non-optimal for some cases.
+    // These cases will be ones where a subset of the payments can be solved in isolation.
+    // These could be common with larger sets, whole number prices, and/or a large margin
+    //      n = debts.size()
+    //      Time -> O(n)
+    //      Space (solution vector) -> O(n)
+    //      Space (other required to solve) -> O(1)
+    static std::vector<std::tuple<std::string, std::string, double> >
+        SettleMinMax(std::unordered_map<std::string, double> debts);
+
+    // TODO: Namespace?
+    // Settle Tree Algorithm and Related Code
+    //
+    // Brute force recursive tree algorithm, slow but optimal
+    // TODO: Note about how solution requires solution to the ____ problem which is open
+    static std::vector<std::tuple<std::string, std::string, double> >
+        SettleTree(std::unordered_map<std::string, double> debts);
+
+    struct ITransaction {
+        std::size_t from;
+        std::size_t to;
+        double cost;
+    };
+
+    double mst_pmargin = 0.01;
+    double mst_nmargin = -0.01;
+    int mst_solnNumT = 0;
+    std::vector<ITransaction> mst_soln;
+
+    static bool SettleTreeRecurse(
+        std::vector<double> pset,
+        std::vector<double> nset,
+        int numT,
+        std::vector<ITransaction>& thisSoln,
+        int& solnNumT,
+        std::vector<ITransaction>& finalSoln,
+        double margin);
+    /////////////
 };
 
 #endif // DATACORE_H

@@ -7,11 +7,12 @@
 #include "transactionmodel.h"
 
 // TODO: m_data assertions?
+// TODO: dataCoreChanged all
 
 class BILLSPLITCORE_EXPORT TransactionsTableModel : public QAbstractTableModel
 {
     Q_OBJECT
-    Q_PROPERTY(DataCoreObject* data MEMBER m_data NOTIFY dataSet)
+    Q_PROPERTY(DataCoreObject* data READ getDataCore WRITE setDataCore NOTIFY dataCoreChanged)
 
 public:
     enum Column
@@ -46,12 +47,16 @@ public:
 
 signals:
     void signalError(QString message) const;
-    void dataSet() const;
+    void dataCoreChanged() const;
 
 private:
+    DataCoreObject* getDataCore() const          { return m_data; }
+    void setDataCore(DataCoreObject* data);
+
     bool isIndexValid(const QModelIndex& index) const;
     int stringToColumnIndex(const QString& columnRole) const;
     QString columnIndexToString(int columnIndex) const;
+    void resetModel();
 
 private:
     DataCoreObject* m_data = nullptr;

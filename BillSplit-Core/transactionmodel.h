@@ -8,6 +8,7 @@
 // TODO: Consistent order cost payer covering description
 // TODO: const signals in all classes
 // TODO: dataSet name?  dataChaned has already been used
+// TODO: some of the sets and gets can be private
 
 class BILLSPLITCORE_EXPORT PersonCheck : public QObject
 {
@@ -43,6 +44,7 @@ class BILLSPLITCORE_EXPORT TransactionModel : public QObject
     Q_PROPERTY(QString payerName READ getPayerName WRITE setPayerName NOTIFY payerNameChanged)
     Q_PROPERTY(int payerIndex READ getPayerIndex WRITE setPayerIndex NOTIFY payerIndexChanged)
     Q_PROPERTY(double cost READ getCost WRITE setCost NOTIFY costChanged)
+    Q_PROPERTY(QString costStr READ getCostStr WRITE setCostStr NOTIFY costChanged)  // TODO: Cache this
     Q_PROPERTY(QString description READ getDescription WRITE setDescription NOTIFY descriptionChanged USER true)
 
     // TODO: Readonly?
@@ -51,22 +53,22 @@ class BILLSPLITCORE_EXPORT TransactionModel : public QObject
 
 public:
     explicit TransactionModel(QObject *parent = nullptr);
-    //TransactionModel(DataCore& dataCore, QObject* parent = nullptr);
-
-    //Q_INVOKABLE void initialize(DataCoreOld* data);
 
     DataCoreObject* getDataCore() const          { return m_data; }
     QString getPayerName() const                 { return m_payerName; }
     int getPayerIndex() const                    { return m_payerIndex; }
     double getCost() const                       { return m_cost; }
+    QString getCostStr() const;
     QString getDescription() const               { return m_description; }
     QList<PersonCheck*> getCoveringList() const  { return m_coveringList; }
     QStringList getAllPeople() const;
 
+    // TODO: const refs?  Others too?
     void setDataCore(DataCoreObject* data);
     void setPayerName(QString payerName);
     void setPayerIndex(int payerIndex);
     void setCost(double cost);
+    void setCostStr(QString cost);
     void setDescription(QString description);
 
     Q_INVOKABLE void load(double cost, QString payer, const QStringList& covering, QString description);

@@ -11,7 +11,7 @@
 class BILLSPLITCORE_EXPORT ResultsModel : public QAbstractListModel
 {
     Q_OBJECT
-    Q_PROPERTY(DataCoreObject* data READ getDataCore WRITE setDataCore NOTIFY dataSet)
+    Q_PROPERTY(DataCoreObject* data READ getDataCore WRITE setDataCore NOTIFY dataCoreChanged)
 
 public:
     ResultsModel(QObject* parent = nullptr);
@@ -21,13 +21,14 @@ public:
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 
     void UpdateResults();
-    DataCoreObject* getDataCore() const              { return m_data; }
-    void setDataCore(DataCoreObject* data);
 
 signals:
-    void dataSet() const;
+    void dataCoreChanged() const;
 
 private:
+    DataCoreObject* getDataCore() const          { return m_data; }
+    void setDataCore(DataCoreObject* data);
+
     bool isIndexValid(const QModelIndex& i) const;
 
 private:

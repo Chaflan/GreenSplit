@@ -75,8 +75,8 @@ private:
     //
     // Brute force recursive tree algorithm, slow but optimal
     // TODO: Note about how solution requires solution to the ____ problem which is open
-    static std::vector<std::tuple<std::string, std::string, double> >
-        SettleTree(std::unordered_map<std::string, double> debts);
+    std::vector<std::tuple<std::string, std::string, double> >
+        SettleTree(std::unordered_map<std::string, double> debts) const;
 
     struct ITransaction {
         std::size_t from;
@@ -84,19 +84,16 @@ private:
         double cost;
     };
 
-    double mst_pmargin = 0.01;
-    double mst_nmargin = -0.01;
-    int mst_solnNumT = 0;
-    std::vector<ITransaction> mst_soln;
+    static constexpr double mst_pmargin = 0.01;
+    static constexpr double mst_nmargin = mst_pmargin * -1;
+    mutable int mst_solnNumT = 0;
+    mutable std::vector<ITransaction> mst_soln;
 
-    static bool SettleTreeRecurse(
+    bool SettleTreeRecurse(
         std::vector<double> pset,
         std::vector<double> nset,
         int numT,
-        std::vector<ITransaction>& thisSoln,
-        int& solnNumT,
-        std::vector<ITransaction>& finalSoln,
-        double margin);
+        std::vector<ITransaction>& thisSoln) const;
     /////////////
 };
 

@@ -163,6 +163,18 @@ bool TransactionsTableModel::addFromModel(TransactionModel* model)
     return result;
 }
 
+void TransactionsTableModel::setDataCore(DataCoreObject* data)
+{
+    if (data != m_data) {
+        m_data = data;
+        assert(m_data);
+        emit dataCoreChanged();
+
+        QObject::connect(m_data, &DataCoreObject::modelCleared,
+            this, &TransactionsTableModel::resetModel);
+    }
+}
+
 bool TransactionsTableModel::isIndexValid(const QModelIndex& index) const
 {
     if (!index.isValid() || index.row() >= rowCount() || index.column() >= columnCount()) {
@@ -218,4 +230,10 @@ QString TransactionsTableModel::columnIndexToString(int columnIndex) const
     }
 
     return columnToString[columnIndex];
+}
+
+void TransactionsTableModel::resetModel()
+{
+    beginResetModel();
+    endResetModel();
 }

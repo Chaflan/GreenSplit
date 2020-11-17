@@ -11,6 +11,8 @@
 // TODO: Return whole list in some cases?
 // TODO: Currently there is nothing preventing the front end from adding a transaction with nonexistant people
 // TODO: Standardize name vs identifier
+// TODO: Braced initialization
+
 
 // TODO: Remove
 //#include <QUrl>
@@ -55,10 +57,10 @@ public:
     // Save and Load methods.
     // TODO: Move these to their own class, or use a database
     // Can probably do some smart overloading here to cut down on num decls
-    void jsonRead(const QString& filePath = "save.json");
-    void jsonWrite(const QString& filePath = "save.json") const;
-    Q_INVOKABLE void jsonRead(const QUrl& filePath);
-    Q_INVOKABLE void jsonWrite(const QUrl& filePath) const;
+    bool jsonRead(const QString& filePath = "save.json");
+    bool jsonWrite(const QString& filePath = "save.json") const;
+    Q_INVOKABLE bool jsonRead(const QUrl& filePath);
+    Q_INVOKABLE bool jsonWrite(const QUrl& filePath) const;
     void jsonRead(const QJsonObject& jsonObj);
     void jsonWrite(QJsonObject& jsonObj) const;
 
@@ -69,6 +71,7 @@ signals:
     void identifierListChanged() const;
     void nameListChanged() const;
     void resultsChanged() const;
+    void modelCleared() const;  // TODO: rethink this
 
 private:
     std::set<std::string> stringListToStdSet(const QStringList& stringList);

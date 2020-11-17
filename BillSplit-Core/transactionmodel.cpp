@@ -36,6 +36,11 @@ TransactionModel::TransactionModel(QObject *parent) :
 {
 }
 
+QString TransactionModel::getCostStr() const
+{
+    return QString::number(m_cost, 'f', 2);
+}
+
 QStringList TransactionModel::getAllPeople() const
 {
     if (m_data) {
@@ -52,7 +57,10 @@ void TransactionModel::setDataCore(DataCoreObject* data)
         assert(m_data);
         emit dataSet();
 
-        QObject::connect(m_data, &DataCoreObject::identifierListChanged, this, &TransactionModel::identifierListChanged);
+        QObject::connect(m_data, &DataCoreObject::identifierListChanged,
+            this, &TransactionModel::identifierListChanged);
+        QObject::connect(m_data, &DataCoreObject::modelCleared,
+            this, &TransactionModel::identifierListChanged);  // TODO: I think this is sufficient
 
         // TODO: Is this call necessary?
         emit allPeopleChanged();
@@ -97,6 +105,11 @@ void TransactionModel::setCost(double cost)
         m_cost = cost;
         emit costChanged();
     }
+}
+
+void TransactionModel::setCostStr(QString cost)
+{
+    m_cost = cost.toDouble();
 }
 
 void TransactionModel::setDescription(QString description)

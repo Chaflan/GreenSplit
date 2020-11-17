@@ -135,6 +135,7 @@ void DataCoreObject::Clear()
     m_identifierList.clear();
     m_nameList.clear();
     m_descriptionsList.clear();
+    emit modelCleared();
 }
 
 int DataCoreObject::numPeople() const
@@ -346,52 +347,58 @@ const QStringList& DataCoreObject::GetIdentifierList() const
     return m_identifierList;
 }
 
-void DataCoreObject::jsonRead(const QString& filePath)
+bool DataCoreObject::jsonRead(const QString& filePath)
 {
     // TODO: Model reset signals.
         // currently these are not needed as you go through AddPeople and AddTransaction
         // but you really need a clean way to add a bunch without ledger updates
         // and without all these signals going bananas
 
-    jsonRead(QUrl::fromLocalFile(filePath));
+    return jsonRead(QUrl::fromLocalFile(filePath));
 }
 
-void DataCoreObject::jsonWrite(const QString& filePath) const
+bool DataCoreObject::jsonWrite(const QString& filePath) const
 {
-    jsonWrite(QUrl::fromLocalFile(filePath));
+    return jsonWrite(QUrl::fromLocalFile(filePath));
 }
 
-void DataCoreObject::jsonRead(const QUrl& filePath)
+bool DataCoreObject::jsonRead(const QUrl& filePath)
 {
     QString fileString(filePath.toLocalFile());
     QFile file(fileString);
+
     // TODO: Clean up this error code
     if (!file.open(QIODevice::ReadOnly)) {
         qDebug() << "Could not open file for reading: " + fileString;
         qDebug() << "Code: " << file.error() << "Reason: " << file.errorString();
         emit signalError("Could not open file for reading: " + fileString);
-    } else {
-        QJsonDocument jsonDoc(QJsonDocument::fromJson(file.readAll()));
-        QJsonObject jsonObj = jsonDoc.object();
-        jsonRead(jsonObj);
+        return false;
     }
+
+    QJsonDocument jsonDoc(QJsonDocument::fromJson(file.readAll()));
+    QJsonObject jsonObj = jsonDoc.object();
+    jsonRead(jsonObj);
+    return true;
 }
 
-void DataCoreObject::jsonWrite(const QUrl& filePath) const
+bool DataCoreObject::jsonWrite(const QUrl& filePath) const
 {
     QString fileString(filePath.toLocalFile());
     QFile file(fileString);
+
     // TODO: Clean up this error code
     if (!file.open(QIODevice::WriteOnly)) {
         qDebug() << "Could not open file for writing: " + fileString;
         qDebug() << "Code: " << file.error() << "Reason: " << file.errorString();
         emit signalError("Could not open file for writing: " + fileString);
-    } else {
-        QJsonObject jsonObj;
-        jsonWrite(jsonObj);
-        QJsonDocument saveDoc(jsonObj);
-        file.write(saveDoc.toJson());
+        return false;
     }
+
+    QJsonObject jsonObj;
+    jsonWrite(jsonObj);
+    QJsonDocument saveDoc(jsonObj);
+    file.write(saveDoc.toJson());
+    return true;
 }
 
 void DataCoreObject::jsonRead(const QJsonObject& jsonObj)

@@ -156,6 +156,18 @@ int PeopleTableModel::columnWidth(int columnIndex, int columnSpacing, int totalW
     return 0;
 }
 
+void PeopleTableModel::setDataCore(DataCoreObject* data)
+{
+    if (data != m_data) {
+        m_data = data;
+        assert(m_data);
+        emit dataCoreChanged();
+
+        QObject::connect(m_data, &DataCoreObject::modelCleared,
+            this, &PeopleTableModel::resetModel);
+    }
+}
+
 bool PeopleTableModel::isIndexValid(const QModelIndex& index) const
 {
     if (!index.isValid() || index.row() >= rowCount() || index.column() >= columnCount()) {
@@ -206,4 +218,10 @@ QString PeopleTableModel::columnIndexToString(int columnIndex) const
     }
 
     return columnToString[columnIndex];
+}
+
+void PeopleTableModel::resetModel()
+{
+    beginResetModel();
+    endResetModel();
 }

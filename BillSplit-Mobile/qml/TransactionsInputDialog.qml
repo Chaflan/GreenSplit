@@ -46,8 +46,8 @@ PopupDialog {
                 id: spinBoxCost
                 anchors.fill: parent
                 onFocusChanged: { if(focus) { selectAll() } } // Select all on click
-                text: transactionModel.cost
-                onDisplayTextChanged: transactionModel.cost = text
+                text: transactionModel.costStr
+                onDisplayTextChanged: transactionModel.costStr = text
             }
         }
 

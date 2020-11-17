@@ -317,11 +317,11 @@ bool DataCore::SettleTreeRecurse(
                 nset_copy[n] = 0;
                 pset_copy[p] = remainder;
             } else if (remainder < mst_nmargin) {
-                AddSolution(n, p, -1 * (nset[n] + remainder));
+                AddSolution(n, p, -1 * (nset[n] - remainder));
                 nset_copy[n] = remainder;
                 pset_copy[p] = 0;
             } else {
-                AddSolution(n, p, -1 * nset[n] - remainder);
+                AddSolution(n, p, -1 * (nset[n] - remainder));
                 nset_copy[n] = 0;
                 pset_copy[p] = 0;
             }

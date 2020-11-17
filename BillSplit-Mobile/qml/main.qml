@@ -22,12 +22,22 @@ ApplicationWindow {
 
             Menu {
                 id: menu
-                //y: fileButton.height
 
                 MenuItem {
                     text: "Open..."
                     onClicked: {
                         fileDialogOpen.open()
+                    }
+                }
+                MenuItem {
+                    id: saveMenuItem
+
+                    enabled: false
+                    property var activeFileUrl
+
+                    text: "Save"
+                    onClicked: {
+                        dataCore.jsonWrite(activeFileUrl)
                     }
                 }
                 MenuItem {
@@ -42,9 +52,12 @@ ApplicationWindow {
                 id: fileDialogOpen
                 title: "Choose a file to open"
                 selectMultiple: false
+                defaultSuffix: "json"
                 onAccepted: {
-                    console.log("You chose: " + fileDialogOpen.fileUrl)
-                    dataCore.jsonRead(fileDialogOpen.fileUrl)
+                    if (dataCore.jsonRead(fileDialogOpen.fileUrl)) {
+                        saveMenuItem.enabled = true
+                        saveMenuItem.activeFileUrl = fileDialogOpen.fileUrl
+                    }
                 }
             }
             FileDialog {
@@ -52,9 +65,12 @@ ApplicationWindow {
                 title: "Choose a file to save"
                 selectExisting: false
                 selectMultiple: false
+                defaultSuffix: "json"
                 onAccepted: {
-                    console.log("You chose: " + fileDialogSave.fileUrl)
-                    dataCore.jsonWrite(fileDialogOpen.fileUrl)
+                    if (dataCore.jsonWrite(fileDialogSave.fileUrl)) {
+                        saveMenuItem.enabled = true
+                        saveMenuItem.activeFileUrl = fileDialogSave.fileUrl
+                    }
                 }
             }
         }

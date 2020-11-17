@@ -48,9 +48,12 @@ void ResultsModel::setDataCore(DataCoreObject* data)
     if (data != m_data) {
         m_data = data;
         assert(m_data);
-        emit dataSet();
+        emit dataCoreChanged();
 
-        QObject::connect(m_data, &DataCoreObject::resultsChanged, this, &ResultsModel::UpdateResults);
+        QObject::connect(m_data, &DataCoreObject::resultsChanged,
+            this, &ResultsModel::UpdateResults);
+        QObject::connect(m_data, &DataCoreObject::modelCleared,
+            this, &ResultsModel::UpdateResults);
         UpdateResults();
     }
 }

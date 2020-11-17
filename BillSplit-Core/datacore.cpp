@@ -1,4 +1,5 @@
 #include "datacore.h"
+#include <algorithm>
 
 // TODO: add noexcepts
 // TODO: Remove this
@@ -215,8 +216,6 @@ std::vector<std::tuple<std::string, std::string, double> >
     std::vector<std::tuple<std::string, std::string, double> > res;
     if (DebtsCanBeSettled(debts)) {
 
-        const double margin = 0.01;
-
         // Sets of positive and negative costs
         std::vector<double> pset;
         std::vector<double> nset;
@@ -226,12 +225,12 @@ std::vector<std::tuple<std::string, std::string, double> >
         std::unordered_map<std::size_t, std::string> nlookup;
 
         for (const auto& [name, cost] : debts) {
-            if (cost < margin * -1) {
-                nset.push_back(cost);
+            if (cost < mst_nmargin) {
                 nlookup[nset.size()] = name;
-            } else if (cost > margin) {
-                pset.push_back(cost);
+                nset.push_back(cost);
+            } else if (cost > mst_pmargin) {
                 plookup[pset.size()] = name;
+                pset.push_back(cost);
             }
         }
 
@@ -242,7 +241,7 @@ std::vector<std::tuple<std::string, std::string, double> >
         mst_solnNumT = std::numeric_limits<int>::max();
         std::vector<ITransaction> tempSolution;
 
-        SettleTreeRecurse(pset, nset, 0, tempSolution);
+        SettleTreeRecurse(pset, pset.size(), nset, nset.size(), 0, tempSolution);
 
         // TODO: Shouldn't need double check
         for (int i = 0; i < mst_solnNumT && i < static_cast<int>(mst_soln.size()); ++i) {
@@ -254,9 +253,12 @@ std::vector<std::tuple<std::string, std::string, double> >
     return res;
 }
 
+// TODO: inclusive margin
 bool DataCore::SettleTreeRecurse(
     std::vector<double> pset,
+    std::size_t pcount,
     std::vector<double> nset,
+    std::size_t ncount,
     int numT,
     std::vector<DataCore::ITransaction>& thisSoln) const
 {
@@ -280,57 +282,8 @@ bool DataCore::SettleTreeRecurse(
     std::cout << "}, numT=" << numT;
     ///////////////////////////
 
-    const auto AddSolution = [&thisSoln, numT] (std::size_t fr, std::size_t to, double payment) {
-        if (static_cast<int>(thisSoln.size()) <= numT) {
-            thisSoln.emplace_back(ITransaction{fr, to, payment});
-        } else {
-            thisSoln[numT].from = fr;
-            thisSoln[numT].to = to;
-            thisSoln[numT].cost = payment;
-        }
-    };
-
-    if (numT >= mst_solnNumT) {
-        return false;
-    }
-
-    bool solutionFound = true;
-    for (std::size_t p = 0; p < pset.size(); ++p) {
-        if (pset[p] < mst_pmargin) {
-            continue;
-        }
-        solutionFound = false;
-
-        for (std::size_t n = 0; n < nset.size(); ++n) {
-            if (nset[n] > mst_nmargin) {
-                continue;
-            }
-
-            // Check below, was drunk when wrote
-            // Calcs need margin in them yo
-            double remainder = pset[p] + nset[n];
-            std::vector<double> nset_copy{nset};
-            std::vector<double> pset_copy{pset};
-
-            if (remainder > mst_pmargin) {
-                AddSolution(n, p, pset[p] - remainder);
-                nset_copy[n] = 0;
-                pset_copy[p] = remainder;
-            } else if (remainder < mst_nmargin) {
-                AddSolution(n, p, -1 * (nset[n] + remainder));
-                nset_copy[n] = remainder;
-                pset_copy[p] = 0;
-            } else {
-                AddSolution(n, p, -1 * nset[n] - remainder);
-                nset_copy[n] = 0;
-                pset_copy[p] = 0;
-            }
-
-            SettleTreeRecurse(std::move(pset_copy), std::move(nset_copy), numT + 1, thisSoln);
-        }
-    }
-
-    if (solutionFound) {
+    if (pcount == 0 && ncount == 0) {
+        // Base case: Solution found
         mst_solnNumT = numT;
         mst_soln = thisSoln;
 
@@ -346,6 +299,73 @@ bool DataCore::SettleTreeRecurse(
         return true;
     }
 
+    if (static_cast<int>(std::max(pcount, ncount)) + numT >= mst_solnNumT) {
+        // Base Case: Can't possibly improve upon best solution
+        std::cout << " rF (cant improve base case)";
+        return false;
+    }
+
+    for (std::size_t p = 0; p < pset.size(); ++p) {
+        if (pset[p] <= mst_pmargin) {
+            continue;
+        }
+
+        for (std::size_t n = 0; n < nset.size(); ++n) {
+            if (nset[n] >= mst_nmargin) {
+                continue;
+            }
+
+            const double remainder = pset[p] + nset[n];
+            const double payment = std::min(pset[p], -1 * nset[n]);
+
+            // Add Solution
+            if (static_cast<int>(thisSoln.size()) <= numT) {
+                thisSoln.emplace_back(ITransaction{n, p, payment});
+            } else {
+                thisSoln[numT].from = n;
+                thisSoln[numT].to = p;
+                thisSoln[numT].cost = payment;
+            }
+
+            std::vector<double> nset_copy{nset};
+            std::vector<double> pset_copy{pset};
+            int ncount_copy = ncount;
+            int pcount_copy = pcount;
+
+            if (remainder < 0) {
+                nset_copy[n] = remainder;
+                pset_copy[p] = 0;
+                pcount_copy--;
+                if (remainder >= mst_nmargin) {
+                    ncount_copy--;
+                }
+            } else {
+                nset_copy[n] = 0;
+                pset_copy[p] = remainder;
+                ncount_copy--;
+                if (remainder <= mst_pmargin) {
+                    pcount_copy--;
+                }
+            }
+
+            // Recursive case.  If we find a solution recheck for the base case where
+            // we can't improve upon solution, mst_solnNumT will be different.
+            if (SettleTreeRecurse(
+                    std::move(pset_copy),
+                    pcount_copy,
+                    std::move(nset_copy),
+                    ncount_copy,
+                    numT + 1,
+                    thisSoln)
+                && static_cast<int>(std::max(pcount, ncount)) + numT >= mst_solnNumT) {
+                    std::cout << " rF (recheck base case)";
+                    return false;
+                }
+        }
+    }
+
+    // No solutions in this branch of the tree
+    std::cout << " rF (end loop)";
     return false;
 }
 

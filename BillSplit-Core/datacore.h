@@ -91,7 +91,9 @@ private:
 
     bool SettleTreeRecurse(
         std::vector<double> pset,
+        std::size_t pcount,
         std::vector<double> nset,
+        std::size_t ncount,
         int numT,
         std::vector<ITransaction>& thisSoln) const;
     /////////////

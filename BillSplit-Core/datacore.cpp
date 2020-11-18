@@ -210,6 +210,7 @@ std::vector<std::tuple<std::string, std::string, double> >
 }
 
 // TODO: Undo this: Assumes debts can be settled
+// TODO: Consider long term resizing and switching back and forth between large solutions and small ones
 std::vector<std::tuple<std::string, std::string, double> >
     DataCore::SettleTree(std::unordered_map<std::string, double> debts) const
 {
@@ -218,9 +219,18 @@ std::vector<std::tuple<std::string, std::string, double> >
 
     // Now break it into components to make it faster to solve
 
-    // Sets of positive and negative costs in the debts object
-    std::vector<double> pset;
-    std::vector<double> nset;
+    // Sets of positive and negative costs in the debts object, prime the first ones
+    if (mst_psets.empty()) {
+        mst_psets.emplace_back();
+    } else {
+        mst_psets[0].clear();
+    }
+
+    if (mst_nsets.empty()) {
+        mst_nsets.emplace_back();
+    } else {
+        mst_nsets[0].clear();
+    }
 
     // Indexing system, map index of vector to person's name
     std::vector<std::string> plookup;
@@ -234,16 +244,13 @@ std::vector<std::tuple<std::string, std::string, double> >
         if (cost < mst_nmargin) {
             nrevlookup[name] = nlookup.size();
             nlookup.push_back(name);
-            nset.push_back(cost);
+            mst_nsets[0].push_back(cost);
         } else if (cost > mst_pmargin) {
             prevlookup[name] = plookup.size();
             plookup.push_back(name);
-            pset.push_back(cost);
+            mst_psets[0].push_back(cost);
         }
     }
-
-    pset.shrink_to_fit();
-    nset.shrink_to_fit();
 
     // Prime the final solution using the SettleMinMax solution
     mst_finalSoln.clear();
@@ -255,10 +262,14 @@ std::vector<std::tuple<std::string, std::string, double> >
             });
     }
     mst_solnNumT = static_cast<int>(mst_finalSoln.size());
+    mst_currSoln.resize(mst_solnNumT - 1);  // TODO: are you sure -1?
     int originalsolutionNumT = mst_solnNumT;
-    mst_currSoln.resize(mst_solnNumT);
 
-    SettleTreeRecurse(pset, pset.size(), nset, nset.size(), 0);
+    // Preallocate for the algorithm
+    mst_psets.resize(mst_solnNumT);
+    mst_nsets.resize(mst_solnNumT);
+
+    SettleTreeRecurse(mst_psets[0].size(), mst_nsets[0].size(), 0);
 
     // If this didn't change, then the final solution is the result from SettleMinMax and we can just return it.
     if (originalsolutionNumT != mst_solnNumT) {
@@ -276,25 +287,26 @@ std::vector<std::tuple<std::string, std::string, double> >
 // return value true means you need to recheck your base case
 // comment should explain how numT acts as an index
 bool DataCore::SettleTreeRecurse(
-    std::vector<double> pset,
     std::size_t pcount,
-    std::vector<double> nset,
     std::size_t ncount,
     int numT) const
 {
+    const auto& currPset = mst_psets[numT];
+    const auto& currNset = mst_nsets[numT];
+
     //////////// Debug output
     std::cout << std::endl;
     for (int i = 0; i < numT; ++i) { std::cout << '\t'; }
     std::cout << "pset{";
     bool needsComma = false;
-    for (const auto& x : pset) {
+    for (const auto& x : currPset) {
         if (needsComma) { std::cout << ","; }
         else { needsComma = true; }
         std::cout << x;
     }
     std::cout << "}, nset{";
     needsComma = false;
-    for (const auto& x : nset) {
+    for (const auto& x : currNset) {
         if (needsComma) { std::cout << ","; }
         else { needsComma = true; }
         std::cout << x;
@@ -313,6 +325,7 @@ bool DataCore::SettleTreeRecurse(
         for (const auto& x : mst_finalSoln) {
             std::cout << (i >= mst_solnNumT ? "ignore" : "");
             std::cout << '{' << x.from << ',' << x.to << ',' << x.cost << "},";
+            i++;
         }
         ////////////////////
 
@@ -325,54 +338,57 @@ bool DataCore::SettleTreeRecurse(
         return false;
     }
 
-    for (std::size_t p = 0; p < pset.size(); ++p) {
-        if (pset[p] <= mst_pmargin) {
+    for (std::size_t p = 0; p < currPset.size(); ++p) {
+        if (currPset[p] <= mst_pmargin) {
             continue;
         }
 
-        for (std::size_t n = 0; n < nset.size(); ++n) {
-            if (nset[n] >= mst_nmargin) {
+        for (std::size_t n = 0; n < currNset.size(); ++n) {
+            if (currNset[n] >= mst_nmargin) {
                 continue;
             }
 
-            const double remainder = pset[p] + nset[n];
-            const double payment = std::min(pset[p], -1 * nset[n]);
+            const double remainder = currPset[p] + currNset[n];
+            const double payment = std::min(currPset[p], -1 * currNset[n]);
 
             // Add Solution
             mst_currSoln[numT].from = n;
             mst_currSoln[numT].to = p;
             mst_currSoln[numT].cost = payment;
 
-            std::vector<double> nset_copy{nset};
-            std::vector<double> pset_copy{pset};
-            int ncount_copy = ncount;
-            int pcount_copy = pcount;
+            // Prime next recurse
+            const int nextNumT = numT + 1;
+            auto& nextNset = mst_nsets[nextNumT];
+            auto& nextPset = mst_psets[nextNumT];
+            nextNset = currNset;
+            nextPset = currPset;
+            int nextNcount = ncount;
+            int nextPcount = pcount;
 
             if (remainder < 0) {
-                nset_copy[n] = remainder;
-                pset_copy[p] = 0;
-                pcount_copy--;
+                nextNset[n] = remainder;
+                nextPset[p] = 0;
+                nextPcount--;
                 if (remainder >= mst_nmargin) {
-                    ncount_copy--;
+                    nextNcount--;
                 }
             } else {
-                nset_copy[n] = 0;
-                pset_copy[p] = remainder;
-                ncount_copy--;
+                nextNset[n] = 0;
+                nextPset[p] = remainder;
+                nextNcount--;
                 if (remainder <= mst_pmargin) {
-                    pcount_copy--;
+                    nextPcount--;
                 }
             }
 
             // Recursive case.  If we find a solution recheck for the base case where
-            // we can't improve upon solution, mst_solnNumT will be different.
+            // we can't improve upon solution because mst_solnNumT will be different.
             if (SettleTreeRecurse(
-                    std::move(pset_copy),
-                    pcount_copy,
-                    std::move(nset_copy),
-                    ncount_copy,
-                    numT + 1)
-                && static_cast<int>(std::max(pcount, ncount)) + numT >= mst_solnNumT) {
+                    nextPcount,
+                    nextNcount,
+                    nextNumT)
+                && static_cast<int>(std::max(pcount, ncount)) + numT >= mst_solnNumT)
+            {
                     std::cout << " rF(recheck base)" << std::flush;
                     return true;
             }

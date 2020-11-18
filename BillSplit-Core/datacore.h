@@ -87,15 +87,15 @@ private:
     static constexpr double mst_pmargin = 0.01;
     static constexpr double mst_nmargin = mst_pmargin * -1;
     mutable int mst_solnNumT = 0;
-    mutable std::vector<ITransaction> mst_soln;
+    mutable std::vector<ITransaction> mst_finalSoln;
+    mutable std::vector<ITransaction> mst_currSoln;
 
     bool SettleTreeRecurse(
         std::vector<double> pset,
         std::size_t pcount,
         std::vector<double> nset,
         std::size_t ncount,
-        int numT,
-        std::vector<ITransaction>& thisSoln) const;
+        int numT) const;
     /////////////
 };
 

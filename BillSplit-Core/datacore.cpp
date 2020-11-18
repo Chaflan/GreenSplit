@@ -171,7 +171,7 @@ std::vector<std::tuple<std::string, std::string, double> >
     std::vector<std::tuple<std::string, std::string, double> > res;
 
     auto DebtsAreSettled = [&debts]()->bool {
-        for(auto [name, cost] : debts) {
+        for(const auto& [name, cost] : debts) {
             if (std::abs(cost) >= 0.01) {
                 return false;
             }
@@ -209,25 +209,34 @@ std::vector<std::tuple<std::string, std::string, double> >
     return res;
 }
 
-// Assumes debts can be settled
+// TODO: Undo this: Assumes debts can be settled
 std::vector<std::tuple<std::string, std::string, double> >
     DataCore::SettleTree(std::unordered_map<std::string, double> debts) const
 {
-    std::vector<std::tuple<std::string, std::string, double> > res;// = SettleMinMax(debts);
+    // Start with the minmax solution
+    std::vector<std::tuple<std::string, std::string, double> > res = SettleMinMax(debts);
 
-    // Sets of positive and negative costs
+    // Now break it into components to make it faster to solve
+
+    // Sets of positive and negative costs in the debts object
     std::vector<double> pset;
     std::vector<double> nset;
 
-    // Indexing system, map index of vector to person's name, this saves size
+    // Indexing system, map index of vector to person's name
     std::vector<std::string> plookup;
     std::vector<std::string> nlookup;
 
+    // Reverse lookup is only needed for converting settle minmax soln to an indexed one.
+    std::unordered_map<std::string, std::size_t> prevlookup;
+    std::unordered_map<std::string, std::size_t> nrevlookup;
+
     for (const auto& [name, cost] : debts) {
         if (cost < mst_nmargin) {
+            nrevlookup[name] = nlookup.size();
             nlookup.push_back(name);
             nset.push_back(cost);
         } else if (cost > mst_pmargin) {
+            prevlookup[name] = plookup.size();
             plookup.push_back(name);
             pset.push_back(cost);
         }
@@ -236,34 +245,42 @@ std::vector<std::tuple<std::string, std::string, double> >
     pset.shrink_to_fit();
     nset.shrink_to_fit();
 
-    mst_soln.clear();
+    // Prime the final solution using the SettleMinMax solution
+    mst_finalSoln.clear();
+    for (const auto& fromToCost : res) {
+        mst_finalSoln.push_back({
+            nrevlookup[std::get<0>(fromToCost)],
+            prevlookup[std::get<1>(fromToCost)],
+            std::get<2>(fromToCost)
+            });
+    }
+    mst_solnNumT = static_cast<int>(mst_finalSoln.size());
+    int originalsolutionNumT = mst_solnNumT;
+    mst_currSoln.resize(mst_solnNumT);
 
-    //for (const auto& fromToCost : res) {
-        //mst.push_back(std::get<0>(fromToCost))
-    //}
+    SettleTreeRecurse(pset, pset.size(), nset, nset.size(), 0);
 
-    mst_solnNumT = std::numeric_limits<int>::max();
-    std::vector<ITransaction> tempSolution;
-
-    SettleTreeRecurse(pset, pset.size(), nset, nset.size(), 0, tempSolution);
-
-    // TODO: Shouldn't need double check
-    for (int i = 0; i < mst_solnNumT && i < static_cast<int>(mst_soln.size()); ++i) {
-        const auto& iTrans = mst_soln[i];
-        res.emplace_back(nlookup[iTrans.from], plookup[iTrans.to], iTrans.cost);
+    // If this didn't change, then the final solution is the result from SettleMinMax and we can just return it.
+    if (originalsolutionNumT != mst_solnNumT) {
+        res.clear();
+        // TODO: Shouldn't need double check
+        for (int i = 0; i < mst_solnNumT && i < static_cast<int>(mst_finalSoln.size()); ++i) {
+            const auto& iTrans = mst_finalSoln[i];
+            res.emplace_back(nlookup[iTrans.from], plookup[iTrans.to], iTrans.cost);
+        }
     }
 
     return res;
 }
 
 // return value true means you need to recheck your base case
+// comment should explain how numT acts as an index
 bool DataCore::SettleTreeRecurse(
     std::vector<double> pset,
     std::size_t pcount,
     std::vector<double> nset,
     std::size_t ncount,
-    int numT,
-    std::vector<DataCore::ITransaction>& thisSoln) const
+    int numT) const
 {
     //////////// Debug output
     std::cout << std::endl;
@@ -288,12 +305,12 @@ bool DataCore::SettleTreeRecurse(
     if (pcount == 0 && ncount == 0) {
         // Base case: Solution found
         mst_solnNumT = numT;
-        mst_soln = thisSoln;
+        mst_finalSoln = mst_currSoln;
 
         /////// Debug output
         std::cout << " SOLN=";
         int i = 0;
-        for (const auto& x : mst_soln) {
+        for (const auto& x : mst_finalSoln) {
             std::cout << (i >= mst_solnNumT ? "ignore" : "");
             std::cout << '{' << x.from << ',' << x.to << ',' << x.cost << "},";
         }
@@ -322,13 +339,9 @@ bool DataCore::SettleTreeRecurse(
             const double payment = std::min(pset[p], -1 * nset[n]);
 
             // Add Solution
-            if (static_cast<int>(thisSoln.size()) <= numT) {
-                thisSoln.emplace_back(ITransaction{n, p, payment});
-            } else {
-                thisSoln[numT].from = n;
-                thisSoln[numT].to = p;
-                thisSoln[numT].cost = payment;
-            }
+            mst_currSoln[numT].from = n;
+            mst_currSoln[numT].to = p;
+            mst_currSoln[numT].cost = payment;
 
             std::vector<double> nset_copy{nset};
             std::vector<double> pset_copy{pset};
@@ -358,8 +371,7 @@ bool DataCore::SettleTreeRecurse(
                     pcount_copy,
                     std::move(nset_copy),
                     ncount_copy,
-                    numT + 1,
-                    thisSoln)
+                    numT + 1)
                 && static_cast<int>(std::max(pcount, ncount)) + numT >= mst_solnNumT) {
                     std::cout << " rF(recheck base)" << std::flush;
                     return true;

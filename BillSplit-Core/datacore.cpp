@@ -164,96 +164,99 @@ void DataCore::ReviseLedger(int fromIndex)
     }
 }
 
+// Assumes debts can be settled
 std::vector<std::tuple<std::string, std::string, double> >
     DataCore::SettleMinMax(std::unordered_map<std::string, double> debts) // TODO: currently by value
 {
     std::vector<std::tuple<std::string, std::string, double> > res;
-    if (DebtsCanBeSettled(debts)) {
 
-        auto DebtsAreSettled = [&debts]()->bool {
-            for(auto [name, cost] : debts) {
-                if (std::abs(cost) >= 0.01) {
-                    return false;
-                }
+    auto DebtsAreSettled = [&debts]()->bool {
+        for(auto [name, cost] : debts) {
+            if (std::abs(cost) >= 0.01) {
+                return false;
             }
-            return true;
-        };
-
-        // Now we turn this into a series of transactions to pay off debts
-        while(!DebtsAreSettled()) {
-            // TODO: References here would be faster
-            std::string gName;
-            std::string lName;
-            double gCost = std::numeric_limits<double>::lowest();
-            double lCost = std::numeric_limits<double>::max();
-
-            for(auto [name, cost] : debts) {
-                if (cost > gCost) {
-                    gName = name;
-                    gCost = cost;
-                }
-                if (cost < lCost) {
-                    lName = name;
-                    lCost = cost;
-                }
-            }
-
-            double currCost = std::min(gCost, lCost * -1);
-            debts[lName] += currCost;
-            debts[gName] -= currCost;
-
-            res.emplace_back(std::move(lName), std::move(gName), currCost);
-            assert(res.size() < 1000);
         }
+        return true;
+    };
+
+    // Now we turn this into a series of transactions to pay off debts
+    while(!DebtsAreSettled()) {
+        // TODO: References here would be faster
+        std::string gName;
+        std::string lName;
+        double gCost = std::numeric_limits<double>::lowest();
+        double lCost = std::numeric_limits<double>::max();
+
+        for(auto [name, cost] : debts) {
+            if (cost > gCost) {
+                gName = name;
+                gCost = cost;
+            }
+            if (cost < lCost) {
+                lName = name;
+                lCost = cost;
+            }
+        }
+
+        double currCost = std::min(gCost, lCost * -1);
+        debts[lName] += currCost;
+        debts[gName] -= currCost;
+
+        res.emplace_back(std::move(lName), std::move(gName), currCost);
+        assert(res.size() < 1000);
     }
 
     return res;
 }
 
+// Assumes debts can be settled
 std::vector<std::tuple<std::string, std::string, double> >
     DataCore::SettleTree(std::unordered_map<std::string, double> debts) const
 {
-    std::vector<std::tuple<std::string, std::string, double> > res;
-    if (DebtsCanBeSettled(debts)) {
+    std::vector<std::tuple<std::string, std::string, double> > res;// = SettleMinMax(debts);
 
-        // Sets of positive and negative costs
-        std::vector<double> pset;
-        std::vector<double> nset;
+    // Sets of positive and negative costs
+    std::vector<double> pset;
+    std::vector<double> nset;
 
-        // Indexing system, map index of vector to person's name, this saves size
-        std::unordered_map<std::size_t, std::string> plookup;
-        std::unordered_map<std::size_t, std::string> nlookup;
+    // Indexing system, map index of vector to person's name, this saves size
+    std::vector<std::string> plookup;
+    std::vector<std::string> nlookup;
 
-        for (const auto& [name, cost] : debts) {
-            if (cost < mst_nmargin) {
-                nlookup[nset.size()] = name;
-                nset.push_back(cost);
-            } else if (cost > mst_pmargin) {
-                plookup[pset.size()] = name;
-                pset.push_back(cost);
-            }
+    for (const auto& [name, cost] : debts) {
+        if (cost < mst_nmargin) {
+            nlookup.push_back(name);
+            nset.push_back(cost);
+        } else if (cost > mst_pmargin) {
+            plookup.push_back(name);
+            pset.push_back(cost);
         }
+    }
 
-        pset.shrink_to_fit();
-        nset.shrink_to_fit();
+    pset.shrink_to_fit();
+    nset.shrink_to_fit();
 
-        mst_soln.clear();
-        mst_solnNumT = std::numeric_limits<int>::max();
-        std::vector<ITransaction> tempSolution;
+    mst_soln.clear();
 
-        SettleTreeRecurse(pset, pset.size(), nset, nset.size(), 0, tempSolution);
+    //for (const auto& fromToCost : res) {
+        //mst.push_back(std::get<0>(fromToCost))
+    //}
 
-        // TODO: Shouldn't need double check
-        for (int i = 0; i < mst_solnNumT && i < static_cast<int>(mst_soln.size()); ++i) {
-            const auto& iTrans = mst_soln[i];
-            res.emplace_back(nlookup[iTrans.from], plookup[iTrans.to], iTrans.cost);
-        }
+    mst_solnNumT = std::numeric_limits<int>::max();
+    std::vector<ITransaction> tempSolution;
+
+    SettleTreeRecurse(pset, pset.size(), nset, nset.size(), 0, tempSolution);
+
+    // TODO: Shouldn't need double check
+    for (int i = 0; i < mst_solnNumT && i < static_cast<int>(mst_soln.size()); ++i) {
+        const auto& iTrans = mst_soln[i];
+        res.emplace_back(nlookup[iTrans.from], plookup[iTrans.to], iTrans.cost);
     }
 
     return res;
 }
 
-// TODO: inclusive margin
+// return value true means you need to recheck your base case
 bool DataCore::SettleTreeRecurse(
     std::vector<double> pset,
     std::size_t pcount,
@@ -279,7 +282,7 @@ bool DataCore::SettleTreeRecurse(
         else { needsComma = true; }
         std::cout << x;
     }
-    std::cout << "}, numT=" << numT;
+    std::cout << "}, numT=" << numT << std::flush;
     ///////////////////////////
 
     if (pcount == 0 && ncount == 0) {
@@ -301,7 +304,7 @@ bool DataCore::SettleTreeRecurse(
 
     if (static_cast<int>(std::max(pcount, ncount)) + numT >= mst_solnNumT) {
         // Base Case: Can't possibly improve upon best solution
-        std::cout << " rF (cant improve base case)";
+        std::cout << " rF(cant improve base)";
         return false;
     }
 
@@ -358,14 +361,14 @@ bool DataCore::SettleTreeRecurse(
                     numT + 1,
                     thisSoln)
                 && static_cast<int>(std::max(pcount, ncount)) + numT >= mst_solnNumT) {
-                    std::cout << " rF (recheck base case)";
-                    return false;
-                }
+                    std::cout << " rF(recheck base)" << std::flush;
+                    return true;
+            }
         }
     }
 
     // No solutions in this branch of the tree
-    std::cout << " rF (end loop)";
+    std::cout << " rF(end loop)";
     return false;
 }
 
@@ -378,18 +381,19 @@ bool DataCore::DebtsCanBeSettled(std::unordered_map<std::string, double> debts)
     return sum < 0.01;
 }
 
-
+// TODO: Rename this to solve
 // from, to, cost
 std::vector<std::tuple<std::string, std::string, double> > DataCore::Calculate() const
 {
-    // TODO: Remove
-    //DebugOutputLedgerData();
-
     if (m_ledger.empty()) {
         return {};
     }
+    const auto& lastLedgerLine = m_ledger[m_ledger.size() - 1];
+    if (!DebtsCanBeSettled(lastLedgerLine)) {
+        return {};
+    }
 
-    return SettleTree(m_ledger[m_ledger.size() - 1]);
+    return SettleTree(lastLedgerLine);
     //return SettleMinMax(m_ledger[m_ledger.size() - 1]);
 }
 

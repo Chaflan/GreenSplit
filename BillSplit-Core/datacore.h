@@ -1,6 +1,7 @@
 #ifndef DATACORE_H
 #define DATACORE_H
 
+#include "algocore.h"
 #include "BillSplit-Core_global.h"
 #include <string>
 #include <set>
@@ -47,56 +48,16 @@ public:
 
 private:
     void VerifyTransactionIndex(int index) const;
-
-    std::vector<Transaction> m_transactions;
-    std::vector<std::unordered_map<std::string, double> > m_ledger;
-    std::vector<std::tuple<std::string, std::string, double> > m_results;
-
-    // Main Algorithms
     void ReviseLedger(int fromIndex);
     static bool DebtsCanBeSettled(std::unordered_map<std::string, double> debts);
     void DebugOutputLedgerData() const;
-    std::vector<std::tuple<std::string, std::string, double> > Calculate() const;
+    std::vector<std::tuple<std::string, std::string, double> > Solve() const;
 
-    // SettleMinMax Algorithm
-    //
-    // Greedy algorithm, fast but non-optimal for some cases.
-    // These cases will be ones where a subset of the payments can be solved in isolation.
-    // These could be common with larger sets, whole number prices, and/or a large margin
-    //      n = debts.size()
-    //      Time -> O(n)
-    //      Space (solution vector) -> O(n)
-    //      Space (other required to solve) -> O(1)
-    static std::vector<std::tuple<std::string, std::string, double> >
-        SettleMinMax(std::unordered_map<std::string, double> debts);
-
-    // TODO: Namespace?
-    // Settle Tree Algorithm and Related Code
-    //
-    // Brute force recursive tree algorithm, slow but optimal
-    // TODO: Note about how solution requires solution to the ____ problem which is open
-    std::vector<std::tuple<std::string, std::string, double> >
-        SettleTree(std::unordered_map<std::string, double> debts) const;
-
-    struct ITransaction {
-        std::size_t from;
-        std::size_t to;
-        double cost;
-    };
-
-    static constexpr double mst_pmargin = 0.01;
-    static constexpr double mst_nmargin = mst_pmargin * -1;
-    mutable int mst_solnNumT = 0;
-    mutable std::vector<std::vector<double> > mst_psets;
-    mutable std::vector<std::vector<double> > mst_nsets;
-    mutable std::vector<ITransaction> mst_finalSoln;
-    mutable std::vector<ITransaction> mst_currSoln;
-
-    bool SettleTreeRecurse(
-        std::size_t pcount,
-        std::size_t ncount,
-        int numT) const;
-    /////////////
+private:
+    std::vector<Transaction> m_transactions;
+    std::vector<std::unordered_map<std::string, double> > m_ledger;
+    std::vector<std::tuple<std::string, std::string, double> > m_results;
+    AlgoCore m_algoCore;
 };
 
 #endif // DATACORE_H

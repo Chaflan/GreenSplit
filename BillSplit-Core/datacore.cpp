@@ -180,7 +180,11 @@ std::vector<std::tuple<std::string, std::string, double> > DataCore::Solve() con
         return {};
     }
     const auto& lastLedgerLine = m_ledger[m_ledger.size() - 1];
+    if (lastLedgerLine.empty()) {
+        return {};
+    }
     if (!DebtsCanBeSettled(lastLedgerLine)) {
+        // TODO: Throw?
         return {};
     }
 

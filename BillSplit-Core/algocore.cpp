@@ -1,10 +1,6 @@
 #include "algocore.h"
 #include <queue>
 
-// TODO: Remove with debug, or add debug macros
-#include <iostream>
-#include <cassert>
-
 // Assumes debts can be settled
 std::vector<std::tuple<std::string, std::string, double> >
     AlgoCore::SolveGreedy(std::unordered_map<std::string, double> debts)
@@ -49,30 +45,20 @@ std::vector<std::tuple<std::string, std::string, double> >
     while(!pQueue.empty()) {
         const double payment = std::min(pQueue.top().first, -1 * nQueue.top().first);
         const double remainder = pQueue.top().first + nQueue.top().first;
-        const size_t pindex = pQueue.top().second;
-        const size_t nindex = nQueue.top().second;
+        const size_t pIndex = pQueue.top().second;
+        const size_t nIndex = nQueue.top().second;
 
         pQueue.pop();
         nQueue.pop();
 
         if (remainder < nMargin) {
-            nQueue.emplace(remainder, nindex);
+            nQueue.emplace(remainder, nIndex);
         } else if (remainder > pMargin) {
-            pQueue.emplace(remainder, pindex);
+            pQueue.emplace(remainder, pIndex);
         }
 
-        res.emplace_back(nNameLookup[nindex], pNameLookup[pindex], payment);
+        res.emplace_back(nNameLookup[nIndex], pNameLookup[pIndex], payment);
     }
-
-    /////// Debug output
-    std::cout << "\n\nGREEDY SOLN=";
-    int i = 0;
-    for (const auto& x : res) {
-        std::cout << '{' << std::get<0>(x) << ',' << std::get<1>(x) << ',' << std::get<2>(x) << "},";
-        i++;
-    }
-    std::cout << std::flush;
-    ////////////////////
 
     return res;
 }
@@ -89,15 +75,12 @@ std::vector<std::tuple<std::string, std::string, double> >
     // To save on copying strings around we set up an indexing system.
     std::vector<std::string> pNameLookup;
     std::vector<std::string> nNameLookup;
-    std::unordered_map<std::string, std::size_t> pIdxLookup;
-    std::unordered_map<std::string, std::size_t> nIdxLookup;
+
     for (const auto& [name, cost] : debts) {
         if (cost < nMargin) {
-            nIdxLookup[name] = nNameLookup.size();
             nNameLookup.push_back(name);
             nFirstSet.push_back(cost);
         } else if (cost > pMargin) {
-            pIdxLookup[name] = pNameLookup.size();
             pNameLookup.push_back(name);
             pFirstSet.push_back(cost);
         }
@@ -110,15 +93,10 @@ std::vector<std::tuple<std::string, std::string, double> >
     const int numTransOriginal = numTransFinal;
 
     std::vector<std::tuple<std::size_t, std::size_t, double> > solnFinalIdx(numTransOriginal - 1);
-    std::vector<std::tuple<std::size_t, std::size_t, double> > solnCurrIdx(numTransOriginal - 1);  // TODO: are you sure -1?
-    for (int i = 0; i < numTransOriginal - 1; ++i) {
-        std::get<0>(solnFinalIdx[i]) = nIdxLookup[std::get<0>(solnFinalStr[i])];
-        std::get<1>(solnFinalIdx[i]) = nIdxLookup[std::get<1>(solnFinalStr[i])];
-        std::get<2>(solnFinalIdx[i]) = std::get<2>(solnFinalStr[i]);
-    }
+    std::vector<std::tuple<std::size_t, std::size_t, double> > solnCurrIdx(numTransOriginal - 1);
 
     // The algorithm is intuitively recursive but can be solved iteratively with for loops and by preserving
-    // the below information in each stack frame.  Doing it this way allows us to preallocate this information
+    // the below information in each stack frame.  Doing it this way allows us to preallocate for this data
     // since we know the depth of the stack can never exceed the size of the greedy solution
     struct StackFrame {
         std::size_t pix;
@@ -135,30 +113,8 @@ std::vector<std::tuple<std::string, std::string, double> >
     // Note that tree depth = number of transactions
     for(int depth = 0; depth >= 0;) {
 
-        //////////// Debug output
-        std::cout << std::endl;
-        for (int i = 0; i < depth; ++i) { std::cout << '\t'; }
-        std::cout << "pix=" << st[depth].pix << " pset{";
-        bool needsComma = false;
-        for (const auto& x : st[depth].pset) {
-            if (needsComma) { std::cout << ","; }
-            else { needsComma = true; }
-            std::cout << x;
-        }
-        std::cout << "}, nix=" << st[depth].nix  << " nset{";
-        needsComma = false;
-        for (const auto& x : st[depth].nset) {
-            if (needsComma) { std::cout << ","; }
-            else { needsComma = true; }
-            std::cout << x;
-        }
-        std::cout << "}, numT=" << depth << std::flush;
-        ///////////////////////////
-
         if (static_cast<int>(std::max(st[depth].pcount, st[depth].ncount)) + depth >= numTransFinal) {
             // Base Case: Can't possibly improve upon final solution
-            std::cout << " ascend(cant improve)";
-
             --depth;
             continue;
         }
@@ -167,25 +123,12 @@ std::vector<std::tuple<std::string, std::string, double> >
             // Base case: Solution found
             numTransFinal = depth;
             solnFinalIdx = solnCurrIdx;
-
-            /////// Debug output
-            std::cout << " SOLN=";
-            int i = 0;
-            for (const auto& x : solnFinalIdx) {
-                std::cout << (i >= numTransFinal ? "ignore" : "");
-                std::cout << '{' << std::get<0>(x) << ',' << std::get<1>(x) << ',' << std::get<2>(x) << "},";
-                i++;
-            }
-            std::cout << "ascend";
-            ////////////////////
-
             --depth;
             continue;
         }
 
-        // We use this as a sentinel to break out of the two for loops below and
-        // then descend the tree.  We break on p but continue on n because descent
-        // happens after we are finished with the current n index.
+        // We use this as a sentinel to break out of the two for loops below and then descend the tree.
+        // We break on p but continue on n because descent happens after we are finished with the current n index.
         bool descend = false;
 
         for (auto& p = st[depth].pix; p < pSetSize; ++p) {
@@ -236,23 +179,24 @@ std::vector<std::tuple<std::string, std::string, double> >
             }
         }
 
-        if (descend) {
-            std::cout << " descend" << std::flush;
+        if (descend) {;
             descend = true;
             ++depth;
         } else {
             // No solutions in this branch of the tree, ascend
-            std::cout << " ascend(end loop)";
             --depth;
         }
     }
 
-    // If this didn't change, then the final solution was unchanged from greedy and we can just return it.
+    // If numTrans didn't change, then the final solution was unchanged from greedy and we can just return it.
     // Otherwise we need to convert the indexed solution to a string one using the lookups.
     if (numTransOriginal != numTransFinal) {
         solnFinalStr.clear();
         for (const auto& iTrans : solnFinalIdx) {
-            solnFinalStr.emplace_back(nNameLookup[std::get<0>(iTrans)], pNameLookup[std::get<1>(iTrans)], std::get<2>(iTrans));
+            solnFinalStr.emplace_back(
+                nNameLookup[std::get<0>(iTrans)],
+                pNameLookup[std::get<1>(iTrans)],
+                std::get<2>(iTrans));
         }
     }
 

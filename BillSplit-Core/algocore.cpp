@@ -1,8 +1,6 @@
 #include "algocore.h"
 #include <queue>
 
-// TODO: Clean up camelCase.  Lots of nextNcount instead of nextNCount
-//          maybe make them all start with p or n
 // TODO: Remove with debug, or add debug macros
 #include <iostream>
 #include <cassert>
@@ -49,8 +47,8 @@ std::vector<std::tuple<std::string, std::string, double> >
 
     // Solve the problem by pairing largest positive with largest negative, push remainders
     while(!pQueue.empty()) {
-        const double remainder = pQueue.top().first + nQueue.top().first;
         const double payment = std::min(pQueue.top().first, -1 * nQueue.top().first);
+        const double remainder = pQueue.top().first + nQueue.top().first;
         const size_t pindex = pQueue.top().second;
         const size_t nindex = nQueue.top().second;
 
@@ -80,61 +78,48 @@ std::vector<std::tuple<std::string, std::string, double> >
 }
 
 // TODO: Undo this: Assumes debts can be settled and that it is non-empty
-// TODO: Consider long term resizing and switching back and forth between large solutions and small ones
+// TODO: Double check your indexing with the breakout sentinel descend
 std::vector<std::tuple<std::string, std::string, double> >
     AlgoCore::SolveOptimal(std::unordered_map<std::string, double> debts)
 {
+    // Sets of positive and negative costs in the debts object.
+    std::vector<double> pFirstSet;
+    std::vector<double> nFirstSet;
 
-    // TODO: Is it possible to remove the indexing system and just use string moves?
-    // We don't have to worry about size anymore.
-
-    // TODO: Is it at least possible to skip using itransactions at all?
-
-    // Sets of positive and negative costs in the debts object
-    std::vector<double> firstPSet;
-    std::vector<double> firstNSet;
-
-    // Indexing system, map index of vector to person's name
-    std::vector<std::string> plookup;
-    std::vector<std::string> nlookup;
-
-    // Reverse lookup is only needed for converting greedy soln to an indexed one.
-    std::unordered_map<std::string, std::size_t> prevlookup;
-    std::unordered_map<std::string, std::size_t> nrevlookup;
-
+    // To save on copying strings around we set up an indexing system.
+    std::vector<std::string> pNameLookup;
+    std::vector<std::string> nNameLookup;
+    std::unordered_map<std::string, std::size_t> pIdxLookup;
+    std::unordered_map<std::string, std::size_t> nIdxLookup;
     for (const auto& [name, cost] : debts) {
         if (cost < nMargin) {
-            nrevlookup[name] = nlookup.size();
-            nlookup.push_back(name);
-            firstNSet.push_back(cost);
+            nIdxLookup[name] = nNameLookup.size();
+            nNameLookup.push_back(name);
+            nFirstSet.push_back(cost);
         } else if (cost > pMargin) {
-            prevlookup[name] = plookup.size();
-            plookup.push_back(name);
-            firstPSet.push_back(cost);
+            pIdxLookup[name] = pNameLookup.size();
+            pNameLookup.push_back(name);
+            pFirstSet.push_back(cost);
         }
     }
 
-    struct ITransaction {
-        std::size_t from;
-        std::size_t to;
-        double cost;
-    };
-
     // Prime the final solution using the greedy solution.  The optimal tree solution
     // will attempt to improve upon this, but won't be able to in most cases.
-    std::vector<std::tuple<std::string, std::string, double> > res = SolveGreedy(debts);
-    int finalSolnNumTrans = static_cast<int>(res.size());
-    const int originalSolnNumTrans = finalSolnNumTrans;
+    std::vector<std::tuple<std::string, std::string, double> > solnFinalStr = SolveGreedy(debts);
+    int numTransFinal = static_cast<int>(solnFinalStr.size());
+    const int numTransOriginal = numTransFinal;
 
-    std::vector<ITransaction> finalSoln(finalSolnNumTrans - 1);
-    std::vector<ITransaction> currSoln(finalSolnNumTrans - 1);  // TODO: are you sure -1?
-
-    for (int i = 0; i < finalSolnNumTrans; ++i) {
-        finalSoln[i].from = nrevlookup[std::get<0>(res[i])];
-        finalSoln[i].to = nrevlookup[std::get<1>(res[i])];
-        finalSoln[i].cost = std::get<2>(res[i]);
+    std::vector<std::tuple<std::size_t, std::size_t, double> > solnFinalIdx(numTransOriginal - 1);
+    std::vector<std::tuple<std::size_t, std::size_t, double> > solnCurrIdx(numTransOriginal - 1);  // TODO: are you sure -1?
+    for (int i = 0; i < numTransOriginal - 1; ++i) {
+        std::get<0>(solnFinalIdx[i]) = nIdxLookup[std::get<0>(solnFinalStr[i])];
+        std::get<1>(solnFinalIdx[i]) = nIdxLookup[std::get<1>(solnFinalStr[i])];
+        std::get<2>(solnFinalIdx[i]) = std::get<2>(solnFinalStr[i]);
     }
 
+    // The algorithm is intuitively recursive but can be solved iteratively with for loops and by preserving
+    // the below information in each stack frame.  Doing it this way allows us to preallocate this information
+    // since we know the depth of the stack can never exceed the size of the greedy solution
     struct StackFrame {
         std::size_t pix;
         std::size_t nix;
@@ -143,37 +128,26 @@ std::vector<std::tuple<std::string, std::string, double> >
         std::size_t pcount;
         std::size_t ncount;
     };
-
-    // TODO: I think its actually solnNumT - 1
-    // TODO: fill a first pset and nset, and move them (?)
-    std::vector<StackFrame> st(finalSolnNumTrans, { 0,
-                                               0,
-                                               firstPSet,
-                                               firstNSet,
-                                               firstPSet.size(),
-                                               firstNSet.size()});
-
+    const size_t pSetSize = pFirstSet.size();
+    const size_t nSetSize = nFirstSet.size();
+    std::vector<StackFrame> st(numTransOriginal, { 0, 0, pFirstSet, nFirstSet, pSetSize, nSetSize});
 
     // Note that tree depth = number of transactions
     for(int depth = 0; depth >= 0;) {
-        const auto& currPset = st[depth].pset;
-        const auto& currNset = st[depth].nset;
-        std::size_t pcount = st[depth].pcount;
-        std::size_t ncount = st[depth].ncount;
 
         //////////// Debug output
         std::cout << std::endl;
         for (int i = 0; i < depth; ++i) { std::cout << '\t'; }
         std::cout << "pix=" << st[depth].pix << " pset{";
         bool needsComma = false;
-        for (const auto& x : currPset) {
+        for (const auto& x : st[depth].pset) {
             if (needsComma) { std::cout << ","; }
             else { needsComma = true; }
             std::cout << x;
         }
         std::cout << "}, nix=" << st[depth].nix  << " nset{";
         needsComma = false;
-        for (const auto& x : currNset) {
+        for (const auto& x : st[depth].nset) {
             if (needsComma) { std::cout << ","; }
             else { needsComma = true; }
             std::cout << x;
@@ -181,7 +155,7 @@ std::vector<std::tuple<std::string, std::string, double> >
         std::cout << "}, numT=" << depth << std::flush;
         ///////////////////////////
 
-        if (static_cast<int>(std::max(pcount, ncount)) + depth >= finalSolnNumTrans) {
+        if (static_cast<int>(std::max(st[depth].pcount, st[depth].ncount)) + depth >= numTransFinal) {
             // Base Case: Can't possibly improve upon final solution
             std::cout << " ascend(cant improve)";
 
@@ -189,17 +163,17 @@ std::vector<std::tuple<std::string, std::string, double> >
             continue;
         }
 
-        if (pcount == 0 && ncount == 0) {
+        if (st[depth].pcount == 0 && st[depth].ncount == 0) {
             // Base case: Solution found
-            finalSolnNumTrans = depth;
-            finalSoln = currSoln;
+            numTransFinal = depth;
+            solnFinalIdx = solnCurrIdx;
 
             /////// Debug output
             std::cout << " SOLN=";
             int i = 0;
-            for (const auto& x : finalSoln) {
-                std::cout << (i >= finalSolnNumTrans ? "ignore" : "");
-                std::cout << '{' << x.from << ',' << x.to << ',' << x.cost << "},";
+            for (const auto& x : solnFinalIdx) {
+                std::cout << (i >= numTransFinal ? "ignore" : "");
+                std::cout << '{' << std::get<0>(x) << ',' << std::get<1>(x) << ',' << std::get<2>(x) << "},";
                 i++;
             }
             std::cout << "ascend";
@@ -214,53 +188,46 @@ std::vector<std::tuple<std::string, std::string, double> >
         // happens after we are finished with the current n index.
         bool descend = false;
 
-        for (auto& p = st[depth].pix; p < currPset.size(); ++p) {
-            if (currPset[p] <= pMargin) {
+        for (auto& p = st[depth].pix; p < pSetSize; ++p) {
+            if (st[depth].pset[p] <= pMargin) {
                 continue;
             }
 
-            for (auto& n = st[depth].nix; n < currNset.size() && !descend; ++n) {
-                if (currNset[n] >= nMargin) {
+            for (auto& n = st[depth].nix; n < nSetSize && !descend; ++n) {
+                if (st[depth].nset[n] >= nMargin) {
                     continue;
                 }
 
-                const double remainder = currPset[p] + currNset[n];
-                const double payment = std::min(currPset[p], -1 * currNset[n]);
+                const double payment = std::min(st[depth].pset[p], -1 * st[depth].nset[n]);
+                const double remainder = st[depth].pset[p] + st[depth].nset[n];
 
-                // Add Solution
-                currSoln[depth].from = n;
-                currSoln[depth].to = p;
-                currSoln[depth].cost = payment;
+                // Add this transaction to the current solution
+                std::get<0>(solnCurrIdx[depth]) = n;
+                std::get<1>(solnCurrIdx[depth]) = p;
+                std::get<2>(solnCurrIdx[depth]) = payment;
 
-                // Prime next recurse
-                const int nextNumT = depth + 1;
-                auto& nextNset = st[nextNumT].nset;
-                auto& nextPset = st[nextNumT].pset;
-                nextNset = currNset;
-                nextPset = currPset;
-                auto& nextNcount = st[nextNumT].ncount;
-                auto& nextPcount = st[nextNumT].pcount;
-                nextNcount = ncount;
-                nextPcount = pcount;
-
+                // Prime next recurse/descent
+                const int depthNext = depth + 1;
+                st[depthNext].pset = st[depth].pset;
+                st[depthNext].nset = st[depth].nset;
+                st[depthNext].pcount = st[depth].pcount;
+                st[depthNext].ncount = st[depth].ncount;
                 if (remainder < 0) {
-                    nextNset[n] = remainder;
-                    nextPset[p] = 0;
-                    nextPcount--;
+                    st[depthNext].nset[n] = remainder;
+                    st[depthNext].pset[p] = 0;
+                    st[depthNext].pcount--;
                     if (remainder >= nMargin) {
-                        nextNcount--;
+                        st[depthNext].ncount--;
                     }
                 } else {
-                    nextNset[n] = 0;
-                    nextPset[p] = remainder;
-                    nextNcount--;
+                    st[depthNext].nset[n] = 0;
+                    st[depthNext].pset[p] = remainder;
+                    st[depthNext].ncount--;
                     if (remainder <= pMargin) {
-                        nextPcount--;
+                        st[depthNext].pcount--;
                     }
                 }
 
-                // TODO: I'm not convinced my indexing makes sense here, it might only work because these
-                // examples are nicely ordered.
                 descend = true;
             }
 
@@ -280,16 +247,14 @@ std::vector<std::tuple<std::string, std::string, double> >
         }
     }
 
-    // If this didn't change, then the final solution is the result from greedy and we can just return it.
-    // Otherwise we need to conver the indexed solution to a string one using the lookups.
-    if (originalSolnNumTrans != finalSolnNumTrans) {
-        res.clear();
-        // TODO: Shouldn't need double check
-        for (int i = 0; i < finalSolnNumTrans && i < static_cast<int>(finalSoln.size()); ++i) {
-            const auto& iTrans = finalSoln[i];
-            res.emplace_back(nlookup[iTrans.from], plookup[iTrans.to], iTrans.cost);
+    // If this didn't change, then the final solution was unchanged from greedy and we can just return it.
+    // Otherwise we need to convert the indexed solution to a string one using the lookups.
+    if (numTransOriginal != numTransFinal) {
+        solnFinalStr.clear();
+        for (const auto& iTrans : solnFinalIdx) {
+            solnFinalStr.emplace_back(nNameLookup[std::get<0>(iTrans)], pNameLookup[std::get<1>(iTrans)], std::get<2>(iTrans));
         }
     }
 
-    return res;
+    return solnFinalStr;
 }

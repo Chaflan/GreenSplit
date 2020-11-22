@@ -23,15 +23,14 @@ QVariant PeopleTableModel::data(const QModelIndex& index, int role) const
     {
         switch (index.column())
         {
-            case Column::Identifier: return m_data->GetPersonIdentifier(index.row());
-            case Column::FullName: return m_data->GetPersonName(index.row());
+            case Column::Identifier: return m_data->getPersonIdentifier(index.row());
+            case Column::FullName: return m_data->getPersonName(index.row());
         }
     }
 
     return QVariant();
 }
 
-// TODO: Make this look like transactionstablemodel setdata
 bool PeopleTableModel::setData(const QModelIndex& index, const QVariant& value, int role)
 {
     if (!isIndexValid(index)) {
@@ -42,50 +41,28 @@ bool PeopleTableModel::setData(const QModelIndex& index, const QVariant& value, 
         return QAbstractTableModel::setData(index, value, role);
     }
 
+    bool successfulEdit = false;
     switch(index.column()) {
-        case Column::Identifier: {
-
-            if (!m_data->EditPersonIdentifier(index.row(), value.toString())) {
-
-                // TODO: Signals should be lower probably, do a signal analysis, could just connect these
-                QString newIdentifier = value.toString();
-                if (newIdentifier.isEmpty()) {
-                    emit signalError("Attempting to change identifier to be empty.  Identifiers cannot be empty.");
-                    return false;
-                }
-                if (m_data->PersonExists(newIdentifier)) {
-                    emit signalError("Attempting to change identifier to one that already exists.  Identifiers must be unique.");
-                    return false;
-                }
-
-                return false;
-            }
-            break;
-        }
-        case Column::FullName: {
-            m_data->EditPersonName(index.row(), value.toString());
-            break;
-        }
+        case Column::Identifier: successfulEdit = m_data->editPersonIdentifier(index.row(), value.toString()); break;
+        case Column::FullName: successfulEdit = m_data->editPersonName(index.row(), value.toString()); break;
     }
 
-    emit dataChanged(index, index);
-    return true;
+    if (successfulEdit) {
+        emit dataChanged(index, index);
+    }
+
+    return successfulEdit;
 }
 
 bool PeopleTableModel::removeRows(int row, int count, const QModelIndex& parent)
 {
-    if (parent.isValid() || row < 0 || count < 1) {
-        return false;
-    }
-
-    if (m_data->PersonInTransactions(m_data->GetPersonIdentifier(row))) {
-        // TODO: Signal should come from datacore and propagate up, try that
-        emit signalError("Person is involved in one or more transactions, cannot remove them");
+    if (parent.isValid()) {
+        qDebug() << "Error - PeopleTableModel::removeRows - Valid parent in non-tree";
         return false;
     }
 
     beginRemoveRows(parent, row, row + count - 1);
-    bool result = m_data->RemovePeople(row, count);
+    bool result = m_data->removePeople(row, count);
     endRemoveRows();
     return result;
 }
@@ -135,13 +112,13 @@ bool PeopleTableModel::addPerson(QString initials, QString name)
         return false;
     }
 
-    if (m_data->PersonExists(initials)) {
+    if (m_data->personExists(initials)) {
         emit signalError("Identifier must be unique.");
         return false;
     }
 
     beginInsertRows(QModelIndex(), rowCount(), rowCount());
-    bool result = m_data->AddPerson(std::move(initials), std::move(name));
+    bool result = m_data->addPerson(std::move(initials), std::move(name));
     endInsertRows();
     return result;
 }

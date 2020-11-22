@@ -1,7 +1,7 @@
 #ifndef PEOPLEMODEL_H
 #define PEOPLEMODEL_H
 
-#include "BillSplit-Core_global.h"
+#include "billsplit-core_global.h"
 #include "datacoreold.h"
 
 #include <QAbstractListModel>

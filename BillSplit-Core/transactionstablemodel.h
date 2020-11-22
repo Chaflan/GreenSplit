@@ -2,7 +2,7 @@
 #define TRANSACTIONSTABLEMODEL_H
 
 #include <QAbstractTableModel>
-#include "BillSplit-Core_global.h"
+#include "billsplit-core_global.h"
 #include "datacoreobject.h"
 #include "transactionmodel.h"
 

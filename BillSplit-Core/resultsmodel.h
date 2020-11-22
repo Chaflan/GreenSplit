@@ -1,7 +1,7 @@
 #ifndef RESULTSMODEL_H
 #define RESULTSMODEL_H
 
-#include "BillSplit-Core_global.h"
+#include "billsplit-core_global.h"
 #include "datacoreobject.h"
 
 #include <QAbstractListModel>

@@ -2,7 +2,7 @@
 #define TRANSACTIONMODEL_H
 
 #include <QObject>
-#include "BillSplit-Core_global.h"
+#include "billsplit-core_global.h"
 #include "datacoreobject.h"
 
 // TODO: Consistent order cost payer covering description

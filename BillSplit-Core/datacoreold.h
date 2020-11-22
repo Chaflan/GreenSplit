@@ -1,7 +1,7 @@
 #ifndef DATACORE_H
 #define DATACORE_H
 
-#include "BillSplit-Core_global.h"
+#include "billsplit-core_global.h"
 #include "person.h"
 #include "transactionold.h"
 

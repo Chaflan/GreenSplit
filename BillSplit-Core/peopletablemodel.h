@@ -2,12 +2,9 @@
 #define PEOPLETABLEMODEL_H
 
 #include <QAbstractTableModel>
-#include "BillSplit-Core_global.h"
-#include "datacoreobject.h"
+#include "billsplit-core_global.h"
 
-#include <QLatin1String>
-
-//class DataCoreObject;
+class DataCoreObject;
 
 class BILLSPLITCORE_EXPORT PeopleTableModel : public QAbstractTableModel
 {

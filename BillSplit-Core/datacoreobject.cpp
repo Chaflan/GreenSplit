@@ -15,12 +15,12 @@ DataCoreObject::DataCoreObject(QObject *parent) :
     jsonRead();
 }
 
-int DataCoreObject::NumTransactions() const
+int DataCoreObject::numTransactions() const
 {
     return static_cast<int>(m_data.NumTransactions());
 }
 
-bool DataCoreObject::AddTransaction(double cost, const QString& payer, const QStringList& covering, QString description)
+bool DataCoreObject::addTransaction(double cost, const QString& payer, const QStringList& covering, QString description)
 {
     try {
         m_data.AddTransaction(payer.toStdString(), cost, stringListToStdSet(covering));
@@ -34,7 +34,7 @@ bool DataCoreObject::AddTransaction(double cost, const QString& payer, const QSt
     return true;
 }
 
-bool DataCoreObject::DeleteTransactions(int index, int count)
+bool DataCoreObject::deleteTransactions(int index, int count)
 {
     try {
         m_data.DeleteTransactions(index, count);
@@ -47,7 +47,7 @@ bool DataCoreObject::DeleteTransactions(int index, int count)
     return false;
 }
 
-bool DataCoreObject::EditTransactionPayer(int index, const QString& newPayer)
+bool DataCoreObject::editTransactionPayer(int index, const QString& newPayer)
 {
     try {
         m_data.EditTransactionPayer(index, newPayer.toStdString());
@@ -60,7 +60,7 @@ bool DataCoreObject::EditTransactionPayer(int index, const QString& newPayer)
     return false;
 }
 
-bool DataCoreObject::EditTransactionCost(int index, double newCost)
+bool DataCoreObject::editTransactionCost(int index, double newCost)
 {
     try {
         m_data.EditTransactionCost(index, newCost);
@@ -73,7 +73,7 @@ bool DataCoreObject::EditTransactionCost(int index, double newCost)
     return false;
 }
 
-bool DataCoreObject::EditTransactionCovering(int index, const QStringList& newCovering)
+bool DataCoreObject::editTransactionCovering(int index, const QStringList& newCovering)
 {
     if (newCovering.isEmpty()) {
         emit signalError("A transaction must cover one or more person");
@@ -82,7 +82,7 @@ bool DataCoreObject::EditTransactionCovering(int index, const QStringList& newCo
 
     try {
         m_data.EditTransactionCovering(index, stringListToStdSet(newCovering));
-        emit resultsChanged();  // TODO: Not always
+        emit resultsChanged();  // TODO: Not always could make called func return true if success
         return true;
     } catch (const std::exception& ex) {
         qDebug() << "Error - DataCoreObject::GetTransactionPayer - " << ex.what();
@@ -91,7 +91,7 @@ bool DataCoreObject::EditTransactionCovering(int index, const QStringList& newCo
     return false;
 }
 
-QString DataCoreObject::GetTransactionPayer(int index) const
+QString DataCoreObject::getTransactionPayer(int index) const
 {
     try {
         return QString::fromStdString(m_data.GetTransactionPayer(index));
@@ -102,7 +102,7 @@ QString DataCoreObject::GetTransactionPayer(int index) const
     return QString();
 }
 
-double DataCoreObject::GetTransactionCost(int index) const
+double DataCoreObject::getTransactionCost(int index) const
 {
     try {
         return m_data.GetTransactionCost(index);
@@ -113,7 +113,7 @@ double DataCoreObject::GetTransactionCost(int index) const
     return 0;
 }
 
-QStringList DataCoreObject::GetTransactionCovering(int index) const
+QStringList DataCoreObject::getTransactionCovering(int index) const
 {
     QStringList result;
     try {
@@ -129,7 +129,7 @@ QStringList DataCoreObject::GetTransactionCovering(int index) const
     return result;
 }
 
-void DataCoreObject::Clear()
+void DataCoreObject::clear()
 {
     m_data.Clear();
     m_identifierList.clear();
@@ -147,21 +147,21 @@ int DataCoreObject::numPeople() const
 // If this is true, PersonInTransactions will also be true, but not
 // vice versa.  You can have a person where PersonExists==true but
 // PersonInTransactions==false.
-bool DataCoreObject::PersonExists(const QString& identifier) const
+bool DataCoreObject::personExists(const QString& identifier) const
 {
     return m_identifierList.contains(identifier);
 }
 
 // Returns true if the datacore has knowledge of the person, meaning
 // they are involved in one or more transactions
-bool DataCoreObject::PersonInTransactions(const QString& identifier) const
+bool DataCoreObject::personInTransactions(const QString& identifier) const
 {
     return m_data.PersonExists(identifier.toStdString());
 }
 
-bool DataCoreObject::AddPerson(QString identifier, QString name)
+bool DataCoreObject::addPerson(QString identifier, QString name)
 {
-    if (PersonExists(identifier)) {
+    if (personExists(identifier)) {
         emit signalError("Identifier \"" + identifier + "\" already exists. Identifiers must be unique.");
         return false;
     }
@@ -172,7 +172,7 @@ bool DataCoreObject::AddPerson(QString identifier, QString name)
     return true;
 }
 
-bool DataCoreObject::RemovePeople(int index, int count)
+bool DataCoreObject::removePeople(int index, int count)
 {
     const int lastIndex = index + count - 1;
     if (index < 0 || count < 1 || lastIndex >= numPeople()) {
@@ -184,7 +184,7 @@ bool DataCoreObject::RemovePeople(int index, int count)
     QVector<int> indicesToDelete;
     for (int i = lastIndex; i >= index; --i) {
         const QString& currentPerson = m_identifierList[i];
-        if (PersonInTransactions(currentPerson)) {
+        if (personInTransactions(currentPerson)) {
             emit signalError("Identifier \"" + currentPerson + "\" is involved in one or more transactions. They cannot be deleted.");
         } else {
             indicesToDelete.append(i);
@@ -210,7 +210,7 @@ bool DataCoreObject::RemovePeople(int index, int count)
     return true;
 }
 
-const QString& DataCoreObject::GetPersonIdentifier(int index) const
+const QString& DataCoreObject::getPersonIdentifier(int index) const
 {
     if (index < 0 || index >= numPeople()) {
         qDebug() << "Error - DataCoreObject::GetPersonIdentifier - Invalid index:" << index;
@@ -221,7 +221,7 @@ const QString& DataCoreObject::GetPersonIdentifier(int index) const
     return m_identifierList[index];
 }
 
-const QString& DataCoreObject::GetPersonName(int index) const
+const QString& DataCoreObject::getPersonName(int index) const
 {
     if (index < 0 || index >= numPeople()) {
         qDebug() << "Error - DataCoreObject::GetPersonName - Invalid index:" << index;
@@ -232,9 +232,9 @@ const QString& DataCoreObject::GetPersonName(int index) const
     return m_nameList[index];
 }
 
-const QString& DataCoreObject::GetTransactionDescription(int index) const
+const QString& DataCoreObject::getTransactionDescription(int index) const
 {
-    if (index < 0 || index >= NumTransactions()) {
+    if (index < 0 || index >= numTransactions()) {
         qDebug() << "Error - DataCoreObject::GetTransactionDescription - Invalid index:" << index;
         const static QString errorString = "";
         return errorString;
@@ -243,9 +243,9 @@ const QString& DataCoreObject::GetTransactionDescription(int index) const
     return m_descriptionsList[index];
 }
 
-QString DataCoreObject::GetResultDebtor(int index) const
+QString DataCoreObject::getResultDebtor(int index) const
 {
-    if (index < 0 || index >= NumResults()) {
+    if (index < 0 || index >= numResults()) {
         qDebug() << "Error - DataCoreObject::GetResultDebtor - Invalid index:" << index;
         const static QString errorString = "";
         return errorString;
@@ -254,9 +254,9 @@ QString DataCoreObject::GetResultDebtor(int index) const
     return QString::fromStdString(std::get<0>(m_data.GetResults()[index]));
 }
 
-QString DataCoreObject::GetResultCreditor(int index) const
+QString DataCoreObject::getResultCreditor(int index) const
 {
-    if (index < 0 || index >= NumResults()) {
+    if (index < 0 || index >= numResults()) {
         qDebug() << "Error - DataCoreObject::GetResultCreditor - Invalid index:" << index;
         const static QString errorString = "";
         return errorString;
@@ -265,9 +265,9 @@ QString DataCoreObject::GetResultCreditor(int index) const
     return QString::fromStdString(std::get<1>(m_data.GetResults()[index]));
 }
 
-double DataCoreObject::GetResultCost(int index) const
+double DataCoreObject::getResultCost(int index) const
 {
-    if (index < 0 || index >= NumResults()) {
+    if (index < 0 || index >= numResults()) {
         qDebug() << "Error - DataCoreObject::GetResultCost - Invalid index:" << index;
         return 0;
     }
@@ -275,12 +275,12 @@ double DataCoreObject::GetResultCost(int index) const
     return std::get<2>(m_data.GetResults()[index]);
 }
 
-int DataCoreObject::NumResults() const
+int DataCoreObject::numResults() const
 {
     return static_cast<int>(m_data.GetResults().size());
 }
 
-bool DataCoreObject::EditTransactionDescription(int index, QString newDescription)
+bool DataCoreObject::editTransactionDescription(int index, QString newDescription)
 {
     if (index < 0 || index >= numPeople()) {
         qDebug() << "Error - DataCoreObject::EditTransactionDescription - Invalid index:" << index;
@@ -297,7 +297,7 @@ bool DataCoreObject::EditTransactionDescription(int index, QString newDescriptio
     return true;
 }
 
-bool DataCoreObject::EditPersonIdentifier(int index, const QString& newIdentifier)
+bool DataCoreObject::editPersonIdentifier(int index, const QString& newIdentifier)
 {
     if (index < 0 || index >= numPeople()) {
         qDebug() << "Error - DataCoreObject::EditPersonIdentifier - Invalid index:" << index;
@@ -315,7 +315,7 @@ bool DataCoreObject::EditPersonIdentifier(int index, const QString& newIdentifie
     }
 
     // TODO: Remove this after you implement the m_data.EditPerson method.  It should throw this error.
-    if (PersonExists(newIdentifier)) {
+    if (personExists(newIdentifier)) {
         emit signalError("Attempting to change identifier to one that already exists.  Identifiers must be unique.");
         return false;
     }
@@ -326,7 +326,7 @@ bool DataCoreObject::EditPersonIdentifier(int index, const QString& newIdentifie
     return true;
 }
 
-bool DataCoreObject::EditPersonName(int index, QString newName)
+bool DataCoreObject::editPersonName(int index, QString newName)
 {
     if (index < 0 || index >= numPeople()) {
         qDebug() << "Error - DataCoreObject::EditPersonName - Invalid index:" << index;
@@ -342,7 +342,7 @@ bool DataCoreObject::EditPersonName(int index, QString newName)
     return true;
 }
 
-const QStringList& DataCoreObject::GetIdentifierList() const
+const QStringList& DataCoreObject::getIdentifierList() const
 {
     return m_identifierList;
 }
@@ -403,12 +403,12 @@ bool DataCoreObject::jsonWrite(const QUrl& filePath) const
 
 void DataCoreObject::jsonRead(const QJsonObject& jsonObj)
 {
-    Clear();
+    clear();
     QJsonArray peopleArray = jsonObj["people"].toArray();
     for (const auto& element : peopleArray)
     {
         QJsonObject personObj = element.toObject();
-        AddPerson(personObj["identifier"].toString(), personObj["name"].toString());
+        addPerson(personObj["identifier"].toString(), personObj["name"].toString());
     }
 
     QJsonArray transactionArray = jsonObj["transaction"].toArray();
@@ -422,7 +422,7 @@ void DataCoreObject::jsonRead(const QJsonObject& jsonObj)
             coveringStringList.append(name.toString());
         }
 
-        AddTransaction(
+        addTransaction(
             transactionObj["cost"].toDouble(),
             transactionObj["payer"].toString(),
             std::move(coveringStringList),
@@ -446,15 +446,15 @@ void DataCoreObject::jsonWrite(QJsonObject& jsonObj) const
     for(int i = 0; i < static_cast<int>(m_data.NumTransactions()); ++i)
     {
         QJsonObject curr;
-        curr["cost"] = GetTransactionCost(i);
-        curr["payer"] = GetTransactionPayer(i);
+        curr["cost"] = getTransactionCost(i);
+        curr["payer"] = getTransactionPayer(i);
 
         QJsonArray coveringArray;
-        for (const auto& name : GetTransactionCovering(i)) {
+        for (const auto& name : getTransactionCovering(i)) {
             coveringArray.append(name);
         }
         curr["covering"] = coveringArray;
-        curr["description"] = GetTransactionDescription(i);
+        curr["description"] = getTransactionDescription(i);
 
         transactionArray.append(curr);
     }

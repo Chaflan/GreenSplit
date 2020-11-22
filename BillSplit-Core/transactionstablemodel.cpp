@@ -11,7 +11,7 @@ TransactionsTableModel::TransactionsTableModel(QObject *parent) :
 
 int TransactionsTableModel::rowCount(const QModelIndex& parent) const
 {
-    return parent.isValid() ? 0 : m_data->NumTransactions();
+    return parent.isValid() ? 0 : m_data->numTransactions();
 }
 
 int TransactionsTableModel::columnCount(const QModelIndex& parent) const
@@ -23,12 +23,12 @@ QVariant TransactionsTableModel::data(const QModelIndex& index, int role) const
 {
     if (isIndexValid(index) && role == Qt::DisplayRole) {
         switch (index.column()) {
-            case Column::Cost: return m_data->GetTransactionCost(index.row());
-            case Column::Payer: return m_data->GetTransactionPayer(index.row());
+            case Column::Cost: return m_data->getTransactionCost(index.row());
+            case Column::Payer: return m_data->getTransactionPayer(index.row());
             case Column::Covering: {
                 QString coveringListStr;
                 bool needsComma = false;
-                for (const auto& str : m_data->GetTransactionCovering(index.row())) {
+                for (const auto& str : m_data->getTransactionCovering(index.row())) {
                     if (needsComma) {
                         coveringListStr += ',';
                     } else {
@@ -38,7 +38,7 @@ QVariant TransactionsTableModel::data(const QModelIndex& index, int role) const
                 }
                 return coveringListStr;
             }
-            case Column::Description: return m_data->GetTransactionDescription(index.row());
+            case Column::Description: return m_data->getTransactionDescription(index.row());
         }
     }
 
@@ -58,10 +58,10 @@ bool TransactionsTableModel::setData(const QModelIndex& index, const QVariant& v
 
     bool successfulEdit = false;
     switch(index.column()) {
-        case Column::Cost: successfulEdit = m_data->EditTransactionCost(index.row(), value.toDouble()); break;
-        case Column::Payer: successfulEdit = m_data->EditTransactionPayer(index.row(), value.toString()); break;
-        case Column::Covering: successfulEdit = m_data->EditTransactionCovering(index.row(), value.toStringList()); break;
-        case Column::Description: successfulEdit = m_data->EditTransactionDescription(index.row(), value.toString()); break;
+        case Column::Cost: successfulEdit = m_data->editTransactionCost(index.row(), value.toDouble()); break;
+        case Column::Payer: successfulEdit = m_data->editTransactionPayer(index.row(), value.toString()); break;
+        case Column::Covering: successfulEdit = m_data->editTransactionCovering(index.row(), value.toStringList()); break;
+        case Column::Description: successfulEdit = m_data->editTransactionDescription(index.row(), value.toString()); break;
     }
 
     if (successfulEdit) {
@@ -79,7 +79,7 @@ bool TransactionsTableModel::removeRows(int row, int count, const QModelIndex& p
     }
 
     beginRemoveRows(parent, row, row + count - 1);
-    bool result = m_data->DeleteTransactions(row, count);
+    bool result = m_data->deleteTransactions(row, count);
     endRemoveRows();
     return result;
 }
@@ -131,10 +131,10 @@ void TransactionsTableModel::loadToModel(int row, TransactionModel* model) const
 {
     assert(model);
     model->load(
-        m_data->GetTransactionCost(row),
-        m_data->GetTransactionPayer(row),
-        m_data->GetTransactionCovering(row),
-        m_data->GetTransactionDescription(row));
+        m_data->getTransactionCost(row),
+        m_data->getTransactionPayer(row),
+        m_data->getTransactionCovering(row),
+        m_data->getTransactionDescription(row));
 }
 
 bool TransactionsTableModel::editFromModel(int row, TransactionModel* model)
@@ -153,7 +153,7 @@ bool TransactionsTableModel::addFromModel(TransactionModel* model)
     assert(model);
     beginInsertRows(QModelIndex(), rowCount(), rowCount());
 
-    bool result = m_data->AddTransaction(
+    bool result = m_data->addTransaction(
         model->getCost(),
         model->getPayerName(),
         model->getCoveringStringList(),

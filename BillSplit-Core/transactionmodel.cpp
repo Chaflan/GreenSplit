@@ -44,7 +44,7 @@ QString TransactionModel::getCostStr() const
 QStringList TransactionModel::getAllPeople() const
 {
     if (m_data) {
-        return m_data->GetIdentifierList();
+        return m_data->getIdentifierList();
     }
 
     return QStringList();
@@ -66,7 +66,7 @@ void TransactionModel::setDataCore(DataCoreObject* data)
         emit allPeopleChanged();
 
         for (int i = 0; i < m_data->numPeople(); ++i) {
-            m_coveringList.append(new PersonCheck(m_data->GetPersonIdentifier(i), true, this));  // TODO: Is this right?  Qt parent system is weird
+            m_coveringList.append(new PersonCheck(m_data->getPersonIdentifier(i), true, this));  // TODO: Is this right?  Qt parent system is weird
         }
         emit coveringListChanged();
 
@@ -78,7 +78,7 @@ void TransactionModel::setPayerName(QString payerName)
 {
     if (m_data && payerName != m_payerName) {
         for (int i = 0; i < m_data->numPeople(); ++i) {
-            if (payerName == m_data->GetPersonIdentifier(i)) {
+            if (payerName == m_data->getPersonIdentifier(i)) {
                 m_payerIndex = i;
                 m_payerName = std::move(payerName);
                 emit payerIndexChanged();
@@ -93,7 +93,7 @@ void TransactionModel::setPayerIndex(int payerIndex)
 {
     if (m_data && payerIndex != m_payerIndex) {
         m_payerIndex = payerIndex;
-        m_payerName = payerIndex == -1 ? "" : m_data->GetPersonIdentifier(m_payerIndex);
+        m_payerName = payerIndex == -1 ? "" : m_data->getPersonIdentifier(m_payerIndex);
         emit payerIndexChanged();
         emit payerNameChanged();
     }
@@ -184,18 +184,18 @@ void TransactionModel::identifierListChanged()
     bool coveringListWasChanged = false;
     for (int i = 0; i < m_data->numPeople(); ++i) {
         if (i >= m_coveringList.size()) {
-            m_coveringList.insert(i, new PersonCheck(m_data->GetPersonIdentifier(i), true, this));
+            m_coveringList.insert(i, new PersonCheck(m_data->getPersonIdentifier(i), true, this));
             coveringListWasChanged = true;
             continue;
         }
 
-        if (m_data->GetPersonIdentifier(i) == m_coveringList[i]->getName()) {
+        if (m_data->getPersonIdentifier(i) == m_coveringList[i]->getName()) {
             continue;
         }
 
         bool found = false;
         for (int j = i + 1; j < m_coveringList.size(); ++j) {
-            if (m_data->GetPersonIdentifier(i) == m_coveringList[j]->getName()) {
+            if (m_data->getPersonIdentifier(i) == m_coveringList[j]->getName()) {
                 m_coveringList.erase(m_coveringList.begin() + i, m_coveringList.begin() + j);  // TODO: does this delete?
                 if (i <= m_payerIndex && m_payerIndex < j) {
                     setDefaultPayer();
@@ -207,7 +207,7 @@ void TransactionModel::identifierListChanged()
         }
 
         if (!found) {
-            m_coveringList.insert(i, new PersonCheck(m_data->GetPersonIdentifier(i), true, this));
+            m_coveringList.insert(i, new PersonCheck(m_data->getPersonIdentifier(i), true, this));
             coveringListWasChanged = true;
         }
     }

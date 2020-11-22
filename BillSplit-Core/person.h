@@ -1,7 +1,7 @@
 #ifndef PERSON_H
 #define PERSON_H
 
-#include "BillSplit-Core_global.h"
+#include "billsplit-core_global.h"
 #include <QString>
 
 class BILLSPLITCORE_EXPORT Person

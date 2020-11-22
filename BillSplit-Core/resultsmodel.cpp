@@ -11,18 +11,18 @@ ResultsModel::ResultsModel(QObject* parent) :
 
 int ResultsModel::rowCount(const QModelIndex& parent) const
 {
-    return parent.isValid() ? 0 : m_data->NumResults();
+    return parent.isValid() ? 0 : m_data->numResults();
 }
 
 QVariant ResultsModel::data(const QModelIndex& index, int role) const
 {
     if (role == Qt::DisplayRole && isIndexValid(index))
     {
-        // cache these
+        // TODO: cache these
         return QString("%1 owes %2 $%3")
-                .arg(m_data->GetResultDebtor(index.row()))
-                .arg(m_data->GetResultCreditor(index.row()))
-                .arg(QString::number(m_data->GetResultCost(index.row()), 'f', 2));
+                .arg(m_data->getResultDebtor(index.row()))
+                .arg(m_data->getResultCreditor(index.row()))
+                .arg(QString::number(m_data->getResultCost(index.row()), 'f', 2));
     }
 
     return QVariant();

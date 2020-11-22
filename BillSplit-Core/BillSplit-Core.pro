@@ -33,8 +33,8 @@ SOURCES += \
     transactionstablemodel.cpp
 
 HEADERS += \
-    BillSplit-Core_global.h \
     algocore.h \
+    billsplit-core_global.h \
     datacore.h \
     datacoreobject.h \
     datacoreold.h \

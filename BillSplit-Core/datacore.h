@@ -2,34 +2,15 @@
 #define DATACORE_H
 
 #include "algocore.h"
-#include "BillSplit-Core_global.h"
 #include <string>
 #include <set>
 #include <vector>
-#include <map>
 #include <unordered_map>
 
 // TODO: Analyze use of set vs uset for names
-// TODO: Entry a private member of datacore?
 // TODO: Edit transaction covering add, delete
-// TODO: Do you need the exports?  I think you don't
-// TODO: Consider how to handle errors at this level.  Perhaps throw exceptions?
 
-struct BILLSPLITCORE_EXPORT Entry
-{
-    // TODO: I don't think you use this anymore
-    double debt;
-    double credit;
-};
-
-struct BILLSPLITCORE_EXPORT Transaction
-{
-    std::string payer;
-    double cost;
-    std::set<std::string> covering;
-};
-
-class BILLSPLITCORE_EXPORT DataCore
+class DataCore
 {
 public:
     std::size_t NumTransactions() const;
@@ -43,7 +24,7 @@ public:
     const std::set<std::string> GetTransactionCovering(int index) const;
     const std::vector<std::tuple<std::string, std::string, double> >& GetResults() const;
     bool EditPerson(const std::string& oldName, std::string newName);
-    bool PersonExists(const std::string& name) const;  // necessary?
+    bool PersonExists(const std::string& name) const;  // TODO: necessary?
     void Clear();
 
 private:
@@ -54,6 +35,14 @@ private:
     std::vector<std::tuple<std::string, std::string, double> > Solve() const;
 
 private:
+
+    struct Transaction
+    {
+        std::string payer;
+        double cost;
+        std::set<std::string> covering;
+    };
+
     std::vector<Transaction> m_transactions;
     std::vector<std::unordered_map<std::string, double> > m_ledger;
     std::vector<std::tuple<std::string, std::string, double> > m_results;

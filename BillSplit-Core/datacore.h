@@ -57,7 +57,6 @@ private:
     std::vector<Transaction> m_transactions;
     std::vector<std::unordered_map<std::string, double> > m_ledger;
     std::vector<std::tuple<std::string, std::string, double> > m_results;
-    AlgoCore m_algoCore;
 };
 
 #endif // DATACORE_H

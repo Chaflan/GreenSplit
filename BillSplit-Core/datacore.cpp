@@ -173,7 +173,6 @@ bool DataCore::DebtsCanBeSettled(std::unordered_map<std::string, double> debts)
     return sum < 0.01;
 }
 
-// from, to, cost
 std::vector<std::tuple<std::string, std::string, double> > DataCore::Solve() const
 {
     if (m_ledger.empty()) {
@@ -188,7 +187,7 @@ std::vector<std::tuple<std::string, std::string, double> > DataCore::Solve() con
         return {};
     }
 
-    return m_algoCore.SolveOptimal(lastLedgerLine);
+    return AlgoCore::SolveOptimal(lastLedgerLine);
 }
 
 void DataCore::DebugOutputLedgerData() const

@@ -7,9 +7,6 @@ namespace Ui {
 class NameEditDialog;
 }
 
-class QString;
-
-// Do this one like you did the other dialog.  No more reference member variables
 class NameEditDialog : public QDialog
 {
     Q_OBJECT
@@ -19,8 +16,13 @@ public:
     enum CustomDialogCode { Cancel, Delete, Save };
 
 public:
-    explicit NameEditDialog(QString& initials, QString& name, Mode mode, QWidget *parent = nullptr);
+    explicit NameEditDialog(Mode mode, QWidget *parent = nullptr);
     ~NameEditDialog();
+
+    void SetName(QString name);
+    void SetInitials(QString initials);
+    QString GetName() const { return m_name; }
+    QString GetInitials() const { return m_initials; }
 
 private slots:
     void on_pushButtonCancel_clicked();
@@ -29,8 +31,8 @@ private slots:
 
 private:
     Ui::NameEditDialog *ui;
-    QString& m_initials;
-    QString& m_name;
+    QString m_initials;
+    QString m_name;
 };
 
 #endif // NAMEEDITDIALOG_H

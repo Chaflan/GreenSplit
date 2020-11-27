@@ -23,13 +23,9 @@ SOURCES += \
     algocore.cpp \
     datacore.cpp \
     datacoreobject.cpp \
-    datacoreold.cpp \
-    peoplemodel.cpp \
     peopletablemodel.cpp \
-    person.cpp \
     resultsmodel.cpp \
     transactionmodel.cpp \
-    transactionold.cpp \
     transactionstablemodel.cpp
 
 HEADERS += \
@@ -37,13 +33,9 @@ HEADERS += \
     billsplit-core_global.h \
     datacore.h \
     datacoreobject.h \
-    datacoreold.h \
-    peoplemodel.h \
     peopletablemodel.h \
-    person.h \
     resultsmodel.h \
     transactionmodel.h \
-    transactionold.h \
     transactionstablemodel.h
 
 # Default rules for deployment.

@@ -22,12 +22,13 @@ public:
 
     void UpdateResults();
 
+    void setDataCore(DataCoreObject* data);
+
 signals:
     void dataCoreChanged() const;
 
 private:
     DataCoreObject* getDataCore() const          { return m_data; }
-    void setDataCore(DataCoreObject* data);
 
     bool isIndexValid(const QModelIndex& i) const;
 

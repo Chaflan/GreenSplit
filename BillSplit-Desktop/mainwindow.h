@@ -2,17 +2,20 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include "datacoreold.h"
+#include <QMessageBox>
 
 // -Hide implementation
 // -Some kind of inheritance for the transaction and people widgets.  They
 // are very similar
 
+// TODO: standardize on m_
+
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
 
-class PeopleModel;
+class DataCoreObject;
+class PeopleTableModel;
 class TransactionsTableModel;
 class ResultsModel;
 
@@ -24,18 +27,15 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-    void closeEvent(QCloseEvent* event) override;
-
-    void ReadFromJsonFile();
-    void WriteJson() const;
-
-private slots:
-    void on_tabWidget_currentChanged(int index);
+private:
+    void ShowErrorMessage(const QString& message) const;
 
 private:
+    mutable QMessageBox m_errorMessageBox;
+
     Ui::MainWindow *ui;
-    DataCoreOld m_data;
-    PeopleModel* mPeopleModel;
+    DataCoreObject* m_data;
+    PeopleTableModel* mPeopleModel;
     TransactionsTableModel* mTransactionsModel;
     ResultsModel* mResultsModel;
 };

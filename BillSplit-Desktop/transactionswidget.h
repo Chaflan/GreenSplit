@@ -17,7 +17,7 @@ public:
     explicit TransactionsWidget(QWidget *parent = nullptr);
     ~TransactionsWidget();
 
-    void SetTransactionsTableModel(TransactionsTableModel* TransactionsTableModel);
+    void SetTransactionsModel(TransactionsTableModel* TransactionsTableModel);
     void ViewSelected(const QModelIndex& index);
 
 private slots:

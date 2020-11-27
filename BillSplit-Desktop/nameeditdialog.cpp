@@ -3,18 +3,12 @@
 
 #include <QMessageBox>
 
-NameEditDialog::NameEditDialog(QString& initials, QString& name, Mode mode, QWidget *parent) :
+NameEditDialog::NameEditDialog(Mode mode, QWidget *parent) :
     QDialog(parent),
-    ui(new Ui::NameEditDialog),
-    m_initials(initials),
-    m_name(name)
+    ui(new Ui::NameEditDialog)
 {
     ui->setupUi(this);
-    ui->lineEditInitials->setText(initials);
-    ui->lineEditName->setText(name);
-
-    if (mode == Mode::Add)
-    {
+    if (mode == Mode::Add) {
         ui->pushButtonDelete->setDisabled(true);
     }
 }
@@ -22,6 +16,18 @@ NameEditDialog::NameEditDialog(QString& initials, QString& name, Mode mode, QWid
 NameEditDialog::~NameEditDialog()
 {
     delete ui;
+}
+
+void NameEditDialog::SetName(QString name)
+{
+    m_name = std::move(name);
+    ui->lineEditName->setText(m_name);
+}
+
+void NameEditDialog::SetInitials(QString initials)
+{
+    m_initials = std::move(initials);
+    ui->lineEditInitials->setText(m_initials);
 }
 
 void NameEditDialog::on_pushButtonCancel_clicked()

@@ -1,7 +1,8 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-#include "peoplemodel.h"
+#include "datacoreobject.h"
+#include "peopletablemodel.h"
 #include "transactionstablemodel.h"
 #include "resultsmodel.h"
 #include <QFile>
@@ -9,18 +10,27 @@
 #include <QJsonObject>
 #include <QMessageBox>
 
-MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent)
-    , ui(new Ui::MainWindow)
+MainWindow::MainWindow(QWidget *parent) :
+    QMainWindow(parent),
+    m_errorMessageBox(QMessageBox::Icon::Critical, "Error", ""),
+    ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
 
-    mPeopleModel = new PeopleModel(m_data, this);
-    mTransactionsModel = new TransactionsTableModel(this);
-    mResultsModel = new ResultsModel(m_data, this);
+    m_data = new DataCoreObject(this);
+    connect(m_data, &DataCoreObject::signalError, this, &MainWindow::ShowErrorMessage);
+    m_data->jsonRead();
 
-    ReadFromJsonFile();
-    mResultsModel->updateCalculations();
+    mPeopleModel = new PeopleTableModel(this);
+    connect(mPeopleModel, &PeopleTableModel::signalError, this, &MainWindow::ShowErrorMessage);
+    mPeopleModel->setDataCore(m_data);
+
+    mTransactionsModel = new TransactionsTableModel(this);
+    connect(mPeopleModel, &PeopleTableModel::signalError, this, &MainWindow::ShowErrorMessage);
+    mTransactionsModel->setDataCore(m_data);
+
+    mResultsModel = new ResultsModel(this);
+    mResultsModel->setDataCore(m_data);
 
     ui->peopleWidget->SetPeopleModel(mPeopleModel);
     ui->transactionsWidget->SetTransactionsModel(mTransactionsModel);
@@ -32,55 +42,8 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::closeEvent(QCloseEvent* event)
+void MainWindow::ShowErrorMessage(const QString& message) const
 {
-//    QMessageBox msgBox;
-//    msgBox.setText("The document has been modified.");
-//    msgBox.setInformativeText("Do you want to save your changes?");
-//    msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard);
-//    msgBox.setDefaultButton(QMessageBox::Save);
-//    int ret = msgBox.exec();
-
-//    switch (ret)
-//    {
-//    case QMessageBox::Save: WriteJson();
-//    }
-
-    WriteJson();
-    QMainWindow::closeEvent(event);
-}
-
-
-// TODO: This needs to be at the model level
-void MainWindow::ReadFromJsonFile()
-{
-    QFile file("save.json");
-    if (file.open(QIODevice::ReadOnly))
-    {
-        QJsonDocument jsonDoc(QJsonDocument::fromJson(file.readAll()));
-        QJsonObject jsonObj = jsonDoc.object();
-        mPeopleModel->jsonRead(jsonObj);
-        mTransactionsModel->jsonRead(jsonObj);
-    }
-}
-
-void MainWindow::WriteJson() const
-{
-    QFile file("save.json");
-    if (file.open(QIODevice::WriteOnly))
-    {
-        QJsonObject json;
-        mPeopleModel->jsonWrite(json);
-        mTransactionsModel->jsonWrite(json);
-        QJsonDocument saveDoc(json);
-        file.write(saveDoc.toJson());
-    }
-}
-
-void MainWindow::on_tabWidget_currentChanged(int index)
-{
-    if (index == 2)
-    {
-        mResultsModel->updateCalculations();
-    }
+    m_errorMessageBox.setText(message);
+    m_errorMessageBox.exec();
 }

@@ -18,7 +18,7 @@ TransactionsWidget::~TransactionsWidget()
     delete ui;
 }
 
-void TransactionsWidget::SetTransactionsTableModel(TransactionsTableModel* TransactionsTableModel)
+void TransactionsWidget::SetTransactionsModel(TransactionsTableModel* TransactionsTableModel)
 {
     model = TransactionsTableModel;
     ui->tableView->setModel(model);

@@ -39,13 +39,14 @@ public:
     Q_INVOKABLE bool addPerson(QString initials, QString name);
     Q_INVOKABLE int columnWidth(int columnIndex, int columnSpacing, int totalWidth);
 
+    void setDataCore(DataCoreObject* data);
+
 signals:
     void signalError(QString message) const;
     void dataCoreChanged() const;
 
 private:
     DataCoreObject* getDataCore() const          { return m_data; }
-    void setDataCore(DataCoreObject* data);
 
     bool isIndexValid(const QModelIndex& index) const;
     int stringToColumnIndex(const QString& columnRole) const;

@@ -2,13 +2,14 @@
 #define PEOPLEWIDGET_H
 
 #include <QWidget>
+#include "nameeditdialog.h"
 
 namespace Ui {
 class PeopleWidget;
 }
 
 class QItemSelectionModel;
-class PeopleModel;
+class PeopleTableModel;
 
 class PeopleWidget : public QWidget
 {
@@ -18,7 +19,7 @@ public:
     explicit PeopleWidget(QWidget *parent = nullptr);
     ~PeopleWidget();
 
-    void SetPeopleModel(PeopleModel* peopleModel);
+    void SetPeopleModel(PeopleTableModel* peopleModel);
     void ViewSelected(const QModelIndex& index);
 
 private slots:
@@ -26,8 +27,9 @@ private slots:
     void on_pushButtonView_clicked();
 
 private:
+
     Ui::PeopleWidget *ui;
-    PeopleModel* model;
+    PeopleTableModel* model;
 };
 
 #endif // PEOPLEWIDGET_H

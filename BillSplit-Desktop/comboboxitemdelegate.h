@@ -3,13 +3,12 @@
 
 #include <QStyledItemDelegate>
 
-//class TransactionsModel;
+class TransactionsTableModel;
 
 class ComboBoxItemDelegate : public QStyledItemDelegate
 {
     Q_OBJECT
 public:
-//    ComboBoxItemDelegate(TransactionsModel* model, QObject* parent = nullptr);
     ComboBoxItemDelegate(QObject* parent = nullptr);
     ~ComboBoxItemDelegate();
 
@@ -17,8 +16,11 @@ public:
     void setEditorData(QWidget *editor, const QModelIndex &index) const override;
     void setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const override;
 
+    void setModel(TransactionsTableModel* model);
+    void updateModel();
+
 private:
-//    TransactionsModel* m_model;
+    TransactionsTableModel* m_model;
 };
 
 #endif // COMBOBOXITEMDELEGATE_H

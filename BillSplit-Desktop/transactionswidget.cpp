@@ -2,7 +2,7 @@
 #include "ui_transactionswidget.h"
 #include "transactionstablemodel.h"
 #include "transactioneditdialog.h"
-#include "comboboxitemdelegate.h"
+//#include "comboboxitemdelegate.h"
 
 TransactionsWidget::TransactionsWidget(QWidget *parent) :
     QWidget(parent),
@@ -35,18 +35,21 @@ void TransactionsWidget::SetTransactionsModel(TransactionsTableModel* transactio
     ui->tableView->horizontalHeader()->setStretchLastSection(true);
     ui->tableView->setStyleSheet("QHeaderView::section { background-color:gray }");
 
+    // TODO: Reinstate this with your new models after some thought
     // Format second column to have a persistent combo box
-    const int payerColumn = 1;
-    ui->tableView->setItemDelegateForColumn(payerColumn, new ComboBoxItemDelegate(this));
+    //    const int payerColumn = 1;
+    //    ui->tableView->setItemDelegateForColumn(payerColumn, new ComboBoxItemDelegate(this));
 
-    for (int row = 0; row < m_model->rowCount(); ++row) {
-        ui->tableView->openPersistentEditor(m_model->index(row, payerColumn));
-    }
+    //    for (int row = 0; row < m_model->rowCount(); ++row) {
+    //        ui->tableView->openPersistentEditor(m_model->index(row, payerColumn));
+    //    }
 }
 
 void TransactionsWidget::SetTransactionModel(TransactionModel* transactionModel)
 {
     m_dialog->SetModel(transactionModel);
+    // TODO: for each comboboxitemdelegate set the model
+    // TODO: make it so you can set these in either order
 }
 
 void TransactionsWidget::ViewSelected(const QModelIndex& index)

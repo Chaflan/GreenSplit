@@ -1,12 +1,6 @@
 #include "comboboxitemdelegate.h"
-//#include "transactionsmodel.h"
+#include "transactionstablemodel.h"
 #include <QComboBox>
-
-//ComboBoxItemDelegate::ComboBoxItemDelegate(TransactionsModel* model, QObject *parent) :
-//    QStyledItemDelegate(parent),
-//    m_model(model)
-//{
-//}
 
 ComboBoxItemDelegate::ComboBoxItemDelegate(QObject *parent) :
     QStyledItemDelegate(parent)
@@ -17,14 +11,16 @@ ComboBoxItemDelegate::~ComboBoxItemDelegate()
 {
 }
 
-QWidget *ComboBoxItemDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const
+QWidget* ComboBoxItemDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const
 {
     Q_UNUSED(option);   // Currently no formatting
     Q_UNUSED(index);    // All indices get the same list
 
     // Create the combobox and populate it
     QComboBox* cb = new QComboBox(parent);
-    //cb->addItems(m_model->getAllInitials());
+    if (m_model) {
+        //cb->addItems(m_model->());
+    }
     return cb;
 }
 
@@ -50,4 +46,14 @@ void ComboBoxItemDelegate::setModelData(QWidget* editor, QAbstractItemModel* mod
     Q_ASSERT(cb);
 
     model->setData(index, cb->currentText(), Qt::EditRole);
+}
+
+void ComboBoxItemDelegate::setModel(TransactionsTableModel* model)
+{
+    Q_UNUSED(model);
+}
+
+void ComboBoxItemDelegate::updateModel()
+{
+    // For connecting with changes to allPeople
 }

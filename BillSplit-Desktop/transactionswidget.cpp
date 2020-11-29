@@ -82,7 +82,7 @@ void TransactionsWidget::on_pushButtonNew_clicked()
         m_dialog->exec();
 
         if (m_dialog->result() == TransactionEditDialog::CustomDialogCode::Save) {
-            m_model->addFromModel(m_dialog->GetModel());
+            isValid = m_model->addFromModel(m_dialog->GetModel());
         }
         else { // Cancel or Delete, do nothing
             isValid = true;

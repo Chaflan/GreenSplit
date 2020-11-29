@@ -182,6 +182,8 @@ std::vector<std::tuple<std::string, std::string, double> > DataCore::Solve() con
     if (lastLedgerLine.empty()) {
         return {};
     }
+
+    // TODO: Put this in the algo core
     if (!DebtsCanBeSettled(lastLedgerLine)) {
         // TODO: Throw?
         return {};

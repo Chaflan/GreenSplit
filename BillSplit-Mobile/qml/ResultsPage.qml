@@ -11,7 +11,6 @@ Page {
         anchors.leftMargin: 5
         anchors.rightMargin: 5
 
-
         Row {
             id: tableheader
             width: listview.contentWidth

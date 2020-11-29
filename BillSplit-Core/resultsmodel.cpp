@@ -4,6 +4,8 @@
 #include <QFont>
 #include <QFontMetrics>
 
+// TODO: Ensure your brace style is upheld throughout
+
 ResultsModel::ResultsModel(QObject* parent) :
     QAbstractListModel(parent)
 {
@@ -16,8 +18,7 @@ int ResultsModel::rowCount(const QModelIndex& parent) const
 
 QVariant ResultsModel::data(const QModelIndex& index, int role) const
 {
-    if (role == Qt::DisplayRole && isIndexValid(index))
-    {
+    if (role == Qt::DisplayRole && isIndexValid(index)) {
         // TODO: cache these
         return QString("%1 owes %2 $%3")
                 .arg(m_data->getResultDebtor(index.row()))

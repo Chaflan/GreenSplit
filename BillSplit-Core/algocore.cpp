@@ -86,6 +86,11 @@ std::vector<std::tuple<std::string, std::string, double> >
         }
     }
 
+    // Check for the trivial solution
+    if (pFirstSet.empty()) {
+        return {};
+    }
+
     // Prime the final solution using the greedy solution.  The optimal tree solution
     // will attempt to improve upon this, but won't be able to in most cases.
     std::vector<std::tuple<std::string, std::string, double> > solnFinalStr = SolveGreedy(debts);

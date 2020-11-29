@@ -66,7 +66,9 @@ void TransactionModel::setDataCore(DataCoreObject* data)
         emit allPeopleChanged();
 
         for (int i = 0; i < m_data->numPeople(); ++i) {
-            m_coveringList.append(new PersonCheck(m_data->getPersonIdentifier(i), true, this));  // TODO: Is this right?  Qt parent system is weird
+            PersonCheck* newPersonCheck = new PersonCheck(m_data->getPersonIdentifier(i), true, this);
+            connect(newPersonCheck, &PersonCheck::checkStatusChanged, [this](){ emit coveringChecksChanged(); });
+            m_coveringList.append(newPersonCheck);  // TODO: Is this right?  Qt parent system is weird
         }
         emit coveringListChanged();
 
@@ -112,11 +114,33 @@ void TransactionModel::setCostStr(QString cost)
     m_cost = cost.toDouble();
 }
 
+// TODO: probably should not use value here since it is most often not moved
 void TransactionModel::setDescription(QString description)
 {
     if (m_data && m_description != description) {
         m_description = std::move(description);
         emit descriptionChanged();
+    }
+}
+
+void TransactionModel::setCoveringList(const QList<PersonCheck*>& coveringList)
+{
+    if (m_data) {
+        if (m_coveringList.length() != coveringList.length()) {
+            qDebug() << "Error - TransactionModel::setCoveringList - coveringLists unequal length";
+        } else {
+            bool coveringListHasChanged = false;
+            for (int i = 0; i < coveringList.length(); ++i) {
+                if (m_coveringList[i]->getCheckStatus() != coveringList[i]->getCheckStatus()) {
+                    m_coveringList[i]->setCheckStatus(coveringList[i]->getCheckStatus());
+                    coveringListHasChanged = true;
+                }
+            }
+
+            if (coveringListHasChanged) {
+                emit coveringListChanged();
+            }
+        }
     }
 }
 
@@ -184,7 +208,9 @@ void TransactionModel::identifierListChanged()
     bool coveringListWasChanged = false;
     for (int i = 0; i < m_data->numPeople(); ++i) {
         if (i >= m_coveringList.size()) {
-            m_coveringList.insert(i, new PersonCheck(m_data->getPersonIdentifier(i), true, this));
+            PersonCheck* newPersonCheck = new PersonCheck(m_data->getPersonIdentifier(i), true, this);
+            connect(newPersonCheck, &PersonCheck::checkStatusChanged, [this](){ emit coveringChecksChanged(); });
+            m_coveringList.insert(i, newPersonCheck);
             coveringListWasChanged = true;
             continue;
         }
@@ -207,7 +233,9 @@ void TransactionModel::identifierListChanged()
         }
 
         if (!found) {
-            m_coveringList.insert(i, new PersonCheck(m_data->getPersonIdentifier(i), true, this));
+            PersonCheck* newPersonCheck = new PersonCheck(m_data->getPersonIdentifier(i), true, this);
+            connect(newPersonCheck, &PersonCheck::checkStatusChanged, [this](){ emit coveringChecksChanged(); });
+            m_coveringList.insert(i, newPersonCheck);
             coveringListWasChanged = true;
         }
     }

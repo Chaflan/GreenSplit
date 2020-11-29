@@ -21,7 +21,7 @@ public:
     PersonCheck(QString name, bool checkStatus, QObject* parent = nullptr);
 
     QString getName() const     { return m_name; }
-    int getCheckStatus() const  { return m_checkStatus; }
+    bool getCheckStatus() const  { return m_checkStatus; }
 
     void setName(QString name);
     void setCheckStatus(bool checkStatus);
@@ -70,6 +70,7 @@ public:
     void setCost(double cost);
     void setCostStr(QString cost);
     void setDescription(QString description);
+    void setCoveringList(const QList<PersonCheck*>& coveringList);
 
     Q_INVOKABLE void load(double cost, QString payer, const QStringList& covering, QString description);
     Q_INVOKABLE void clear();
@@ -84,6 +85,7 @@ signals:
     void descriptionChanged() const;
     void allPeopleChanged() const;
     void coveringListChanged() const;
+    void coveringChecksChanged() const;
 
 private:
     void identifierListChanged();

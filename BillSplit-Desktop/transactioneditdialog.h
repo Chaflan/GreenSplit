@@ -2,11 +2,18 @@
 #define TRANSACTIONEDITDIALOG_H
 
 #include <QDialog>
-#include <vector>
+
+// TODO: More research on how widget models work.  They are frustratingly different from QML models
+// and so there isnt much carryover.  For instance a widget combo box uses a QStringListModel while
+// the QML version uses QStringList.  Similarly QML is ok with a QList<QVariant> as a model but
+// Widgets once again must have something that inherits from QAbstractItemModel.
+// for now I am using the oldschool boilerplate connect code with clunky transfers.
 
 namespace Ui {
 class transactioneditdialog;
 }
+
+class TransactionModel;
 
 class TransactionEditDialog : public QDialog
 {
@@ -17,23 +24,19 @@ public:
     enum CustomDialogCode { Cancel, Delete, Save };
 
 public:
-    explicit TransactionEditDialog(
-            const QStringList& allNames,
-            Mode mode,
-            QWidget *parent = nullptr);
-    explicit TransactionEditDialog(
-            QString payer,
-            double cost,
-            QString description,
-            QStringList coveringNames,
-            const QStringList& allNames,
-            Mode mode,
-            QWidget *parent = nullptr);
+    explicit TransactionEditDialog(QWidget *parent = nullptr);
     ~TransactionEditDialog();
 
-private:
-    void SetAllNames(const QStringList& allNames);
     void SetMode(Mode mode);
+
+    void SetModel(TransactionModel* model);
+    TransactionModel* GetModel() const { return m_model; }
+
+    void LoadFromModelCost();
+    void LoadFromModelDescription();
+    void LoadFromModelAllPeople();
+    void LoadFromModelPayerIndex();
+    void LoadFromModelChecks();
 
 private slots:
     void on_pushButtonSave_clicked();
@@ -44,11 +47,7 @@ private:
     Ui::transactioneditdialog *ui;
 
 public:
-    // TODO: Gets only
-    QString m_payer;
-    double m_cost;
-    QString m_description;
-    QStringList m_coveringNames;
+    TransactionModel* m_model = nullptr;
 };
 
 #endif // TRANSACTIONEDITDIALOG_H

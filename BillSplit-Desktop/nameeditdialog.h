@@ -31,6 +31,8 @@ private slots:
 
 private:
     Ui::NameEditDialog *ui;
+
+    // TODO: Try not even having these, just pull from the UI
     QString m_initials;
     QString m_name;
 };

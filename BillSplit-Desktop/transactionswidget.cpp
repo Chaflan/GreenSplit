@@ -3,30 +3,30 @@
 #include "transactionstablemodel.h"
 #include "transactioneditdialog.h"
 #include "comboboxitemdelegate.h"
-#include <QMessageBox>
 
 TransactionsWidget::TransactionsWidget(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::TransactionsWidget),
-    model(nullptr)
+    m_dialog(new TransactionEditDialog())
 {
     ui->setupUi(this);
+    m_dialog->setModal(true);
 }
 
 TransactionsWidget::~TransactionsWidget()
 {
+    delete m_dialog;
     delete ui;
 }
 
-void TransactionsWidget::SetTransactionsModel(TransactionsTableModel* TransactionsTableModel)
+void TransactionsWidget::SetTransactionsModel(TransactionsTableModel* transactionsTableModel)
 {
-    model = TransactionsTableModel;
-    ui->tableView->setModel(model);
+    m_model = transactionsTableModel;
+    ui->tableView->setModel(m_model);
 
     ui->pushButtonView->setDisabled(true);
     connect(ui->tableView->selectionModel(), &QItemSelectionModel::selectionChanged,
-        [this]()
-        {
+        [this]() {
             ui->pushButtonView->setDisabled(!ui->tableView->selectionModel()->hasSelection());
         });
 
@@ -39,9 +39,14 @@ void TransactionsWidget::SetTransactionsModel(TransactionsTableModel* Transactio
     const int payerColumn = 1;
     ui->tableView->setItemDelegateForColumn(payerColumn, new ComboBoxItemDelegate(this));
 
-    for (int row = 0; row < model->rowCount(); ++row) {
-        ui->tableView->openPersistentEditor(model->index(row, payerColumn));
+    for (int row = 0; row < m_model->rowCount(); ++row) {
+        ui->tableView->openPersistentEditor(m_model->index(row, payerColumn));
     }
+}
+
+void TransactionsWidget::SetTransactionModel(TransactionModel* transactionModel)
+{
+    m_dialog->SetModel(transactionModel);
 }
 
 void TransactionsWidget::ViewSelected(const QModelIndex& index)
@@ -50,78 +55,39 @@ void TransactionsWidget::ViewSelected(const QModelIndex& index)
         return;
     }
 
-//    QString payerName = model->data(index, TransactionsTableModel::Roles::PayerRole).toString();
-//    double cost = model->data(index, TransactionsTableModel::Roles::CostRole).toDouble();
-//    QString description = model->data(index, TransactionsTableModel::Roles::DescriptionRole).toString();
-//    QStringList coveringNames = model->data(index, TransactionsTableModel::Roles::CoveringInitialsRole).toStringList();
+    m_model->loadToModel(index.row(), m_dialog->GetModel());
+    m_dialog->SetMode(TransactionEditDialog::Mode::Edit);
 
-//    for (bool isValid = false; !isValid;)
-//    {
-//        TransactionEditDialog dialog(payerName,
-//                                     cost,
-//                                     description,
-//                                     coveringNames,
-//                                     model->getAllInitials(),
-//                                     TransactionEditDialog::Mode::Edit);
-//        dialog.setModal(true);
-//        dialog.exec();
-
-//        if (dialog.result() == TransactionEditDialog::CustomDialogCode::Save)
-//        {
-//            if (payerName != dialog.m_payer) {
-//                model->setData(index, std::move(dialog.m_payer), TransactionsTableModel::Roles::PayerPidRole);
-//            }
-
-//            if (coveringNames != dialog.m_coveringNames) {
-//                model->setData(index, dialog.m_coveringNames, TransactionsTableModel::Roles::CoveringInitialsRole);
-//            }
-
-//            if (description != dialog.m_description) {
-//                model->setData(index, dialog.m_description, TransactionsTableModel::Roles::DescriptionRole);
-//            }
-
-//            if (cost != dialog.m_cost) {
-//                model->setData(index, dialog.m_cost, TransactionsTableModel::Roles::CostRole);
-//            }
-//        }
-//        else if (dialog.result() == TransactionEditDialog::CustomDialogCode::Delete)
-//        {
-//            model->removeRow(index.row());
-//            isValid = true;
-//        }
-//        else // Cancel, do nothing
-//        {
-//            isValid = true;
-//        }
-//    }
+    for (bool isValid = false; !isValid;) {
+        m_dialog->exec();
+        if (m_dialog->result() == TransactionEditDialog::CustomDialogCode::Save) {
+            isValid = m_model->editFromModel(index.row(), m_dialog->GetModel());
+        }
+        else if (m_dialog->result() == TransactionEditDialog::CustomDialogCode::Delete) {
+            m_model->removeRow(index.row());
+            isValid = true;
+        }
+        else { // Cancel, do nothing
+            isValid = true;
+        }
+    }
 }
 
 void TransactionsWidget::on_pushButtonNew_clicked()
 {
-//    for (bool isValid = false; !isValid;)
-//    {
-//        TransactionEditDialog dialog(model->getAllInitials(), TransactionEditDialog::Mode::Add);
-//        dialog.setModal(true);
-//        dialog.exec();
+    m_dialog->GetModel()->clear();
+    m_dialog->SetMode(TransactionEditDialog::Mode::Add);
 
-//        if (dialog.result() == TransactionEditDialog::CustomDialogCode::Save)
-//        {
-//            if (model->addTransaction(dialog.m_payer, dialog.m_cost, dialog.m_description, dialog.m_coveringNames))
-//            {
-//                isValid = true;
-//            }
-//            else
-//            {
-//                QMessageBox message(QMessageBox::Icon::Critical, "Error",
-//                    "This transaction is invalid.");
-//                message.exec();
-//            }
-//        }
-//        else // Cancel or Delete, do nothing
-//        {
-//            isValid = true;
-//        }
-//    }
+    for (bool isValid = false; !isValid;) {
+        m_dialog->exec();
+
+        if (m_dialog->result() == TransactionEditDialog::CustomDialogCode::Save) {
+            m_model->addFromModel(m_dialog->GetModel());
+        }
+        else { // Cancel or Delete, do nothing
+            isValid = true;
+        }
+    }
 }
 
 void TransactionsWidget::on_pushButtonView_clicked()

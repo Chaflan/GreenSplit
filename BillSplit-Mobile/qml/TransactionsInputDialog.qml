@@ -66,7 +66,6 @@ PopupDialog {
         }
 
         GroupBox {
-
             id: groupBoxCovering
             Layout.fillWidth: true
             Layout.fillHeight: true

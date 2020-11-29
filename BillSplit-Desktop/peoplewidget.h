@@ -4,6 +4,9 @@
 #include <QWidget>
 #include "nameeditdialog.h"
 
+
+// TODO: SetPeopleModel -> SetModel for all
+
 namespace Ui {
 class PeopleWidget;
 }

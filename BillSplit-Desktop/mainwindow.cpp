@@ -4,11 +4,12 @@
 #include "datacoreobject.h"
 #include "peopletablemodel.h"
 #include "transactionstablemodel.h"
+#include "transactionmodel.h"
 #include "resultsmodel.h"
-#include <QFile>
-#include <QJsonDocument>
-#include <QJsonObject>
-#include <QMessageBox>
+//#include <QFile>
+//#include <QJsonDocument>
+//#include <QJsonObject>
+//#include <QMessageBox>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -21,19 +22,23 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(m_data, &DataCoreObject::signalError, this, &MainWindow::ShowErrorMessage);
     m_data->jsonRead();
 
-    mPeopleModel = new PeopleTableModel(this);
-    connect(mPeopleModel, &PeopleTableModel::signalError, this, &MainWindow::ShowErrorMessage);
-    mPeopleModel->setDataCore(m_data);
+    m_peopleModel = new PeopleTableModel(this);
+    connect(m_peopleModel, &PeopleTableModel::signalError, this, &MainWindow::ShowErrorMessage);
+    m_peopleModel->setDataCore(m_data);
 
-    mTransactionsModel = new TransactionsTableModel(this);
-    connect(mPeopleModel, &PeopleTableModel::signalError, this, &MainWindow::ShowErrorMessage);
-    mTransactionsModel->setDataCore(m_data);
+    m_transactionsModel = new TransactionsTableModel(this);
+    connect(m_peopleModel, &PeopleTableModel::signalError, this, &MainWindow::ShowErrorMessage);
+    m_transactionsModel->setDataCore(m_data);
+
+    m_transactionModel = new TransactionModel(this);
+    m_transactionModel->setDataCore(m_data);
 
     mResultsModel = new ResultsModel(this);
     mResultsModel->setDataCore(m_data);
 
-    ui->peopleWidget->SetPeopleModel(mPeopleModel);
-    ui->transactionsWidget->SetTransactionsModel(mTransactionsModel);
+    ui->peopleWidget->SetPeopleModel(m_peopleModel);
+    ui->transactionsWidget->SetTransactionsModel(m_transactionsModel);
+    ui->transactionsWidget->SetTransactionModel(m_transactionModel);
     ui->resultsWidget->SetResultsModel(mResultsModel);
 }
 

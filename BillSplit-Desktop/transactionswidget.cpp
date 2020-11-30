@@ -26,9 +26,10 @@ void TransactionsWidget::SetTransactionsModel(TransactionsTableModel* transactio
 
     ui->pushButtonView->setDisabled(true);
     connect(ui->tableView->selectionModel(), &QItemSelectionModel::selectionChanged,
-        [this]() {
-            ui->pushButtonView->setDisabled(!ui->tableView->selectionModel()->hasSelection());
-        });
+        [this]() { ui->pushButtonView->setDisabled(!ui->tableView->selectionModel()->hasSelection()); });
+    connect(m_model, &TransactionsTableModel::modelCleared,
+        [this]() { ui->pushButtonView->setDisabled(!ui->tableView->selectionModel()->hasSelection()); });
+
 
     // Table formatting
     ui->tableView->horizontalHeader()->setDefaultAlignment(Qt::AlignLeft);

@@ -15,7 +15,7 @@ public:
     enum Column
     {
         Identifier = 0,
-        FullName = 1,
+        Name = 1,
         COUNT = 2
     };
 
@@ -44,6 +44,7 @@ public:
 signals:
     void signalError(QString message) const;
     void dataCoreChanged() const;
+    void modelCleared() const;  // TODO: rethink this
 
 private:
     DataCoreObject* getDataCore() const          { return m_data; }

@@ -314,6 +314,11 @@ bool DataCoreObject::editPersonIdentifier(int index, const QString& newIdentifie
         return false;
     }
 
+    if (newIdentifier.length() >= 3) {
+        emit signalError("Identifiers cannot exceed 3 characters in length");
+        return false;
+    }
+
     // TODO: Remove this after you implement the m_data.EditPerson method.  It should throw this error.
     if (personExists(newIdentifier)) {
         emit signalError("Attempting to change identifier to one that already exists.  Identifiers must be unique.");
@@ -321,7 +326,7 @@ bool DataCoreObject::editPersonIdentifier(int index, const QString& newIdentifie
     }
 
     // TODO: m_data.EditPerson(m_identifierList[index].toStdString(), newIdentifier.toStdString());
-    m_identifierList[index] = std::move(newIdentifier);
+    m_identifierList[index] = newIdentifier;
     emit identifierListChanged();
     return true;
 }

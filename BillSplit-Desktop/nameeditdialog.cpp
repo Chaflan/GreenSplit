@@ -18,16 +18,24 @@ NameEditDialog::~NameEditDialog()
     delete ui;
 }
 
-void NameEditDialog::SetName(QString name)
+void NameEditDialog::SetName(const QString& name)
 {
-    m_name = std::move(name);
-    ui->lineEditName->setText(m_name);
+    ui->lineEditName->setText(name);
 }
 
-void NameEditDialog::SetInitials(QString initials)
+void NameEditDialog::SetInitials(const QString& initials)
 {
-    m_initials = std::move(initials);
-    ui->lineEditInitials->setText(m_initials);
+    ui->lineEditInitials->setText(initials);
+}
+
+QString NameEditDialog::GetName() const
+{
+    return ui->lineEditName->text();
+}
+
+QString NameEditDialog::GetInitials() const
+{
+    return ui->lineEditInitials->text();
 }
 
 void NameEditDialog::on_pushButtonCancel_clicked()
@@ -42,21 +50,5 @@ void NameEditDialog::on_pushButtonDelete_clicked()
 
 void NameEditDialog::on_pushButtonSave_clicked()
 {
-    QString initialsEntry = ui->lineEditInitials->text();
-    if (initialsEntry.isEmpty()) {
-        QMessageBox message(QMessageBox::Icon::Critical, "Error", "Initials cannot be blank");
-        message.exec();
-        return;
-    }
-
-    QString nameEntry = ui->lineEditName->text();
-    if (nameEntry.isEmpty()) {
-        QMessageBox message(QMessageBox::Icon::Critical, "Error", "Name cannot be blank");
-        message.exec();
-        return;
-    }
-
-    m_initials = std::move(initialsEntry);
-    m_name = std::move(nameEntry);
     this->done(CustomDialogCode::Save);
 }

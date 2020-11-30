@@ -6,6 +6,7 @@
 
 
 // TODO: SetPeopleModel -> SetModel for all
+// TODO: Do a const check
 
 namespace Ui {
 class PeopleWidget;
@@ -32,7 +33,7 @@ private slots:
 private:
 
     Ui::PeopleWidget *ui;
-    PeopleTableModel* model;
+    PeopleTableModel* m_model;
 };
 
 #endif // PEOPLEWIDGET_H

@@ -26,7 +26,7 @@
       <item>
        <widget class="QLabel" name="label">
         <property name="text">
-         <string>Initials:</string>
+         <string>Identifier (3 Char Limit):</string>
         </property>
        </widget>
       </item>

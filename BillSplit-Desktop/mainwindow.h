@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QMessageBox>
+#include <QUrl>
 
 // -Hide implementation
 // -Some kind of inheritance for the transaction and people widgets.  They
@@ -32,8 +33,15 @@ public:
 private:
     void ShowErrorMessage(const QString& message) const;
 
+private slots:
+    void FileNew();
+    void FileOpen();
+    void FileSave();
+    void FileSaveAs();
+
 private:
     mutable QMessageBox m_errorMessageBox;
+    mutable QUrl m_saveFile;
 
     Ui::MainWindow *ui;
     DataCoreObject* m_data;

@@ -24,7 +24,7 @@ QVariant PeopleTableModel::data(const QModelIndex& index, int role) const
         switch (index.column())
         {
             case Column::Identifier: return m_data->getPersonIdentifier(index.row());
-            case Column::FullName: return m_data->getPersonName(index.row());
+            case Column::Name: return m_data->getPersonName(index.row());
         }
     }
 
@@ -44,7 +44,7 @@ bool PeopleTableModel::setData(const QModelIndex& index, const QVariant& value, 
     bool successfulEdit = false;
     switch(index.column()) {
         case Column::Identifier: successfulEdit = m_data->editPersonIdentifier(index.row(), value.toString()); break;
-        case Column::FullName: successfulEdit = m_data->editPersonName(index.row(), value.toString()); break;
+        case Column::Name: successfulEdit = m_data->editPersonName(index.row(), value.toString()); break;
     }
 
     if (successfulEdit) {
@@ -127,7 +127,7 @@ int PeopleTableModel::columnWidth(int columnIndex, int columnSpacing, int totalW
 {
     switch (columnIndex) {
         case Column::Identifier: return 150;
-        case Column::FullName: return totalWidth - columnSpacing * (Column::COUNT - 1) - 150;
+        case Column::Name: return totalWidth - columnSpacing * (Column::COUNT - 1) - 150;
     }
 
     return 0;
@@ -142,6 +142,8 @@ void PeopleTableModel::setDataCore(DataCoreObject* data)
 
         QObject::connect(m_data, &DataCoreObject::modelCleared,
             this, &PeopleTableModel::resetModel);
+        QObject::connect(m_data, &DataCoreObject::modelCleared,
+            [this](){ emit modelCleared(); });
     }
 }
 
@@ -163,7 +165,7 @@ int PeopleTableModel::stringToColumnIndex(const QString& columnRole) const
 {
     const static QMap<QString, int> stringToColumn {
         { columnIndexToString(Column::Identifier), Column::Identifier },
-        { columnIndexToString(Column::FullName), Column::FullName }
+        { columnIndexToString(Column::Name), Column::Name }
     };
 
     auto findResult = stringToColumn.find(columnRole);

@@ -19,10 +19,10 @@ public:
     explicit NameEditDialog(Mode mode, QWidget *parent = nullptr);
     ~NameEditDialog();
 
-    void SetName(QString name);
-    void SetInitials(QString initials);
-    QString GetName() const { return m_name; }
-    QString GetInitials() const { return m_initials; }
+    void SetName(const QString& name);
+    void SetInitials(const QString& initials);
+    QString GetName() const;
+    QString GetInitials() const;
 
 private slots:
     void on_pushButtonCancel_clicked();
@@ -31,10 +31,6 @@ private slots:
 
 private:
     Ui::NameEditDialog *ui;
-
-    // TODO: Try not even having these, just pull from the UI
-    QString m_initials;
-    QString m_name;
 };
 
 #endif // NAMEEDITDIALOG_H

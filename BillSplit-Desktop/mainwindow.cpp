@@ -10,6 +10,8 @@
 //#include <QJsonDocument>
 //#include <QJsonObject>
 //#include <QMessageBox>
+#include <QDebug>
+#include <QFileDialog>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -17,6 +19,10 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    connect(ui->actionOpen, &QAction::triggered, this, &MainWindow::FileOpen);
+    connect(ui->actionSave, &QAction::triggered, this, &MainWindow::FileSave);
+    connect(ui->actionSave_As, &QAction::triggered, this, &MainWindow::FileSaveAs);
+    connect(ui->actionNew, &QAction::triggered, this, &MainWindow::FileNew);
 
     m_data = new DataCoreObject(this);
     connect(m_data, &DataCoreObject::signalError, this, &MainWindow::ShowErrorMessage);
@@ -51,4 +57,37 @@ void MainWindow::ShowErrorMessage(const QString& message) const
 {
     m_errorMessageBox.setText(message);
     m_errorMessageBox.exec();
+}
+
+void MainWindow::FileNew()
+{
+    m_data->clear();
+    ui->actionSave->setEnabled(false);
+    ui->actionSave->setText("Save");
+}
+
+void MainWindow::FileOpen()
+{
+    QUrl fileToOpen = QFileDialog::getOpenFileUrl(this, "Select File To Open", QUrl(), "*.json");
+    if (!fileToOpen.isEmpty() && m_data->jsonRead(fileToOpen)) {
+        ui->actionSave->setEnabled(true);
+        ui->actionSave->setText("Save (" + fileToOpen.fileName() + ")");
+        m_saveFile = std::move(fileToOpen);
+    }
+}
+
+void MainWindow::FileSave()
+{
+    m_data->jsonWrite(m_saveFile);
+}
+
+// TODO: Ensure QML does the Save file retargeting too
+void MainWindow::FileSaveAs()
+{
+    QUrl fileToSave = QFileDialog::getSaveFileUrl(this, "Select File To Save", QUrl(), "*.json");
+    if (!fileToSave.isEmpty() && m_data->jsonWrite(fileToSave)) {
+        ui->actionSave->setEnabled(true);
+        ui->actionSave->setText("Save (" + fileToSave.fileName() + ")");
+        m_saveFile = std::move(fileToSave);
+    }
 }

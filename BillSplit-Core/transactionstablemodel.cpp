@@ -36,6 +36,7 @@ QVariant TransactionsTableModel::data(const QModelIndex& index, int role) const
                     }
                     coveringListStr += str;
                 }
+                qDebug() << coveringListStr;
                 return coveringListStr;
             }
             case Column::Description: return m_data->getTransactionDescription(index.row());
@@ -172,6 +173,8 @@ void TransactionsTableModel::setDataCore(DataCoreObject* data)
 
         QObject::connect(m_data, &DataCoreObject::modelCleared,
             this, &TransactionsTableModel::resetModel);
+        QObject::connect(m_data, &DataCoreObject::modelCleared,
+            [this](){ emit modelCleared(); });
     }
 }
 

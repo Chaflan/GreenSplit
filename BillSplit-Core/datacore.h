@@ -23,8 +23,8 @@ public:
     double GetTransactionCost(int index) const;
     const std::set<std::string> GetTransactionCovering(int index) const;
     const std::vector<std::tuple<std::string, std::string, double> >& GetResults() const;
-    bool EditPerson(const std::string& oldName, std::string newName);
-    bool PersonExists(const std::string& name) const;  // TODO: necessary?
+    bool EditPerson(const std::string& oldName, const std::string& newName);
+    bool PersonExists(const std::string& name) const;
     void Clear();
 
 private:

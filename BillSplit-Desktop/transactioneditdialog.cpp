@@ -26,11 +26,11 @@ void TransactionEditDialog::SetModel(TransactionModel* model)
     LoadFromModelPayerIndex();
     LoadFromModelChecks();
 
-    connect(m_model, &TransactionModel::costChanged, this, &TransactionEditDialog::LoadFromModelCost);
-    connect(m_model, &TransactionModel::descriptionChanged, this, &TransactionEditDialog::LoadFromModelDescription);
-    connect(m_model, &TransactionModel::allPeopleChanged, this, &TransactionEditDialog::LoadFromModelAllPeople);
-    connect(m_model, &TransactionModel::payerIndexChanged, this, &TransactionEditDialog::LoadFromModelPayerIndex);
-    connect(m_model, &TransactionModel::coveringChecksChanged, this, &TransactionEditDialog::LoadFromModelChecks);
+    QObject::connect(m_model, &TransactionModel::costChanged, this, &TransactionEditDialog::LoadFromModelCost);
+    QObject::connect(m_model, &TransactionModel::descriptionChanged, this, &TransactionEditDialog::LoadFromModelDescription);
+    QObject::connect(m_model, &TransactionModel::allPeopleChanged, this, &TransactionEditDialog::LoadFromModelAllPeople);
+    QObject::connect(m_model, &TransactionModel::payerIndexChanged, this, &TransactionEditDialog::LoadFromModelPayerIndex);
+    QObject::connect(m_model, &TransactionModel::coveringChecksChanged, this, &TransactionEditDialog::LoadFromModelChecks);
 }
 
 void TransactionEditDialog::LoadFromModelCost()

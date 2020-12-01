@@ -38,7 +38,7 @@ QVariant ResultsModel::headerData(int section, Qt::Orientation orientation, int 
     return QAbstractItemModel::headerData(section, orientation, role);
 }
 
-void ResultsModel::UpdateResults()
+void ResultsModel::resetModel()
 {
     beginResetModel();
     endResetModel();
@@ -52,10 +52,8 @@ void ResultsModel::setDataCore(DataCoreObject* data)
         emit dataCoreChanged();
 
         QObject::connect(m_data, &DataCoreObject::resultsChanged,
-            this, &ResultsModel::UpdateResults);
-        QObject::connect(m_data, &DataCoreObject::modelCleared,
-            this, &ResultsModel::UpdateResults);
-        UpdateResults();
+            this, &ResultsModel::resetModel);
+        resetModel();
     }
 }
 

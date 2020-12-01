@@ -62,10 +62,22 @@ public:
 
 signals:
     void signalError(QString error) const;
-    void identifierListChanged() const;
-    void nameListChanged() const;
+
+    //--------------------------------------------------------------------------------------------------------------------
+    // Signal system
+    //
+    // This signal system is adapted to this particular design and a little bit stiff.  The burden of deciding how signals
+    // are handled by submodels (peopleModel, transactionsModel, etc) is on this dataCoreObject class which is backwards.
+    // I did this to keep things simple.  A problem we want to avoid is a submodel that sends a signal it also needs to
+    // handle, and another model also sends that signal.  We would have to listen for that signal and also send that signal
+    // resulting in a loop.  Instead dataCoreObject only sends a signal when it is an action performed by one submodel,
+    // that a different submodel needs to react to.  A more adaptable system would have a signaller enum and just ignore
+    // any signal that came from itself.  The burden would then be on the submodels to deal with the signals, but this has
+    // a lot of extra code and is clunky.
+    //--------------------------------------------------------------------------------------------------------------------
+    void peopleChanged() const;
+    void transactionsChanged() const;
     void resultsChanged() const;
-    void modelCleared() const;  // TODO: rethink this
 
 private:
     std::set<std::string> stringListToStdSet(const QStringList& stringList);

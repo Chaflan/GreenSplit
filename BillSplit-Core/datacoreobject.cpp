@@ -38,39 +38,39 @@ bool DataCoreObject::deleteTransactions(int index, int count)
 {
     try {
         m_data.DeleteTransactions(index, count);
-        emit resultsChanged();
-        return true;
     } catch (const std::exception& ex) {
         qDebug() << "Error - DataCoreObject::DeleteTransactions - " << ex.what();
+        return false;
     }
 
-    return false;
+    emit resultsChanged();
+    return true;
 }
 
 bool DataCoreObject::editTransactionPayer(int index, const QString& newPayer)
 {
     try {
         m_data.EditTransactionPayer(index, newPayer.toStdString());
-        emit resultsChanged();  // TODO: Not always
-        return true;
     } catch (const std::exception& ex) {
         qDebug() << "Error - DataCoreObject::GetTransactionPayer - " << ex.what();
+        return false;
     }
 
-    return false;
+    emit resultsChanged();  // TODO: Not always
+    return true;
 }
 
 bool DataCoreObject::editTransactionCost(int index, double newCost)
 {
     try {
         m_data.EditTransactionCost(index, newCost);
-        emit resultsChanged();  // TODO: Not always
-        return true;
     } catch (const std::exception& ex) {
         qDebug() << "Error - DataCoreObject::GetTransactionPayer - " << ex.what();
+        return false;
     }
 
-    return false;
+    emit resultsChanged();  // TODO: Not always
+    return true;
 }
 
 bool DataCoreObject::editTransactionCovering(int index, const QStringList& newCovering)
@@ -82,13 +82,13 @@ bool DataCoreObject::editTransactionCovering(int index, const QStringList& newCo
 
     try {
         m_data.EditTransactionCovering(index, stringListToStdSet(newCovering));
-        emit resultsChanged();  // TODO: Not always could make called func return true if success
-        return true;
     } catch (const std::exception& ex) {
         qDebug() << "Error - DataCoreObject::GetTransactionPayer - " << ex.what();
+        return false;
     }
 
-    return false;
+    emit resultsChanged();  // TODO: Not always could make called func return true if success
+    return true;
 }
 
 QString DataCoreObject::getTransactionPayer(int index) const
@@ -129,13 +129,22 @@ QStringList DataCoreObject::getTransactionCovering(int index) const
     return result;
 }
 
+// This function is meant as just a passthrough for DataCore, editPersonIdentifier is the full version
+// TODO: Make this private?
+bool DataCoreObject::editPerson(const QString& oldName, const QString& newName)
+{
+    return m_data.EditPerson(oldName.toStdString(), newName.toStdString());
+}
+
 void DataCoreObject::clear()
 {
     m_data.Clear();
     m_identifierList.clear();
     m_nameList.clear();
     m_descriptionsList.clear();
-    emit modelCleared();
+    emit peopleChanged();
+    emit transactionsChanged();
+    emit resultsChanged();
 }
 
 int DataCoreObject::numPeople() const
@@ -149,6 +158,7 @@ int DataCoreObject::numPeople() const
 // PersonInTransactions==false.
 bool DataCoreObject::personExists(const QString& identifier) const
 {
+    // TODO: This is quite slow, maybe consider the data structure for it
     return m_identifierList.contains(identifier);
 }
 
@@ -167,11 +177,11 @@ bool DataCoreObject::addPerson(QString identifier, QString name)
     }
 
     m_identifierList.append(std::move(identifier));
-    emit identifierListChanged();
     m_nameList.append(std::move(name));
     return true;
 }
 
+// Must return true only if people were removed
 bool DataCoreObject::removePeople(int index, int count)
 {
     const int lastIndex = index + count - 1;
@@ -204,10 +214,10 @@ bool DataCoreObject::removePeople(int index, int count)
             }
         }
 
-        emit identifierListChanged();
+        return true;
     }
 
-    return true;
+    return false;
 }
 
 const QString& DataCoreObject::getPersonIdentifier(int index) const
@@ -319,15 +329,17 @@ bool DataCoreObject::editPersonIdentifier(int index, const QString& newIdentifie
         return false;
     }
 
-    // TODO: Remove this after you implement the m_data.EditPerson method.  It should throw this error.
     if (personExists(newIdentifier)) {
         emit signalError("Attempting to change identifier to one that already exists.  Identifiers must be unique.");
         return false;
     }
 
-    // TODO: m_data.EditPerson(m_identifierList[index].toStdString(), newIdentifier.toStdString());
     m_identifierList[index] = newIdentifier;
-    emit identifierListChanged();
+    if (editPerson(m_identifierList[index], newIdentifier)) {
+        emit transactionsChanged();
+        emit resultsChanged();
+    }
+
     return true;
 }
 

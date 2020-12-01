@@ -20,7 +20,7 @@ public:
     QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 
-    void UpdateResults();
+    void resetModel();
 
     void setDataCore(DataCoreObject* data);
 

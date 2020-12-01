@@ -92,14 +92,61 @@ const std::vector<std::tuple<std::string, std::string, double> >& DataCore::GetR
     return m_results;
 }
 
-bool DataCore::PersonExists(const std::string& name) const
+// Returns true if person was edited
+bool DataCore::EditPerson(const std::string& oldName, const std::string& newName)
 {
-    if (m_ledger.empty()) {
+    if (PersonExists(newName)) {
+        // Attempting to change name to one that already exists
         return false;
     }
 
-    const auto& lastLedgerEntry = m_ledger[m_ledger.size() - 1];
-    return lastLedgerEntry.find(name) != lastLedgerEntry.end();
+    bool personWasEdited = false;
+    for (auto& transaction : m_transactions) {
+        if (transaction.payer == oldName) {
+            transaction.payer = newName;
+            personWasEdited = true;
+        }
+        auto node = transaction.covering.extract(oldName);
+        if (!node.empty()) {
+            node.value() = newName;
+            transaction.covering.insert(std::move(node));
+            personWasEdited = true;
+        }
+    }
+
+    // No need to mark personWasEdited flag, names in the ledger and results
+    // are a subset of names in transactions
+    for (auto& ledgerEntry : m_ledger) {
+        auto node = ledgerEntry.extract(oldName);
+        if (!node.empty()) {
+            node.key() = newName;
+            ledgerEntry.insert(std::move(node));
+        }
+    }
+
+    for (auto& result : m_results) {
+        if (std::get<0>(result) == oldName) {
+            std::get<0>(result) = newName;
+        } else if (std::get<1>(result) == oldName) {
+            std::get<1>(result) = newName;
+        }
+    }
+
+    return personWasEdited;
+}
+
+bool DataCore::PersonExists(const std::string& name) const
+{
+    // We can't just check the last ledger line (which would be very fast)
+    // A transaction with a below margin cost could exist.  So we must check all transactions
+
+    for (const auto& transaction : m_transactions) {
+        if (transaction.payer == name || transaction.covering.find(name) != transaction.covering.end()) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 void DataCore::Clear()

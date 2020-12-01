@@ -140,10 +140,9 @@ void PeopleTableModel::setDataCore(DataCoreObject* data)
         assert(m_data);
         emit dataCoreChanged();
 
-        QObject::connect(m_data, &DataCoreObject::modelCleared,
+        QObject::connect(m_data, &DataCoreObject::peopleChanged,
             this, &PeopleTableModel::resetModel);
-        QObject::connect(m_data, &DataCoreObject::modelCleared,
-            [this](){ emit modelCleared(); });
+        resetModel();
     }
 }
 

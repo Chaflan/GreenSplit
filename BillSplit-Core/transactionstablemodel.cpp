@@ -171,10 +171,9 @@ void TransactionsTableModel::setDataCore(DataCoreObject* data)
         assert(m_data);
         emit dataCoreChanged();
 
-        QObject::connect(m_data, &DataCoreObject::modelCleared,
+        QObject::connect(m_data, &DataCoreObject::transactionsChanged,
             this, &TransactionsTableModel::resetModel);
-        QObject::connect(m_data, &DataCoreObject::modelCleared,
-            [this](){ emit modelCleared(); });
+        resetModel();
     }
 }
 

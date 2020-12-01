@@ -19,21 +19,21 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    connect(ui->actionOpen, &QAction::triggered, this, &MainWindow::FileOpen);
-    connect(ui->actionSave, &QAction::triggered, this, &MainWindow::FileSave);
-    connect(ui->actionSave_As, &QAction::triggered, this, &MainWindow::FileSaveAs);
-    connect(ui->actionNew, &QAction::triggered, this, &MainWindow::FileNew);
+    QObject::connect(ui->actionOpen, &QAction::triggered, this, &MainWindow::FileOpen);
+    QObject::connect(ui->actionSave, &QAction::triggered, this, &MainWindow::FileSave);
+    QObject::connect(ui->actionSave_As, &QAction::triggered, this, &MainWindow::FileSaveAs);
+    QObject::connect(ui->actionNew, &QAction::triggered, this, &MainWindow::FileNew);
 
     m_data = new DataCoreObject(this);
-    connect(m_data, &DataCoreObject::signalError, this, &MainWindow::ShowErrorMessage);
+    QObject::connect(m_data, &DataCoreObject::signalError, this, &MainWindow::ShowErrorMessage);
     m_data->jsonRead();
 
     m_peopleModel = new PeopleTableModel(this);
-    connect(m_peopleModel, &PeopleTableModel::signalError, this, &MainWindow::ShowErrorMessage);
+    QObject::connect(m_peopleModel, &PeopleTableModel::signalError, this, &MainWindow::ShowErrorMessage);
     m_peopleModel->setDataCore(m_data);
 
     m_transactionsModel = new TransactionsTableModel(this);
-    connect(m_peopleModel, &PeopleTableModel::signalError, this, &MainWindow::ShowErrorMessage);
+    QObject::connect(m_peopleModel, &PeopleTableModel::signalError, this, &MainWindow::ShowErrorMessage);
     m_transactionsModel->setDataCore(m_data);
 
     m_transactionModel = new TransactionModel(this);

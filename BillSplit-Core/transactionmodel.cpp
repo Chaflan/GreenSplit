@@ -57,17 +57,17 @@ void TransactionModel::setDataCore(DataCoreObject* data)
         assert(m_data);
         emit dataSet();
 
-        QObject::connect(m_data, &DataCoreObject::identifierListChanged,
+        QObject::connect(m_data, &DataCoreObject::peopleChanged,
             this, &TransactionModel::identifierListChanged);
-        QObject::connect(m_data, &DataCoreObject::modelCleared,
-            this, &TransactionModel::identifierListChanged);  // TODO: I think this is sufficient
+//        QObject::connect(m_data, &DataCoreObject::modelReset,
+//            this, &TransactionModel::identifierListChanged);  // TODO: I think this is sufficient
 
         // TODO: Is this call necessary?
         emit allPeopleChanged();
 
         for (int i = 0; i < m_data->numPeople(); ++i) {
             PersonCheck* newPersonCheck = new PersonCheck(m_data->getPersonIdentifier(i), true, this);
-            connect(newPersonCheck, &PersonCheck::checkStatusChanged, [this](){ emit coveringChecksChanged(); });
+            QObject::connect(newPersonCheck, &PersonCheck::checkStatusChanged, [this](){ emit coveringChecksChanged(); });
             m_coveringList.append(newPersonCheck);  // TODO: Is this right?  Qt parent system is weird
         }
         emit coveringListChanged();
@@ -209,7 +209,7 @@ void TransactionModel::identifierListChanged()
     for (int i = 0; i < m_data->numPeople(); ++i) {
         if (i >= m_coveringList.size()) {
             PersonCheck* newPersonCheck = new PersonCheck(m_data->getPersonIdentifier(i), true, this);
-            connect(newPersonCheck, &PersonCheck::checkStatusChanged, [this](){ emit coveringChecksChanged(); });
+            QObject::connect(newPersonCheck, &PersonCheck::checkStatusChanged, [this](){ emit coveringChecksChanged(); });
             m_coveringList.insert(i, newPersonCheck);
             coveringListWasChanged = true;
             continue;
@@ -234,7 +234,7 @@ void TransactionModel::identifierListChanged()
 
         if (!found) {
             PersonCheck* newPersonCheck = new PersonCheck(m_data->getPersonIdentifier(i), true, this);
-            connect(newPersonCheck, &PersonCheck::checkStatusChanged, [this](){ emit coveringChecksChanged(); });
+            QObject::connect(newPersonCheck, &PersonCheck::checkStatusChanged, [this](){ emit coveringChecksChanged(); });
             m_coveringList.insert(i, newPersonCheck);
             coveringListWasChanged = true;
         }

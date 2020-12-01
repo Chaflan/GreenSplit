@@ -26,9 +26,9 @@ void PeopleWidget::SetPeopleModel(PeopleTableModel* peopleModel)
     ui->tableView->setModel(m_model);
 
     ui->pushButtonView->setDisabled(true);
-    connect(ui->tableView->selectionModel(), &QItemSelectionModel::selectionChanged,
+    QObject::connect(ui->tableView->selectionModel(), &QItemSelectionModel::selectionChanged,
         [this]() { ui->pushButtonView->setDisabled(!ui->tableView->selectionModel()->hasSelection()); });
-   connect(m_model, &PeopleTableModel::modelCleared,
+    QObject::connect(m_model, &PeopleTableModel::modelReset,
         [this]() { ui->pushButtonView->setDisabled(!ui->tableView->selectionModel()->hasSelection()); });
 
     // Table formatting

@@ -50,7 +50,6 @@ public:
 signals:
     void signalError(QString message) const;
     void dataCoreChanged() const;
-    void modelCleared() const;  // TODO: rethink this
 
 private:
     DataCoreObject* getDataCore() const          { return m_data; }

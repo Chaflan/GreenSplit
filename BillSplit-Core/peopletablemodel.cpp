@@ -61,9 +61,12 @@ bool PeopleTableModel::removeRows(int row, int count, const QModelIndex& parent)
         return false;
     }
 
-    beginRemoveRows(parent, row, row + count - 1);
+    // We can't use begin/endRemoveRows here becuase Qt still removes them from the view
+    // even if removePeople fails.
+    beginResetModel();
     bool result = m_data->removePeople(row, count);
-    endRemoveRows();
+    endResetModel();
+
     return result;
 }
 
@@ -107,19 +110,11 @@ bool PeopleTableModel::setData(int row, const QString& roleString, const QVarian
 
 bool PeopleTableModel::addPerson(QString initials, QString name)
 {
-    if (initials.isEmpty()) {
-        emit signalError("Identifier cannot be empty.");
-        return false;
-    }
-
-    if (m_data->personExists(initials)) {
-        emit signalError("Identifier must be unique.");
-        return false;
-    }
-
-    beginInsertRows(QModelIndex(), rowCount(), rowCount());
+    // Can't use begin/endInsertRows here. Qt still adds to view
+    // even if addPerson fails.
+    beginResetModel();
     bool result = m_data->addPerson(std::move(initials), std::move(name));
-    endInsertRows();
+    endResetModel();
     return result;
 }
 

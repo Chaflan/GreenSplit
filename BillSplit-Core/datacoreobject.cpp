@@ -171,8 +171,7 @@ bool DataCoreObject::personInTransactions(const QString& identifier) const
 
 bool DataCoreObject::addPerson(QString identifier, QString name)
 {
-    if (personExists(identifier)) {
-        emit signalError("Identifier \"" + identifier + "\" already exists. Identifiers must be unique.");
+    if (!isNewIdentifierValid(identifier)) {
         return false;
     }
 
@@ -319,23 +318,13 @@ bool DataCoreObject::editPersonIdentifier(int index, const QString& newIdentifie
         return true;
     }
 
-    if (newIdentifier.isEmpty()) {
-        emit signalError("Attempting to change identifier to be empty.  Identifiers cannot be empty.");
+    if (!isNewIdentifierValid(newIdentifier)) {
         return false;
     }
 
-    if (newIdentifier.length() >= 3) {
-        emit signalError("Identifiers cannot exceed 3 characters in length");
-        return false;
-    }
-
-    if (personExists(newIdentifier)) {
-        emit signalError("Attempting to change identifier to one that already exists.  Identifiers must be unique.");
-        return false;
-    }
-
+    bool editedInTransactions = editPerson(m_identifierList[index], newIdentifier);
     m_identifierList[index] = newIdentifier;
-    if (editPerson(m_identifierList[index], newIdentifier)) {
+    if (editedInTransactions) {
         emit transactionsChanged();
         emit resultsChanged();
     }
@@ -492,4 +481,24 @@ std::set<std::string> DataCoreObject::stringListToStdSet(const QStringList& stri
         }
     }
     return ret;
+}
+
+bool DataCoreObject::isNewIdentifierValid(const QString& identifier) const
+{
+    if (identifier.isEmpty()) {
+        emit signalError("Identifiers cannot be empty.");
+        return false;
+    }
+
+    if (identifier.length() >= 3) {
+        emit signalError("Identifiers cannot exceed 3 characters in length");
+        return false;
+    }
+
+    if (personExists(identifier)) {
+        emit signalError("Identifier \"" + identifier + "\" already exists. Identifiers must be unique.");
+        return false;
+    }
+
+    return true;
 }

@@ -81,6 +81,7 @@ signals:
 
 private:
     std::set<std::string> stringListToStdSet(const QStringList& stringList);
+    bool isNewIdentifierValid(const QString& identifier) const;
 
 private:
     QStringList m_identifierList;

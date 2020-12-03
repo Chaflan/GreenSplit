@@ -36,6 +36,7 @@ void PersonCheck::setCheckStatus(bool checkStatus)
 TransactionModel::TransactionModel(QObject *parent) :
     QObject(parent)
 {
+    setCostStr("0");
 }
 
 void TransactionModel::setDataCore(DataCoreObject* data)

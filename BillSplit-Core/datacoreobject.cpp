@@ -20,7 +20,8 @@ int DataCoreObject::numTransactions() const
     return static_cast<int>(m_data.NumTransactions());
 }
 
-bool DataCoreObject::addTransaction(double cost, const QString& payer, const QStringList& covering, QString description)
+// silent flag exists for bulk transaction add
+bool DataCoreObject::addTransaction(double cost, const QString& payer, const QStringList& covering, QString description, bool silent)
 {
     try {
         m_data.AddTransaction(payer.toStdString(), cost, stringListToStdSet(covering));
@@ -28,49 +29,61 @@ bool DataCoreObject::addTransaction(double cost, const QString& payer, const QSt
         qDebug() << "Error - DataCoreObject::AddTransaction - " << ex.what();
         return false;
     }
-
     m_descriptionsList.append(std::move(description));
-    emit resultsChanged();
+
+    if (!silent) {
+        emit resultsChanged();
+    }
+
     return true;
 }
 
 bool DataCoreObject::deleteTransactions(int index, int count)
 {
+    bool success = false;
     try {
-        m_data.DeleteTransactions(index, count);
+        success = m_data.DeleteTransactions(index, count);
     } catch (const std::exception& ex) {
         qDebug() << "Error - DataCoreObject::DeleteTransactions - " << ex.what();
         return false;
     }
 
-    emit resultsChanged();
-    return true;
+    if (success) {
+        emit resultsChanged();
+    }
+    return success;
 }
 
 bool DataCoreObject::editTransactionPayer(int index, const QString& newPayer)
 {
+    bool success = false;
     try {
-        m_data.EditTransactionPayer(index, newPayer.toStdString());
+        success = m_data.EditTransactionPayer(index, newPayer.toStdString());
     } catch (const std::exception& ex) {
         qDebug() << "Error - DataCoreObject::GetTransactionPayer - " << ex.what();
         return false;
     }
 
-    emit resultsChanged();  // TODO: Not always
-    return true;
+    if (success) {
+        emit resultsChanged();
+    }
+    return success;
 }
 
 bool DataCoreObject::editTransactionCost(int index, double newCost)
 {
+    bool success = false;
     try {
-        m_data.EditTransactionCost(index, newCost);
+        success = m_data.EditTransactionCost(index, newCost);
     } catch (const std::exception& ex) {
         qDebug() << "Error - DataCoreObject::GetTransactionPayer - " << ex.what();
         return false;
     }
 
-    emit resultsChanged();  // TODO: Not always
-    return true;
+    if (success) {
+        emit resultsChanged();
+    }
+    return success;
 }
 
 bool DataCoreObject::editTransactionCovering(int index, const QStringList& newCovering)
@@ -80,15 +93,18 @@ bool DataCoreObject::editTransactionCovering(int index, const QStringList& newCo
         return false;
     }
 
+    bool success = false;
     try {
-        m_data.EditTransactionCovering(index, stringListToStdSet(newCovering));
+        success = m_data.EditTransactionCovering(index, stringListToStdSet(newCovering));
     } catch (const std::exception& ex) {
         qDebug() << "Error - DataCoreObject::GetTransactionPayer - " << ex.what();
         return false;
     }
 
-    emit resultsChanged();  // TODO: Not always could make called func return true if success
-    return true;
+    if (success) {
+        emit resultsChanged();
+    }
+    return success;
 }
 
 QString DataCoreObject::getTransactionPayer(int index) const
@@ -286,6 +302,7 @@ double DataCoreObject::getResultCost(int index) const
 
 int DataCoreObject::numResults() const
 {
+
     return static_cast<int>(m_data.GetResults().size());
 }
 
@@ -302,7 +319,6 @@ bool DataCoreObject::editTransactionDescription(int index, QString newDescriptio
     }
 
     m_descriptionsList[index] = std::move(newDescription);
-    // Signal people changed
     return true;
 }
 
@@ -412,6 +428,8 @@ void DataCoreObject::jsonRead(const QJsonObject& jsonObj)
         addPerson(personObj["identifier"].toString(), personObj["name"].toString());
     }
 
+    emit peopleChanged();
+
     QJsonArray transactionArray = jsonObj["transaction"].toArray();
     for (const auto& element : transactionArray)
     {
@@ -423,12 +441,18 @@ void DataCoreObject::jsonRead(const QJsonObject& jsonObj)
             coveringStringList.append(name.toString());
         }
 
+        // Bulk add silently and then emit the results changed signal
+        // to avoid a recalc upon each add.
         addTransaction(
             transactionObj["cost"].toDouble(),
             transactionObj["payer"].toString(),
             std::move(coveringStringList),
-            transactionObj["description"].toString());
+            transactionObj["description"].toString(),
+            true);
     }
+
+    emit transactionsChanged();
+    emit resultsChanged();
 }
 
 void DataCoreObject::jsonWrite(QJsonObject& jsonObj) const

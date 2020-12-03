@@ -20,7 +20,7 @@ public:
 
     // DataCore wrapper methods
     int numTransactions() const;
-    bool addTransaction(double cost, const QString& payer, const QStringList& covering, QString description);
+    bool addTransaction(double cost, const QString& payer, const QStringList& covering, QString description, bool silent = false);
     bool deleteTransactions(int index, int count);
     bool editTransactionPayer(int index, const QString& newPayer);
     bool editTransactionCost(int index, double newCost);
@@ -73,6 +73,12 @@ signals:
     // that a different submodel needs to react to.  A more adaptable system would have a signaller enum and just ignore
     // any signal that came from itself.  The burden would then be on the submodels to deal with the signals, but this has
     // a lot of extra code and is clunky.
+    //
+    // Note that QML and Widgets treat model reloads differently.  EG: changing an identifier from people view will send
+    // a transactionsChanged signal.  QML will immediately reload all transactions and call data to get all of them for the
+    // table.  When you flip to the transactions tab the new ones are already loaded and no further loads occur.
+    // Widgets instead will not reload on signal, but always loads the data with the data call when flipping to the
+    // transactions tab.  Therefore the signal is not needed for widgets, but it also does no harm.
     //--------------------------------------------------------------------------------------------------------------------
     void peopleChanged() const;
     void transactionsChanged() const;

@@ -1,6 +1,7 @@
 #include "transactioneditdialog.h"
 #include "ui_transactioneditdialog.h"
 #include "transactionmodel.h"
+#include <QDebug>
 
 // TODO: you are not deleting things
 
@@ -19,58 +20,36 @@ TransactionEditDialog::~TransactionEditDialog()
 void TransactionEditDialog::SetModel(TransactionModel* model)
 {
     m_model = model;
-    
-    LoadFromModelCost();
-    LoadFromModelDescription();
-    LoadFromModelAllPeople();
-    LoadFromModelPayerIndex();
-    LoadFromModelChecks();
-
-    QObject::connect(m_model, &TransactionModel::costChanged, this, &TransactionEditDialog::LoadFromModelCost);
-    QObject::connect(m_model, &TransactionModel::descriptionChanged, this, &TransactionEditDialog::LoadFromModelDescription);
-    QObject::connect(m_model, &TransactionModel::allPeopleChanged, this, &TransactionEditDialog::LoadFromModelAllPeople);
-    QObject::connect(m_model, &TransactionModel::payerIndexChanged, this, &TransactionEditDialog::LoadFromModelPayerIndex);
-    QObject::connect(m_model, &TransactionModel::coveringChecksChanged, this, &TransactionEditDialog::LoadFromModelChecks);
 }
 
-void TransactionEditDialog::LoadFromModelCost()
+int TransactionEditDialog::exec()
 {
-    ui->doubleSpinBoxCost->setValue(m_model->getCost());
-}
+    if (!m_model) {
+        qDebug() << "Error - TransactionEditDialog::exec - called with null model";
+    } else {
+        // load data from the model to the view
 
-void TransactionEditDialog::LoadFromModelDescription()
-{
-    ui->lineEditDescription->setText(m_model->getDescription());
-}
+        ui->doubleSpinBoxCost->setValue(m_model->getCostDbl());
+        ui->lineEditDescription->setText(m_model->getDescription());
 
-void TransactionEditDialog::LoadFromModelAllPeople()
-{
-    ui->comboBoxPayer->clear();
-    QStringList allPeople = m_model->getAllPeople();
-    for (const QString& name : allPeople) {
-        ui->comboBoxPayer->addItem(name);
-    }
-
-    ui->listWidget->clear();
-    ui->listWidget->addItems(allPeople);
-}
-
-void TransactionEditDialog::LoadFromModelPayerIndex()
-{
-    if (!m_model->getPayerName().isEmpty()) {
+        ui->comboBoxPayer->clear();
+        for (const QString& name : m_model->getAllPeople()) {
+            ui->comboBoxPayer->addItem(name);
+        }
         ui->comboBoxPayer->setCurrentIndex(m_model->getPayerIndex());
-    }
-}
 
-void TransactionEditDialog::LoadFromModelChecks()
-{
-    const auto& coveringList = m_model->getCoveringList();
-    for(int i = 0; i < ui->listWidget->count(); ++i)
-    {
-        QListWidgetItem* item = ui->listWidget->item(i);
-        item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
-        item->setCheckState((coveringList[i]->getCheckStatus() ? Qt::Checked : Qt::Unchecked));
+        ui->listWidget->clear();
+        const auto& coveringList = m_model->getCoveringList();
+        for(int i = 0; i < coveringList.length(); ++i)
+        {
+            ui->listWidget->addItem(coveringList[i]->getName());
+            QListWidgetItem* item = ui->listWidget->item(i);
+            item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
+            item->setCheckState((coveringList[i]->getCheckStatus() ? Qt::Checked : Qt::Unchecked));
+        }
     }
+
+    return QDialog::exec();
 }
 
 void TransactionEditDialog::SetMode(TransactionEditDialog::Mode mode)
@@ -80,17 +59,14 @@ void TransactionEditDialog::SetMode(TransactionEditDialog::Mode mode)
 
 void TransactionEditDialog::on_pushButtonSave_clicked()
 {
-    // Save all this data to the model
-    m_model->setCost(ui->doubleSpinBoxCost->value());
+    // Save view data to the model
+    m_model->setCostDbl(ui->doubleSpinBoxCost->value());
     m_model->setDescription(ui->lineEditDescription->text());
     m_model->setPayerIndex(ui->comboBoxPayer->currentIndex());
 
-    // Pull out the model, edit it, and resubmit it.  Very wasteful.
-    auto coveringList = m_model->getCoveringList();
     for(int i = 0; i < ui->listWidget->count(); ++i) {
-        coveringList[i]->setCheckStatus(ui->listWidget->item(i)->checkState() == Qt::Checked);
+        m_model->setCheck(i, ui->listWidget->item(i)->checkState() == Qt::Checked);
     }
-    m_model->setCoveringList(coveringList);
 
     this->done(CustomDialogCode::Save);
 }

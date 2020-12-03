@@ -35,19 +35,31 @@ private:
     bool m_checkStatus;
 };
 
+//------------------------------------------------------------------------------------------
+// TransactionModel
+//
+// This class is used to model a single transaction for the view or add transaction window
+// popup.  It's use is very different between the QML and Widget views.  For QML we load or
+// loadDefault and cached data is bound to the view using qt properties.  For widgets we simply load
+// model data to the view on popup execution, and save view data to the model on popup save.
+// The QML solution is unnecessarily complex as the view window is modal, so binding user changes
+// that later get changed again is a waste of resources.  It also adds a lot of code.  I did it
+// this way partially to learn how this is done, and partially because in the future this
+// model may be useful for some changes I have in mind.  This comment is here to explain why
+// this model seems to be doing a lot more than it needs to.
+//-------------------------------------------------------------------------------------------
 class BILLSPLITCORE_EXPORT TransactionModel : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(DataCoreObject* data READ getDataCore WRITE setDataCore NOTIFY dataSet)
 
-    // TODO: Try MEMBER with a NOTIFY only called by non-setters
-    Q_PROPERTY(QString payerName READ getPayerName WRITE setPayerName NOTIFY payerNameChanged)
+    // ReadWrite properties
+    Q_PROPERTY(DataCoreObject* data READ getDataCore WRITE setDataCore NOTIFY dataSet)
     Q_PROPERTY(int payerIndex READ getPayerIndex WRITE setPayerIndex NOTIFY payerIndexChanged)
-    Q_PROPERTY(double cost READ getCost WRITE setCost NOTIFY costChanged)
-    Q_PROPERTY(QString costStr READ getCostStr WRITE setCostStr NOTIFY costChanged)  // TODO: Cache this
+    Q_PROPERTY(double costDbl READ getCostDbl WRITE setCostDbl NOTIFY costChanged)
+    Q_PROPERTY(QString costStr READ getCostStr WRITE setCostStr NOTIFY costChanged)
     Q_PROPERTY(QString description READ getDescription WRITE setDescription NOTIFY descriptionChanged USER true)
 
-    // TODO: Readonly?
+    // Readonly properties
     Q_PROPERTY(QStringList allPeople READ getAllPeople NOTIFY allPeopleChanged)
     Q_PROPERTY(QList<PersonCheck*> coveringList READ getCoveringList NOTIFY coveringListChanged)
 
@@ -55,52 +67,44 @@ public:
     explicit TransactionModel(QObject *parent = nullptr);
 
     DataCoreObject* getDataCore() const          { return m_data; }
-    QString getPayerName() const                 { return m_payerName; }
     int getPayerIndex() const                    { return m_payerIndex; }
-    double getCost() const                       { return m_cost; }
-    QString getCostStr() const;
+    double getCostDbl() const                    { return m_costDbl; }
+    QString getCostStr() const                   { return m_costStr; }
     QString getDescription() const               { return m_description; }
     QList<PersonCheck*> getCoveringList() const  { return m_coveringList; }
-    QStringList getAllPeople() const;
+    QStringList getAllPeople() const             { return m_allPeople; }
 
-    // TODO: const refs?  Others too?
     void setDataCore(DataCoreObject* data);
-    void setPayerName(QString payerName);
     void setPayerIndex(int payerIndex);
-    void setCost(double cost);
-    void setCostStr(QString cost);
-    void setDescription(QString description);
-    void setCoveringList(const QList<PersonCheck*>& coveringList);
+    void setCostDbl(double cost);
+    void setCostStr(const QString& cost);
+    void setDescription(const QString& description);
 
-    Q_INVOKABLE void load(double cost, QString payer, const QStringList& covering, QString description);
-    Q_INVOKABLE void clear();
+    // Functions interacting with TransactionsModel
+    Q_INVOKABLE void load(double cost, const QString& payer, const QStringList& covering, const QString& description);
+    Q_INVOKABLE void loadDefault();
+    QString getPayerName() const;
     QStringList getCoveringStringList() const;
-    void setCoveringStringList(const QStringList& stringList);
+
+    // Functions interacting with only WidgetsView
+    void setCheck(int index, bool check);
 
 signals:
     void dataSet() const;
-    void payerNameChanged() const;
     void payerIndexChanged() const;
     void costChanged() const;
     void descriptionChanged() const;
     void allPeopleChanged() const;
     void coveringListChanged() const;
-    void coveringChecksChanged() const;
 
 private:
-    void identifierListChanged();
-    void setDefaultPayer();
-
-private:
-    // TODO: Some of this data is in the people model, do we want to hook them together?
-    QString m_payerName;
-    int m_payerIndex = -1;
-    double m_cost;
+    int m_payerIndex;
+    double m_costDbl;
+    QString m_costStr;
     QString m_description;
+    QStringList m_allPeople;
     QList<PersonCheck*> m_coveringList;
 
-    // TODO: This information can change from the people model, so we really should
-    // store models in here, not the raw data core, that is a fix for the future though
     DataCoreObject* m_data = nullptr;
 };
 

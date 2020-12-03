@@ -24,9 +24,29 @@ ApplicationWindow {
                 id: menu
 
                 MenuItem {
+                    text: "New"
+                    onClicked: {
+                        dataCore.clear();
+                        saveMenuItem.enabled = false;
+                    }
+                }
+                MenuItem {
                     text: "Open..."
                     onClicked: {
                         fileDialogOpen.open()
+                    }
+
+                    FileDialog {
+                        id: fileDialogOpen
+                        title: "Choose a file to open"
+                        selectMultiple: false
+                        defaultSuffix: "json"
+                        onAccepted: {
+                            if (dataCore.jsonRead(fileDialogOpen.fileUrl)) {
+                                saveMenuItem.enabled = true
+                                saveMenuItem.activeFileUrl = fileDialogOpen.fileUrl
+                            }
+                        }
                     }
                 }
                 MenuItem {
@@ -45,31 +65,19 @@ ApplicationWindow {
                     onClicked: {
                         fileDialogSave.open()
                     }
-                }
-            }
 
-            FileDialog {
-                id: fileDialogOpen
-                title: "Choose a file to open"
-                selectMultiple: false
-                defaultSuffix: "json"
-                onAccepted: {
-                    if (dataCore.jsonRead(fileDialogOpen.fileUrl)) {
-                        saveMenuItem.enabled = true
-                        saveMenuItem.activeFileUrl = fileDialogOpen.fileUrl
-                    }
-                }
-            }
-            FileDialog {
-                id: fileDialogSave
-                title: "Choose a file to save"
-                selectExisting: false
-                selectMultiple: false
-                defaultSuffix: "json"
-                onAccepted: {
-                    if (dataCore.jsonWrite(fileDialogSave.fileUrl)) {
-                        saveMenuItem.enabled = true
-                        saveMenuItem.activeFileUrl = fileDialogSave.fileUrl
+                    FileDialog {
+                        id: fileDialogSave
+                        title: "Choose a file to save"
+                        selectExisting: false
+                        selectMultiple: false
+                        defaultSuffix: "json"
+                        onAccepted: {
+                            if (dataCore.jsonWrite(fileDialogSave.fileUrl)) {
+                                saveMenuItem.enabled = true
+                                saveMenuItem.activeFileUrl = fileDialogSave.fileUrl
+                            }
+                        }
                     }
                 }
             }

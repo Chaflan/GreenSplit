@@ -121,7 +121,7 @@ Page {
                     if (dataCore.numPeople() < 1) {
                         popupMessage("Add at least one person to begin adding transactions")
                     } else {
-                        viewTransactionDialog.transactionModel.clear()
+                        addTransactionDialog.transactionModel.loadDefault()
                         addTransactionDialog.open()
                     }
                 }

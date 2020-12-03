@@ -29,7 +29,7 @@ public:
     double getTransactionCost(int index) const;
     QStringList getTransactionCovering(int index) const; // TODO: Stringlist?  Cache this?
     bool editPerson(const QString& oldName, const QString& newName);
-    void clear();
+    Q_INVOKABLE void clear();
 
     // DataCore extending methods
     Q_INVOKABLE int numPeople() const;
@@ -47,7 +47,6 @@ public:
     bool editTransactionDescription(int index, QString newDescription);   // It might be that the fail case is more common meaning we want const ref here
     bool editPersonIdentifier(int index, const QString& newIdentifier);
     bool editPersonName(int index, QString newName);
-    const QStringList& getIdentifierList() const;
 
     // Save and Load methods.
     // TODO: Move these to their own class, or use a database

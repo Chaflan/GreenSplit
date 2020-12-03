@@ -9,6 +9,8 @@
 // Widgets once again must have something that inherits from QAbstractItemModel.
 // for now I am using the oldschool boilerplate connect code with clunky transfers.
 
+
+
 namespace Ui {
 class transactioneditdialog;
 }
@@ -32,11 +34,8 @@ public:
     void SetModel(TransactionModel* model);
     TransactionModel* GetModel() const { return m_model; }
 
-    void LoadFromModelCost();
-    void LoadFromModelDescription();
-    void LoadFromModelAllPeople();
-    void LoadFromModelPayerIndex();
-    void LoadFromModelChecks();
+public slots:
+    int exec() override;
 
 private slots:
     void on_pushButtonSave_clicked();
@@ -45,8 +44,6 @@ private slots:
 
 private:
     Ui::transactioneditdialog *ui;
-
-public:
     TransactionModel* m_model = nullptr;
 };
 

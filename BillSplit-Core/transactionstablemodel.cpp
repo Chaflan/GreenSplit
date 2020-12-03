@@ -36,7 +36,6 @@ QVariant TransactionsTableModel::data(const QModelIndex& index, int role) const
                     }
                     coveringListStr += str;
                 }
-                qDebug() << coveringListStr;
                 return coveringListStr;
             }
             case Column::Description: return m_data->getTransactionDescription(index.row());
@@ -142,7 +141,7 @@ bool TransactionsTableModel::editFromModel(int row, TransactionModel* model)
 {
     assert(model);
     bool ret = true;
-    ret &= setData(row, Column::Cost, model->getCost());
+    ret &= setData(row, Column::Cost, model->getCostDbl());
     ret &= setData(row, Column::Payer, model->getPayerName());
     ret &= setData(row, Column::Covering, model->getCoveringStringList());
     ret &= setData(row, Column::Description, model->getDescription());
@@ -155,7 +154,7 @@ bool TransactionsTableModel::addFromModel(TransactionModel* model)
     beginInsertRows(QModelIndex(), rowCount(), rowCount());
 
     bool result = m_data->addTransaction(
-        model->getCost(),
+        model->getCostDbl(),
         model->getPayerName(),
         model->getCoveringStringList(),
         model->getDescription());

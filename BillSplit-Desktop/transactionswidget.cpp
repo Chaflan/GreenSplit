@@ -78,7 +78,7 @@ void TransactionsWidget::ViewSelected(const QModelIndex& index)
 
 void TransactionsWidget::on_pushButtonNew_clicked()
 {
-    m_dialog->GetModel()->clear();
+    m_dialog->GetModel()->loadDefault();
     m_dialog->SetMode(TransactionEditDialog::Mode::Add);
 
     for (bool isValid = false; !isValid;) {

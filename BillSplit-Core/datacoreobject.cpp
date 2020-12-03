@@ -348,11 +348,6 @@ bool DataCoreObject::editPersonName(int index, QString newName)
     return true;
 }
 
-const QStringList& DataCoreObject::getIdentifierList() const
-{
-    return m_identifierList;
-}
-
 bool DataCoreObject::jsonRead(const QString& filePath)
 {
     // TODO: Model reset signals.

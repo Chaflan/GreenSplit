@@ -232,15 +232,6 @@ void DataCore::SetLedgerRevisionIndex(std::size_t newIndex) const
     m_ledgerRevisionIndex = std::min(m_ledgerRevisionIndex, newIndex);
 }
 
-bool DataCore::DebtsCanBeSettled(std::unordered_map<std::string, double> debts)
-{
-    double sum = 0;
-    for (const auto& [ name, debt ]  : debts) {
-        sum += debt;
-    }
-    return sum < 0.01;
-}
-
 std::vector<std::tuple<std::string, std::string, double> > DataCore::Solve() const
 {
     // Beware: Solve assumes ledger is updated.  The chain of calls currently makes this always true.
@@ -248,18 +239,8 @@ std::vector<std::tuple<std::string, std::string, double> > DataCore::Solve() con
     if (m_ledger.empty()) {
         return {};
     }
-    const auto& lastLedgerLine = m_ledger[m_ledger.size() - 1];
-    if (lastLedgerLine.empty()) {
-        return {};
-    }
 
-    // TODO: Put this in the algo core
-    if (!DebtsCanBeSettled(lastLedgerLine)) {
-        // TODO: Throw?
-        return {};
-    }
-
-    return AlgoCore::SolveOptimal(lastLedgerLine);
+    return AlgoCore::SolveOptimal(m_ledger[m_ledger.size() - 1]);
 }
 
 void DataCore::DebugOutputLedgerData() const

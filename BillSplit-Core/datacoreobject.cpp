@@ -270,34 +270,50 @@ const QString& DataCoreObject::getTransactionDescription(int index) const
 
 QString DataCoreObject::getResultDebtor(int index) const
 {
+    QString result;
     if (index < 0 || index >= numResults()) {
         qDebug() << "Error - DataCoreObject::GetResultDebtor - Invalid index:" << index;
-        const static QString errorString = "";
-        return errorString;
+    } else {
+        try {
+            result = QString::fromStdString(std::get<0>(m_data.GetResults()[index]));
+        } catch (const std::exception& ex) {
+            qDebug() << "Error - DataCoreObject::GetResultDebtor - " << ex.what();
+            result.clear();
+        }
     }
-
-    return QString::fromStdString(std::get<0>(m_data.GetResults()[index]));
+    return result;
 }
 
 QString DataCoreObject::getResultCreditor(int index) const
 {
+    QString result;
     if (index < 0 || index >= numResults()) {
         qDebug() << "Error - DataCoreObject::GetResultCreditor - Invalid index:" << index;
-        const static QString errorString = "";
-        return errorString;
+    } else {
+        try {
+            result = QString::fromStdString(std::get<1>(m_data.GetResults()[index]));
+        } catch (const std::exception& ex) {
+            qDebug() << "Error - DataCoreObject::GetResultDebtor - " << ex.what();
+            result.clear();
+        }
     }
-
-    return QString::fromStdString(std::get<1>(m_data.GetResults()[index]));
+    return result;
 }
 
 double DataCoreObject::getResultCost(int index) const
 {
+    double result = 0;
     if (index < 0 || index >= numResults()) {
         qDebug() << "Error - DataCoreObject::GetResultCost - Invalid index:" << index;
-        return 0;
+    } else {
+        try {
+            result = std::get<2>(m_data.GetResults()[index]);
+        } catch (const std::exception& ex) {
+            qDebug() << "Error - DataCoreObject::GetResultDebtor - " << ex.what();
+            result = 0;
+        }
     }
-
-    return std::get<2>(m_data.GetResults()[index]);
+    return result;
 }
 
 int DataCoreObject::numResults() const
@@ -306,7 +322,7 @@ int DataCoreObject::numResults() const
     return static_cast<int>(m_data.GetResults().size());
 }
 
-bool DataCoreObject::editTransactionDescription(int index, QString newDescription)
+bool DataCoreObject::editTransactionDescription(int index, const QString& newDescription)
 {
     if (index < 0 || index >= numPeople()) {
         qDebug() << "Error - DataCoreObject::EditTransactionDescription - Invalid index:" << index;
@@ -318,7 +334,7 @@ bool DataCoreObject::editTransactionDescription(int index, QString newDescriptio
         return true;
     }
 
-    m_descriptionsList[index] = std::move(newDescription);
+    m_descriptionsList[index] = newDescription;
     return true;
 }
 

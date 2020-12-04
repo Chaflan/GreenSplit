@@ -14,16 +14,16 @@ class DataCore
 {
 public:
     std::size_t NumTransactions() const;
-    void AddTransaction(std::string payer, double cost, std::set<std::string> covering); //
-    bool DeleteTransactions(int index, int count); //
-    bool EditTransactionPayer(int index, std::string newPayer); //
-    bool EditTransactionCost(int index, double newCost); //
+    void AddTransaction(std::string payer, double cost, std::set<std::string> covering);
+    bool DeleteTransactions(int index, int count);
+    bool EditTransactionPayer(int index, std::string newPayer);
+    bool EditTransactionCost(int index, double newCost);
     bool EditTransactionCovering(int index, std::set<std::string> newCovering);
     const std::string& GetTransactionPayer(int index) const;
     double GetTransactionCost(int index) const;
     const std::set<std::string>& GetTransactionCovering(int index) const;
-    const std::vector<std::tuple<std::string, std::string, double> >& GetResults() const; // start here
-    bool EditPerson(const std::string& oldName, const std::string& newName); //
+    const std::vector<std::tuple<std::string, std::string, double> >& GetResults() const;
+    bool EditPerson(const std::string& oldName, const std::string& newName);
     bool PersonExists(const std::string& name) const;
     void Clear();
 
@@ -33,7 +33,6 @@ public:
 private:
     void VerifyTransactionIndex(int index) const;
     void SetLedgerRevisionIndex(std::size_t newIndex) const;
-    static bool DebtsCanBeSettled(std::unordered_map<std::string, double> debts);  // TODO: move to algo core
     void DebugOutputLedgerData() const;
     std::vector<std::tuple<std::string, std::string, double> > Solve() const;
 

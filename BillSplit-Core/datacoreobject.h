@@ -44,7 +44,7 @@ public:
     QString getResultCreditor(int index) const;
     double getResultCost(int index) const;
     int numResults() const;
-    bool editTransactionDescription(int index, QString newDescription);   // It might be that the fail case is more common meaning we want const ref here
+    bool editTransactionDescription(int index, const QString& newDescription);
     bool editPersonIdentifier(int index, const QString& newIdentifier);
     bool editPersonName(int index, QString newName);
 

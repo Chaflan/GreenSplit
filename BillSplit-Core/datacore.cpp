@@ -77,30 +77,6 @@ bool DataCore::EditTransactionCovering(int index, std::set<std::string> newCover
     return false;
 }
 
-const std::string& DataCore::GetTransactionPayer(int index) const
-{
-    VerifyTransactionIndex(index);
-    return m_transactions[index].payer;
-}
-
-double DataCore::GetTransactionCost(int index) const
-{
-    VerifyTransactionIndex(index);
-    return m_transactions[index].cost;
-}
-
-const std::set<std::string>& DataCore::GetTransactionCovering(int index) const
-{
-    VerifyTransactionIndex(index);
-    return m_transactions[index].covering;
-}
-
-const std::vector<std::tuple<std::string, std::string, double> >& DataCore::GetResults() const
-{
-    UpdateResults();
-    return m_results;
-}
-
 // Returns true if person was edited
 bool DataCore::EditPerson(const std::string& oldName, const std::string& newName)
 {
@@ -142,6 +118,30 @@ bool DataCore::EditPerson(const std::string& oldName, const std::string& newName
     }
 
     return personWasEdited;
+}
+
+const std::string& DataCore::GetTransactionPayer(int index) const
+{
+    VerifyTransactionIndex(index);
+    return m_transactions[index].payer;
+}
+
+double DataCore::GetTransactionCost(int index) const
+{
+    VerifyTransactionIndex(index);
+    return m_transactions[index].cost;
+}
+
+const std::set<std::string>& DataCore::GetTransactionCovering(int index) const
+{
+    VerifyTransactionIndex(index);
+    return m_transactions[index].covering;
+}
+
+const std::vector<std::tuple<std::string, std::string, double> >& DataCore::GetResults() const
+{
+    UpdateResults();
+    return m_results;
 }
 
 bool DataCore::PersonExists(const std::string& name) const
@@ -240,7 +240,7 @@ std::vector<std::tuple<std::string, std::string, double> > DataCore::Solve() con
         return {};
     }
 
-    return AlgoCore::SolveOptimal(m_ledger[m_ledger.size() - 1]);
+    return AlgoCore::SolveFewestTransfers(m_ledger[m_ledger.size() - 1]);
 }
 
 void DataCore::DebugOutputLedgerData() const

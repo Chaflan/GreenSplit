@@ -17,36 +17,35 @@ class BILLSPLITCORE_EXPORT DataCoreObject : public QObject
     Q_OBJECT
 public:
     explicit DataCoreObject(QObject *parent = nullptr);
+    virtual ~DataCoreObject();
 
-    // DataCore wrapper methods
     int numTransactions() const;
     bool addTransaction(double cost, const QString& payer, const QStringList& covering, QString description, bool silent = false);
     bool deleteTransactions(int index, int count);
-    bool editTransactionPayer(int index, const QString& newPayer);
-    bool editTransactionCost(int index, double newCost);
-    bool editTransactionCovering(int index, const QStringList& newCovering);
     QString getTransactionPayer(int index) const; // Cache this and return const &
     double getTransactionCost(int index) const;
+    const QString& getTransactionDescription(int index) const;
     QStringList getTransactionCovering(int index) const; // TODO: Stringlist?  Cache this?
-    bool editPerson(const QString& oldName, const QString& newName);
-    Q_INVOKABLE void clear();
+    bool editTransactionPayer(int index, const QString& newPayer);
+    bool editTransactionCost(int index, double newCost);
+    bool editTransactionDescription(int index, const QString& newDescription);
+    bool editTransactionCovering(int index, const QStringList& newCovering);
 
-    // DataCore extending methods
     Q_INVOKABLE int numPeople() const;
     bool personExists(const QString& identifier) const;
-    bool personInTransactions(const QString& identifier) const;
     bool addPerson(QString identifier, QString name);
     bool removePeople(int index, int count);
     const QString& getPersonIdentifier(int index) const;
     const QString& getPersonName(int index) const;
-    const QString& getTransactionDescription(int index) const;
+    bool editPersonIdentifier(int index, const QString& newIdentifier);
+    bool editPersonName(int index, QString newName);
+
+    int numResults() const;
     QString getResultDebtor(int index) const;
     QString getResultCreditor(int index) const;
     double getResultCost(int index) const;
-    int numResults() const;
-    bool editTransactionDescription(int index, const QString& newDescription);
-    bool editPersonIdentifier(int index, const QString& newIdentifier);
-    bool editPersonName(int index, QString newName);
+
+    Q_INVOKABLE void clear();
 
     // Save and Load methods.
     // TODO: Move these to their own class, or use a database
@@ -56,8 +55,6 @@ public:
     Q_INVOKABLE bool jsonWrite(const QUrl& filePath) const;
     void jsonRead(const QJsonObject& jsonObj);
     void jsonWrite(QJsonObject& jsonObj) const;
-
-    virtual ~DataCoreObject();
 
 signals:
     void signalError(QString error) const;
@@ -85,13 +82,16 @@ signals:
     void resultsChanged() const;
 
 private:
+    bool personInTransactions(const QString& identifier) const;
     std::set<std::string> stringListToStdSet(const QStringList& stringList);
     bool isNewIdentifierValid(const QString& identifier) const;
 
 private:
+    // Data kept in addition to any in the data core to facilitate a clean user experience
     QStringList m_identifierList;
     QStringList m_nameList;
     QStringList m_descriptionsList;
+
     DataCore m_data;
 };
 

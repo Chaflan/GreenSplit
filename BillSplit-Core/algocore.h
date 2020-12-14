@@ -5,7 +5,20 @@
 #include <string>
 #include <unordered_map>
 
-// TODO: from, to, cost explain in comments
+// TODO: its possible to set your margins as one thing and to have a solution problem
+// TODO: need a fewest transaction and lowest transfer cost algo
+// TODO: review data structure choice here.  Order is irrelevant with return value.
+
+//---------------------------------------------------------------------------------------
+// A namespace of functions to solve the fewest transactions problem.
+//
+// Input (credits): a mapping of names (string) to amount of money owed to them (double).
+//      This amount can be negative indicating that it is a debt; money they owe.
+//      To whom is irrelevant.
+// Output (return value): A sequence of payments/transactions to be made to solve the
+//      problem.  Order is arbitrary. Tuple elements are <from, to, amount>.
+//      e.g. <"Mary", "Tom", 50> is a transaction where Mary pays Tom 50 units of currency.
+//---------------------------------------------------------------------------------------
 namespace AlgoCore
 {
     //---------------------------------------------------------------------------------------
@@ -14,23 +27,25 @@ namespace AlgoCore
     // These could be common with larger sets, whole number prices, and/or a large margin
     //      n = debts.size()
     //      Time -> O(n)
-    //      Space (solution vector) -> O(n)
-    //      Space (other required to solve) -> O(1)
+    //      Space -> O(n)
     //---------------------------------------------------------------------------------------
     std::vector<std::tuple<std::string, std::string, double> >
-        SolveGreedy(const std::unordered_map<std::string, double>& debts);
+        SolveGreedy(const std::unordered_map<std::string, double>& credits);
 
     //---------------------------------------------------------------------------------------
-    // Brute force recursive tree algorithm, slow but optimal
-    // TODO: Note about how solution requires solution to the ____ problem which is open
+    // Solves the problem such that you have the fewest number of transactions possible.
+    // It is always slower than greedy.
+    //      n = debts.size()
+    //      Time -> O(n)
+    //      Space -> O(n)
     //---------------------------------------------------------------------------------------
     std::vector<std::tuple<std::string, std::string, double> >
-        SolveOptimal(const std::unordered_map<std::string, double>& debts);
+        SolveFewestTransfers(const std::unordered_map<std::string, double>& credits);
 
     //---------------------------------------------------------------------------------------
-    // Throws an invalid argument exception if its impossible to solve debts
+    // Throws an invalid argument exception if its impossible to solve the passed credits.
     //---------------------------------------------------------------------------------------
-    void ValidateDebts(const std::unordered_map<std::string, double>& debts);
+    void Validate(const std::unordered_map<std::string, double>& credits);
 
     // Values between the margins (inclusive) are considered essentially zero
     // (a settled transaction) for the purpose of the algorithm

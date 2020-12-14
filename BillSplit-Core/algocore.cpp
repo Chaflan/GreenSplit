@@ -1,11 +1,10 @@
 #include "algocore.h"
 #include <queue>
 
-// Assumes debts can be settled
 std::vector<std::tuple<std::string, std::string, double> >
-    AlgoCore::SolveGreedy(const std::unordered_map<std::string, double>& debts)
+    AlgoCore::SolveGreedy(const std::unordered_map<std::string, double>& credits)
 {
-    ValidateDebts(debts);
+    Validate(credits);
     std::vector<std::tuple<std::string, std::string, double> > res;
 
     // Create two priority queues; one for negative costs, and one for positive.
@@ -32,7 +31,7 @@ std::vector<std::tuple<std::string, std::string, double> >
     std::vector<std::string> pNameLookup;
     std::vector<std::string> nNameLookup;
 
-    for (const auto& [name, cost] : debts) {
+    for (const auto& [name, cost] : credits) {
         if (cost < nMargin) {
             nQueue.emplace(cost, nNameLookup.size());
             nNameLookup.push_back(name);
@@ -67,11 +66,11 @@ std::vector<std::tuple<std::string, std::string, double> >
 // TODO: Undo this: Assumes debts can be settled and that it is non-empty
 // TODO: Double check your indexing with the breakout sentinel descend
 std::vector<std::tuple<std::string, std::string, double> >
-    AlgoCore::SolveOptimal(const std::unordered_map<std::string, double>& debts)
+    AlgoCore::SolveFewestTransfers(const std::unordered_map<std::string, double>& credits)
 {
     // Prime the final solution using the greedy solution.  The optimal tree solution
     // will attempt to improve upon this, but won't be able to in most cases.
-    std::vector<std::tuple<std::string, std::string, double> > solnFinalStr = SolveGreedy(debts);
+    std::vector<std::tuple<std::string, std::string, double> > solnFinalStr = SolveGreedy(credits);
     int numTransFinal = static_cast<int>(solnFinalStr.size());
 
     // Fewer than 4 transactions is guaranteed optimal already.  I have a proof in my notebook.
@@ -88,7 +87,7 @@ std::vector<std::tuple<std::string, std::string, double> >
         std::vector<std::string> nNameLookup;
         std::vector<std::tuple<std::size_t, std::size_t, double> > solnFinalIdx(numTransOriginal - 1);
         std::vector<std::tuple<std::size_t, std::size_t, double> > solnCurrIdx(numTransOriginal - 1);
-        for (const auto& [name, cost] : debts) {
+        for (const auto& [name, cost] : credits) {
             if (cost < nMargin) {
                 nNameLookup.push_back(name);
                 nFirstSet.push_back(cost);
@@ -208,10 +207,10 @@ std::vector<std::tuple<std::string, std::string, double> >
     return solnFinalStr;
 }
 
-void AlgoCore::ValidateDebts(const std::unordered_map<std::string, double>& debts)
+void AlgoCore::Validate(const std::unordered_map<std::string, double>& credits)
 {
     double sum = 0;
-    for (const auto& [ name, debt ]  : debts) {
+    for (const auto& [ name, debt ]  : credits) {
         sum += debt;
     }
 

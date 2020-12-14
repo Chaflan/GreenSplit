@@ -8,7 +8,8 @@
 #include <unordered_map>
 
 // TODO: Analyze use of set vs uset for names
-// TODO: Edit transaction covering add, delete
+// TODO: Consider a "Transactions" method that returns the whole thing const ref
+//      could include a tuple instead of transactions object
 
 class DataCore
 {
@@ -16,19 +17,23 @@ public:
     std::size_t NumTransactions() const;
     void AddTransaction(std::string payer, double cost, std::set<std::string> covering);
     bool DeleteTransactions(int index, int count);
+
     bool EditTransactionPayer(int index, std::string newPayer);
     bool EditTransactionCost(int index, double newCost);
     bool EditTransactionCovering(int index, std::set<std::string> newCovering);
+
     const std::string& GetTransactionPayer(int index) const;
     double GetTransactionCost(int index) const;
     const std::set<std::string>& GetTransactionCovering(int index) const;
-    const std::vector<std::tuple<std::string, std::string, double> >& GetResults() const;
-    bool EditPerson(const std::string& oldName, const std::string& newName);
-    bool PersonExists(const std::string& name) const;
-    void Clear();
 
+    bool PersonExists(const std::string& name) const;
+    bool EditPerson(const std::string& oldName, const std::string& newName);
+
+    const std::vector<std::tuple<std::string, std::string, double> >& GetResults() const;
     bool UpdateLedger() const;
     bool UpdateResults() const;
+
+    void Clear();
 
 private:
     void VerifyTransactionIndex(int index) const;

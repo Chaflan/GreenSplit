@@ -15,6 +15,11 @@ DataCoreObject::DataCoreObject(QObject *parent) :
     jsonRead();
 }
 
+DataCoreObject::~DataCoreObject()
+{
+    jsonWrite();
+}
+
 int DataCoreObject::numTransactions() const
 {
     return static_cast<int>(m_data.NumTransactions());
@@ -143,13 +148,6 @@ QStringList DataCoreObject::getTransactionCovering(int index) const
     }
 
     return result;
-}
-
-// This function is meant as just a passthrough for DataCore, editPersonIdentifier is the full version
-// TODO: Make this private?
-bool DataCoreObject::editPerson(const QString& oldName, const QString& newName)
-{
-    return m_data.EditPerson(oldName.toStdString(), newName.toStdString());
 }
 
 void DataCoreObject::clear()
@@ -354,7 +352,7 @@ bool DataCoreObject::editPersonIdentifier(int index, const QString& newIdentifie
         return false;
     }
 
-    bool editedInTransactions = editPerson(m_identifierList[index], newIdentifier);
+    bool editedInTransactions = m_data.EditPerson(m_identifierList[index].toStdString(), newIdentifier.toStdString());;
     m_identifierList[index] = newIdentifier;
     if (editedInTransactions) {
         emit transactionsChanged();
@@ -484,7 +482,7 @@ void DataCoreObject::jsonWrite(QJsonObject& jsonObj) const
     jsonObj["people"] = peopleArray;
 
     QJsonArray transactionArray;
-    for(int i = 0; i < static_cast<int>(m_data.NumTransactions()); ++i)
+    for(int i = 0; i < numTransactions(); ++i)
     {
         QJsonObject curr;
         curr["cost"] = getTransactionCost(i);
@@ -500,11 +498,6 @@ void DataCoreObject::jsonWrite(QJsonObject& jsonObj) const
         transactionArray.append(curr);
     }
     jsonObj["transaction"] = transactionArray;
-}
-
-DataCoreObject::~DataCoreObject()
-{
-    jsonWrite();
 }
 
 std::set<std::string> DataCoreObject::stringListToStdSet(const QStringList& stringList)

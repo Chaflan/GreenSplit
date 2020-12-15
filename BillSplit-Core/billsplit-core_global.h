@@ -10,3 +10,9 @@
 #endif
 
 #endif // BILLSPLITCORE_GLOBAL_H
+
+// TODO: FULL PROGRAM TODOS
+
+// const
+// braced initialization
+//

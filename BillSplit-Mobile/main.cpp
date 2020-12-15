@@ -13,11 +13,15 @@ int main(int argc, char *argv[])
 
     QGuiApplication app(argc, argv);
     QQmlApplicationEngine engine;
+    QObject::connect(&engine, &QQmlApplicationEngine::quit,
+        [&app](){
+            qDebug() << "Engine called quit, telling app to quit too.";
+            app.quit();
+        });
 
     app.setOrganizationName("OrgName");
     app.setOrganizationDomain("OrgDomain");
 
-    // Type registration
     qmlRegisterType<DataCoreObject>("com.company.core", 1,0, "DataCore");
     qmlRegisterType<PeopleTableModel>("com.company.core", 1,0, "PeopleTableModel");
     qmlRegisterType<TransactionsTableModel>("com.company.core", 1,0, "TransactionsTableModel");
@@ -33,5 +37,7 @@ int main(int argc, char *argv[])
     engine.load(url);
 
     auto ret = app.exec();
+
+    qDebug() << "Program exiting with " << ret;
     return ret;
 }

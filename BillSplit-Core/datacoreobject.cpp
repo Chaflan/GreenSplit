@@ -6,6 +6,7 @@
 #include <QJsonArray>
 #include <QFile>
 #include <QJsonDocument>
+#include <QDir>
 
 // TODO: Disallow blank payer name?
 
@@ -380,17 +381,12 @@ bool DataCoreObject::editPersonName(int index, QString newName)
 
 bool DataCoreObject::jsonRead(const QString& filePath)
 {
-    // TODO: Model reset signals.
-        // currently these are not needed as you go through AddPeople and AddTransaction
-        // but you really need a clean way to add a bunch without ledger updates
-        // and without all these signals going bananas
-
-    return jsonRead(QUrl::fromLocalFile(filePath));
+    return jsonRead(QUrl::fromLocalFile(addJsonExtension(filePath)));
 }
 
 bool DataCoreObject::jsonWrite(const QString& filePath) const
 {
-    return jsonWrite(QUrl::fromLocalFile(filePath));
+    return jsonWrite(QUrl::fromLocalFile(addJsonExtension(filePath)));
 }
 
 bool DataCoreObject::jsonRead(const QUrl& filePath)
@@ -498,6 +494,28 @@ void DataCoreObject::jsonWrite(QJsonObject& jsonObj) const
         transactionArray.append(curr);
     }
     jsonObj["transaction"] = transactionArray;
+}
+
+QStringList DataCoreObject::getLocalSaveFiles() const
+{
+    QDir directory;
+    QStringList entriesWithExt = directory.entryList(QStringList() << "*.json" << "*.JSON", QDir::Files);
+
+    QStringList entriesNameOnly;
+    for (const QString& entry : entriesWithExt) {
+        entriesNameOnly.append(entry.left(entry.lastIndexOf(".")));
+    }
+
+    return entriesNameOnly;
+}
+
+QString DataCoreObject::addJsonExtension(QString path)
+{
+    if (!path.endsWith(".json", Qt::CaseInsensitive)) {
+        path += ".json";
+    }
+
+    return path;
 }
 
 std::set<std::string> DataCoreObject::stringListToStdSet(const QStringList& stringList)

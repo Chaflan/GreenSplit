@@ -11,7 +11,14 @@ ApplicationWindow {
     height: 600
     title: qsTr("Tabs")
 
+    Item {
+        id: origin
+        x: menuBarRow.x
+        y: menuBarRow.y
+    }
+
     header: RowLayout {
+        id: menuBarRow
         height: 50
         Item { Layout.fillWidth: true } // Spacer
         RoundButton {
@@ -28,58 +35,61 @@ ApplicationWindow {
                     onClicked: {
                         dataCore.clear();
                         saveMenuItem.enabled = false;
+                        saveMenuItem.text = "Save"
                     }
                 }
                 MenuItem {
-                    text: "Open..."
+                    text: "Open (Local)..."
                     onClicked: {
-                        fileDialogOpen.open()
-                    }
-
-                    FileDialog {
-                        id: fileDialogOpen
-                        title: "Choose a file to open"
-                        selectMultiple: false
-                        defaultSuffix: "json"
-                        onAccepted: {
-                            if (dataCore.jsonRead(fileDialogOpen.fileUrl)) {
-                                saveMenuItem.enabled = true
-                                saveMenuItem.activeFileUrl = fileDialogOpen.fileUrl
-                            }
-                        }
+                        fileLocalDialogOpen.open()
                     }
                 }
                 MenuItem {
                     id: saveMenuItem
 
                     enabled: false
-                    property var activeFileUrl
+                    property string activeFileName
 
                     text: "Save"
                     onClicked: {
-                        dataCore.jsonWrite(activeFileUrl)
+                        dataCore.jsonWrite(activeFileName)
                     }
                 }
                 MenuItem {
-                    text: "Save As..."
+                    text: "Save As (Local)..."
                     onClicked: {
-                        fileDialogSave.open()
-                    }
-
-                    FileDialog {
-                        id: fileDialogSave
-                        title: "Choose a file to save"
-                        selectExisting: false
-                        selectMultiple: false
-                        defaultSuffix: "json"
-                        onAccepted: {
-                            if (dataCore.jsonWrite(fileDialogSave.fileUrl)) {
-                                saveMenuItem.enabled = true
-                                saveMenuItem.activeFileUrl = fileDialogSave.fileUrl
-                            }
-                        }
+                        fileLocalDialogSave.open()
                     }
                 }
+                MenuItem {
+                    text: "Exit"
+                    onClicked: {
+                        Qt.quit()
+                    }
+                }
+            }
+        }
+    }
+
+    FileLocalDialog {
+        id: fileLocalDialogSave
+        Component.onCompleted: setSaveMode()
+        onAcceptPressed: {
+            if (dataCore.jsonWrite(fileLocalDialogSave.fileName)) {
+                saveMenuItem.enabled = true
+                saveMenuItem.activeFileName = fileLocalDialogSave.fileName
+                saveMenuItem.text = "Save (" + saveMenuItem.activeFileName + ")"
+            }
+        }
+    }
+    FileLocalDialog {
+        id: fileLocalDialogOpen
+        Component.onCompleted: setOpenMode()
+        onAcceptPressed: {
+            if (dataCore.jsonRead(fileLocalDialogOpen.fileName)) {
+                saveMenuItem.enabled = true
+                saveMenuItem.activeFileName = fileLocalDialogOpen.fileName
+                saveMenuItem.text = "Save (" + saveMenuItem.activeFileName + ")"
             }
         }
     }
@@ -89,17 +99,9 @@ ApplicationWindow {
         anchors.fill: parent
         currentIndex: tabBar.currentIndex
 
-        PeoplePage {
-        }
-
-        TransactionsPage {
-        }
-
-        ResultsPage {
-//            onFocusChanged: {
-//                resultsModel.updateCalculations()
-//            }
-        }
+        PeoplePage {}
+        TransactionsPage {}
+        ResultsPage {}
     }
 
     footer: TabBar {

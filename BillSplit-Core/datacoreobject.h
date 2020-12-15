@@ -47,14 +47,14 @@ public:
 
     Q_INVOKABLE void clear();
 
-    // Save and Load methods.
-    // TODO: Move these to their own class, or use a database
-    bool jsonRead(const QString& filePath = "save.json");
-    bool jsonWrite(const QString& filePath = "save.json") const;
+    // Save and Load methods
+    Q_INVOKABLE bool jsonRead(const QString& filePath = "autosave.json");
+    Q_INVOKABLE bool jsonWrite(const QString& filePath = "autosave.json") const;
     Q_INVOKABLE bool jsonRead(const QUrl& filePath);
     Q_INVOKABLE bool jsonWrite(const QUrl& filePath) const;
     void jsonRead(const QJsonObject& jsonObj);
     void jsonWrite(QJsonObject& jsonObj) const;
+    Q_INVOKABLE QStringList getLocalSaveFiles() const;
 
 signals:
     void signalError(QString error) const;
@@ -82,8 +82,9 @@ signals:
     void resultsChanged() const;
 
 private:
+    static QString addJsonExtension(QString path);
     bool personInTransactions(const QString& identifier) const;
-    std::set<std::string> stringListToStdSet(const QStringList& stringList);
+    static std::set<std::string> stringListToStdSet(const QStringList& stringList);
     bool isNewIdentifierValid(const QString& identifier) const;
 
 private:

@@ -4,10 +4,6 @@ import QtQml.Models 2.12
 import Qt.labs.qmlmodels 1.0
 import QtQuick.Layouts 1.3
 
-// TODO: standardize use of table.model and peoplemodel
-// TODO: standardize the use of parent vs id
-// TODO: texttt
-
 Page {
     Item {
         id: table
@@ -31,7 +27,7 @@ Page {
                     color: "green"
 
                     Text {
-                        id: texttt
+                        id: headerText
                         font.pixelSize: 15
                         anchors.fill: parent
                         anchors.leftMargin: 10
@@ -144,25 +140,18 @@ Page {
 
     PersonInputDialog {
         id: addPersonDialog
-        anchors.centerIn: parent
         onSavePressed: {
-            if (!tableview.model.addPerson(addPersonDialog.initials, addPersonDialog.name)) {
-                console.warn("person couldn't be added. I=" + initials + " N=" + name)
-            } else {
-                tableview.forceLayout() // contentHeight won't update without this as it is loaded on demand
-            }
+            tableview.model.addPerson(addPersonDialog.initials, addPersonDialog.name)
         }
     }
     PersonInputDialog {
         id: viewPersonDialog
-        anchors.centerIn: parent
         onSavePressed: {
             tableview.model.setData(tableview.selectedRow, "Identifier", viewPersonDialog.initials)
             tableview.model.setData(tableview.selectedRow, "Name", viewPersonDialog.name)
         }
         onDeletePressed: {
             tableview.model.removeRows(tableview.selectedRow, 1)
-            tableview.forceLayout() // contentHeight won't update without this as it is loaded on demand
         }
         onClosed: {
             viewButton.enabled = false

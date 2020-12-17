@@ -132,7 +132,6 @@ Page {
     // TODO: rename, singular
     TransactionsInputDialog {
         id: addTransactionDialog
-        anchors.centerIn: parent
         onSavePressed: {
             if (!tableview.model.addFromModel(transactionModel)) {
                 console.warn("transaction couldn't be added.")
@@ -143,7 +142,6 @@ Page {
     }
     TransactionsInputDialog {
         id: viewTransactionDialog
-        anchors.centerIn: parent
         onSavePressed: {
             if (!tableview.model.editFromModel(tableview.selectedRow, transactionModel)) {
                 console.warn("transaction couldn't be edited.")

@@ -40,7 +40,6 @@ bool DataCoreObject::addTransaction(double cost, const QString& payer, const QSt
     if (!silent) {
         emit resultsChanged();
     }
-
     return true;
 }
 
@@ -62,34 +61,51 @@ bool DataCoreObject::deleteTransactions(int index, int count)
 
 bool DataCoreObject::editTransactionPayer(int index, const QString& newPayer)
 {
-    bool success = false;
+    bool wasChanged = false;
     try {
-        success = m_data.EditTransactionPayer(index, newPayer.toStdString());
+        wasChanged = m_data.EditTransactionPayer(index, newPayer.toStdString());
     } catch (const std::exception& ex) {
         qDebug() << "Error - DataCoreObject::GetTransactionPayer - " << ex.what();
         return false;
     }
 
-    if (success) {
+    if (wasChanged) {
         emit resultsChanged();
     }
-    return success;
+    return true;
 }
 
+// TODO: Make a note somewhere.  DCO returns false if something went wrong, DC returns true if something changed.
 bool DataCoreObject::editTransactionCost(int index, double newCost)
 {
-    bool success = false;
+    bool wasChanged = false;
     try {
-        success = m_data.EditTransactionCost(index, newCost);
+        wasChanged = m_data.EditTransactionCost(index, newCost);
     } catch (const std::exception& ex) {
         qDebug() << "Error - DataCoreObject::GetTransactionPayer - " << ex.what();
         return false;
     }
 
-    if (success) {
+    if (wasChanged) {
         emit resultsChanged();
     }
-    return success;
+    return true;
+}
+
+bool DataCoreObject::editTransactionDescription(int index, const QString& newDescription)
+{
+    if (index < 0 || index >= numPeople()) {
+        qDebug() << "Error - DataCoreObject::EditTransactionDescription - Invalid index:" << index;
+        return false;
+    }
+
+    // Editing to what it already is, nothing to do.
+    if (m_descriptionsList[index] == newDescription) {
+        return true;
+    }
+
+    m_descriptionsList[index] = newDescription;
+    return true;
 }
 
 bool DataCoreObject::editTransactionCovering(int index, const QStringList& newCovering)
@@ -99,18 +115,18 @@ bool DataCoreObject::editTransactionCovering(int index, const QStringList& newCo
         return false;
     }
 
-    bool success = false;
+    bool wasChanged = false;
     try {
-        success = m_data.EditTransactionCovering(index, stringListToStdSet(newCovering));
+        wasChanged = m_data.EditTransactionCovering(index, stringListToStdSet(newCovering));
     } catch (const std::exception& ex) {
         qDebug() << "Error - DataCoreObject::GetTransactionPayer - " << ex.what();
         return false;
     }
 
-    if (success) {
+    if (wasChanged) {
         emit resultsChanged();
     }
-    return success;
+    return true;
 }
 
 QString DataCoreObject::getTransactionPayer(int index) const
@@ -319,22 +335,6 @@ int DataCoreObject::numResults() const
 {
 
     return static_cast<int>(m_data.GetResults().size());
-}
-
-bool DataCoreObject::editTransactionDescription(int index, const QString& newDescription)
-{
-    if (index < 0 || index >= numPeople()) {
-        qDebug() << "Error - DataCoreObject::EditTransactionDescription - Invalid index:" << index;
-        return false;
-    }
-
-    // Editing to what it already is, nothing to do.
-    if (m_descriptionsList[index] == newDescription) {
-        return true;
-    }
-
-    m_descriptionsList[index] = newDescription;
-    return true;
 }
 
 bool DataCoreObject::editPersonIdentifier(int index, const QString& newIdentifier)

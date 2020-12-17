@@ -10,6 +10,9 @@ import QtQuick.Layouts 1.3
 // freeze the app.  To solve the problem I customized a popup.
 //-----------------------------------------------------------------------
 Popup {
+    y: origin.y + 10
+    x: origin.x + 10
+    width: mainApplicationWindow.width - 20
     modal: true
 
     default property alias content: contentItem.data

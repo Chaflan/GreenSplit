@@ -7,9 +7,7 @@ import com.company.core 1.0
 import "."
 
 PopupDialog {
-    id: root
     height: 500
-    width: 400
 
     property alias transactionModel: transactionModel
 
@@ -45,6 +43,7 @@ PopupDialog {
             TextField {
                 id: spinBoxCost
                 anchors.fill: parent
+                inputMethodHints: Qt.ImhDigitsOnly
                 onFocusChanged: { if(focus) { selectAll() } } // Select all on click
                 text: transactionModel.costStr
                 onDisplayTextChanged: transactionModel.costStr = text

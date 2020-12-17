@@ -141,7 +141,16 @@ bool TransactionsTableModel::editFromModel(int row, TransactionModel* model)
 {
     assert(model);
     bool ret = true;
-    ret &= setData(row, Column::Cost, model->getCostDbl());
+
+    bool ok;
+    model->getCostStr().toDouble(&ok);
+    if (!ok) {
+        emit signalError("Cost must be numeric.\nSetting it to zero.");
+        ret &= setData(row, Column::Cost, 0);
+    } else {
+        ret &= setData(row, Column::Cost, model->getCostDbl());
+    }
+
     ret &= setData(row, Column::Payer, model->getPayerName());
     ret &= setData(row, Column::Covering, model->getCoveringStringList());
     ret &= setData(row, Column::Description, model->getDescription());
@@ -151,15 +160,24 @@ bool TransactionsTableModel::editFromModel(int row, TransactionModel* model)
 bool TransactionsTableModel::addFromModel(TransactionModel* model)
 {
     assert(model);
-    beginInsertRows(QModelIndex(), rowCount(), rowCount());
 
+    bool ok;
+    double cost = 0;
+    model->getCostStr().toDouble(&ok);
+    if (!ok) {
+        emit signalError("Cost must be numeric.\nSetting it to zero.");
+    } else {
+        cost = model->getCostDbl();
+    }
+
+    beginInsertRows(QModelIndex(), rowCount(), rowCount());
     bool result = m_data->addTransaction(
-        model->getCostDbl(),
+        cost,
         model->getPayerName(),
         model->getCoveringStringList(),
         model->getDescription());
-
     endInsertRows();
+
     return result;
 }
 

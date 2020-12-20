@@ -21,6 +21,16 @@ SOURCES += \
 RESOURCES += \
     billsplit.qrc
 
+OTHER_FILES += \
+    qml/FileLocalDialog.qml \
+    qml/main.qml \
+    qml/PeoplePage.qml \
+    qml/PersonInputDialog.qml \
+    qml/PopupDialog.qml \
+    qml/ResultsPage.qml \
+    qml/TransactionsInputDialog.qml \
+    qml/TransactionsPage.qml
+
 # Additional import path used to resolve QML modules in Qt Creator's code model
 QML_IMPORT_PATH =
 

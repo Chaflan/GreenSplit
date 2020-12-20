@@ -6,10 +6,8 @@
         <file>qtquickcontrols2.conf</file>
         <file>qml/ResultsPage.qml</file>
         <file>qml/PersonInputDialog.qml</file>
-        <file>qml/Test.qml</file>
         <file>qml/TransactionsInputDialog.qml</file>
         <file>qml/PopupDialog.qml</file>
-        <file>qml/DoubleSpinBox.qml</file>
         <file>qml/FileLocalDialog.qml</file>
     </qresource>
 </RCC>

@@ -18,15 +18,15 @@ Popup {
         buttonAccept.text = "Open"
         textFieldFileName.visible = false
         resultLabel.visible = false
-        acceptContentItemText.color = "black"
-        cancelContentItemText.color = "black"
+        privates.setActiveColor(privates.openColor)
+        privates.listTextColor = privates.openColor
     }
     function setSaveMode() {
         buttonAccept.text = "Save"
         textFieldFileName.visible = true
         resultLabel.visible = true
-        acceptContentItemText.color = "darkgreen"
-        cancelContentItemText.color = "darkgreen"
+        privates.setActiveColor(privates.saveColor)
+        privates.listTextColor = "black"
     }
 
     property alias fileName: textFieldFileName.text
@@ -36,14 +36,27 @@ Popup {
     signal closeNoPress     // Popup closed, but user did not press a button to do so
 
     QtObject {
-        id: privateProperties
+        id: privates
+
+        function setActiveColor(newActiveColor) {
+            activeColor = newActiveColor
+            acceptContentItemText.color = activeColor
+            cancelContentItemText.color = activeColor
+            resultLabel.color = activeColor
+        }
+
         property int pressResult: 0
+        property color activeColor
+        property color listTextColor: "black"
+
+        readonly property color saveColor: "darkred"
+        readonly property color openColor: "darkgreen"
     }
 
     ColumnLayout {
         id: columnLayout
         anchors.fill: parent
-        spacing: 20
+        //spacing: 20
 
         ListView {
             id: listView
@@ -61,7 +74,7 @@ Popup {
             }
 
             delegate: TextField {
-                id: textField
+                id: listViewText
                 text: modelData
 
                 anchors.left: parent.left
@@ -69,25 +82,28 @@ Popup {
                 horizontalAlignment: TextInput.AlignHCenter
                 font.pixelSize: 15
                 readOnly: true
+                color: privates.listTextColor
 
                 background: Rectangle {
-                    id: backgroundRectangle
-                    border.color: "black"
+                    id: listViewTextBackground
+                    border.color: "lightgray"
                     border.width: 1
                 }
 
                 onActiveFocusChanged: {
                     if (activeFocus) {
-                        backgroundRectangle.border.color = "blue"
-                        backgroundRectangle.border.width = 2
+                        listViewTextBackground.border.color = "blue"
+                        listViewTextBackground.border.width = 2
                         textFieldFileName.text = text
                     } else {
-                        backgroundRectangle.border.color = "black"
-                        backgroundRectangle.border.width = 1
+                        listViewTextBackground.border.color = "lightgray"
+                        listViewTextBackground.border.width = 1
                     }
                 }
             }
         }
+
+        Item { implicitHeight: 40 } // Spacer
 
         Label {
             id: resultLabel
@@ -95,7 +111,7 @@ Popup {
             Layout.fillWidth: true
             horizontalAlignment: TextInput.AlignHCenter
             font.pixelSize: 15
-            color: "darkgreen"
+            color: privates.activeColor
         }
 
         TextField {
@@ -103,7 +119,7 @@ Popup {
             Layout.fillWidth: true
             horizontalAlignment: TextInput.AlignHCenter
             font.pixelSize: 15
-            color: "darkgreen"
+            color: privates.activeColor
         }
 
         RowLayout {
@@ -122,7 +138,7 @@ Popup {
                     horizontalAlignment: Text.AlignHCenter
                     verticalAlignment: Text.AlignVCenter
                 }
-                onClicked: { privateProperties.pressResult = 2; close() }
+                onClicked: { privates.pressResult = 2; close() }
             }
             Item { Layout.fillWidth: true } // Spacer
             Button {
@@ -135,7 +151,7 @@ Popup {
                     horizontalAlignment: Text.AlignHCenter
                     verticalAlignment: Text.AlignVCenter
                 }
-                onClicked: { privateProperties.pressResult = 3; close() }
+                onClicked: { privates.pressResult = 3; close() }
             }
             Layout.rightMargin: 5
         }
@@ -146,9 +162,9 @@ Popup {
     }
 
     onClosed: {
-        if (privateProperties.pressResult === 2) {
+        if (privates.pressResult === 2) {
             acceptPressed()
-        } else if (privateProperties.pressResult === 3) {
+        } else if (privates.pressResult === 3) {
             cancelPressed()
         } else {
             closeNoPress()

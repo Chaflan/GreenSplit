@@ -5,6 +5,7 @@ import Qt.labs.qmlmodels 1.0
 import QtQuick.Layouts 1.3
 
 Page {
+    id: page
     Item {
         id: table
         anchors.fill:parent
@@ -13,17 +14,15 @@ Page {
 
         Row {
             id: tableheader
-            width: listview.contentWidth
+            anchors.left: parent.left
+            anchors.right: parent.right
             height: 40
             x: -listview.contentX
             z: 1
             spacing: 5
 
             Rectangle {
-                width: 200
-                // TODO: Fix these.  Width needs to be tied to something, but god knows what
-                //width: tableview.model.columnWidth(index, tableheader.spacing, table.width)
-                height: parent.height
+                anchors.fill: parent
                 color: "green"
 
                 Text {
@@ -46,21 +45,31 @@ Page {
 
             anchors.fill: parent
             anchors.topMargin: tableheader.height + 5
+            spacing: 5
 
-            // TODO: WHY>?!?!
-            spacing: -5
-
-            delegate: Rectangle {
-                id: delegate
+            delegate: TextField {
+                id: textField
+                text: display
                 implicitHeight: 50
-                border.color: "black"
+                font.pixelSize: 15
+                anchors.left: parent.left
+                anchors.right: parent.right
+                readOnly: true
 
-                // For some dumb reason only TextField shows a border, not Text
-                TextField {
-                    id: textField
-                    text: display
-                    font.pixelSize: 15
-                    readOnly: true
+                background: Rectangle {
+                    id: backgroundRectangle
+                    border.color: "lightgray"
+                    border.width: 1
+                }
+
+                onActiveFocusChanged: {
+                    if (activeFocus) {
+                        backgroundRectangle.border.color = "blue"
+                        backgroundRectangle.border.width = 2
+                    } else {
+                        backgroundRectangle.border.color = "black"
+                        backgroundRectangle.border.width = 1
+                    }
                 }
             }
         }

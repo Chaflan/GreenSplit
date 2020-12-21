@@ -42,6 +42,11 @@ FORMS += \
     transactioneditdialog.ui \
     transactionswidget.ui
 
+OTHER_FILES += \
+    icons/appicon.ico
+
+RC_ICONS = icons/appicon.ico
+
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin

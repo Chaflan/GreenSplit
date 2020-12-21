@@ -16,7 +16,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-        main.cpp
+    main.cpp
 
 RESOURCES += \
     billsplit.qrc
@@ -29,7 +29,10 @@ OTHER_FILES += \
     qml/PopupDialog.qml \
     qml/ResultsPage.qml \
     qml/TransactionsInputDialog.qml \
-    qml/TransactionsPage.qml
+    qml/TransactionsPage.qml \
+    icons/appicon.ico
+
+RC_ICONS = icons/appicon.ico
 
 # Additional import path used to resolve QML modules in Qt Creator's code model
 QML_IMPORT_PATH =

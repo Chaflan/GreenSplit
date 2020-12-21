@@ -9,5 +9,6 @@
         <file>qml/TransactionsInputDialog.qml</file>
         <file>qml/PopupDialog.qml</file>
         <file>qml/FileLocalDialog.qml</file>
+        <file>icons/appicon.ico</file>
     </qresource>
 </RCC>

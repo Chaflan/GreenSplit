@@ -120,7 +120,7 @@ ApplicationWindow {
         }
     }
 
-    // TODO: Put these in the scopes to which they belong?
+    // TODO: Put these in the scopes to which they belong? (and their connections)
     // Models
     DataCore {
         id: dataCore

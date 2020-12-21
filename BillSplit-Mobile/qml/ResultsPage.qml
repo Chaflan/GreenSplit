@@ -22,7 +22,9 @@ Page {
             spacing: 5
 
             Rectangle {
-                anchors.fill: parent
+                width: parent.width
+                anchors.top: parent.top
+                anchors.bottom: parent.bottom
                 color: "green"
 
                 Text {

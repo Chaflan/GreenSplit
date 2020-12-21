@@ -105,7 +105,7 @@ Page {
             x: -tableview.contentX
             y: -tableview.contentY + tableview.contentHeight + tableheader.height + tableview.rowSpacing + 5
 
-            RoundButton {
+            Button {
                 id: viewButton
                 enabled: false
                 text: "View"
@@ -121,7 +121,7 @@ Page {
                 }
             }
             Item { Layout.fillWidth: true } // Spacer
-            RoundButton {
+            Button {
                 id: addButton
                 text: "Add"
                 font.pointSize: 10

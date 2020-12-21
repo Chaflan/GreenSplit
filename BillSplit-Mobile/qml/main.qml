@@ -20,11 +20,12 @@ ApplicationWindow {
     header: RowLayout {
         id: menuBarRow
         height: 50
-        Item { Layout.fillWidth: true } // Spacer
-        RoundButton {
-            id: menuButton
-            text: "Menu"
-            Layout.rightMargin: 5
+
+        Button {
+            id: burgerButton
+            icon.source: "../icons/ic_menu_grey600_36dp.png"
+            implicitWidth: 50
+            Layout.leftMargin: 5
             onClicked: menu.open()
 
             Menu {
@@ -68,6 +69,16 @@ ApplicationWindow {
                     }
                 }
             }
+        }
+
+        Item { Layout.fillWidth: true } // Spacer
+
+        Button {
+            id: kebabButton
+            icon.source: "../icons/ic_dots_vertical_grey600_36dp.png"
+            implicitWidth: 50
+            Layout.rightMargin: 5
+            enabled: false
         }
     }
 

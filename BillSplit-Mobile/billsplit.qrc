@@ -10,5 +10,7 @@
         <file>qml/PopupDialog.qml</file>
         <file>qml/FileLocalDialog.qml</file>
         <file>icons/appicon.ico</file>
+        <file>icons/ic_menu_grey600_36dp.png</file>
+        <file>icons/ic_dots_vertical_grey600_36dp.png</file>
     </qresource>
 </RCC>

@@ -30,7 +30,9 @@ OTHER_FILES += \
     qml/ResultsPage.qml \
     qml/TransactionsInputDialog.qml \
     qml/TransactionsPage.qml \
-    icons/appicon.ico
+    icons/appicon.ico \
+    icons/ic_dots_vertical_grey600_36dp.png \
+    icons/ic_menu_grey600_36dp.png
 
 RC_ICONS = icons/appicon.ico
 

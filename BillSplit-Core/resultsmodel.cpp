@@ -20,9 +20,11 @@ QVariant ResultsModel::data(const QModelIndex& index, int role) const
 {
     if (role == Qt::DisplayRole && isIndexValid(index)) {
         // TODO: cache these
-        return QString("%1 owes %2 $%3")
-                .arg(m_data->getResultDebtor(index.row()))
-                .arg(m_data->getResultCreditor(index.row()))
+        return QString("(%1)%2    owes    (%3)%4    %5")
+                .arg(m_data->getResultDebtorId(index.row()))
+                .arg(m_data->getResultDebtorName(index.row()))
+                .arg(m_data->getResultCreditorId(index.row()))
+                .arg(m_data->getResultCreditorName(index.row()))
                 .arg(QString::number(m_data->getResultCost(index.row()), 'f', 2));
     }
 

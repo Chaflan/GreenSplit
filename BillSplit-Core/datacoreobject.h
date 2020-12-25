@@ -2,6 +2,7 @@
 #define DATACOREOBJECT_H
 
 #include <QObject>
+#include <QMap>
 #include "billsplit-core_global.h"
 #include "datacore.h"
 
@@ -41,8 +42,10 @@ public:
     bool editPersonName(int index, QString newName);
 
     int numResults() const;
-    QString getResultDebtor(int index) const;
-    QString getResultCreditor(int index) const;
+    QString getResultDebtorId(int index) const;
+    QString getResultDebtorName(int index) const;
+    QString getResultCreditorId(int index) const;
+    QString getResultCreditorName(int index) const;
     double getResultCost(int index) const;
 
     Q_INVOKABLE void clear();
@@ -92,6 +95,10 @@ private:
     QStringList m_identifierList;
     QStringList m_nameList;
     QStringList m_descriptionsList;
+
+    // Maps identifier to its index in the identifierList, which is also the
+    // index of the corresponding name in nameList
+    QMap<QString, int> m_identifierIndexLookup;
 
     DataCore m_data;
 };

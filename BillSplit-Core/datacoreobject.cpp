@@ -172,6 +172,7 @@ void DataCoreObject::clear()
     m_data.Clear();
     m_identifierList.clear();
     m_nameList.clear();
+    m_identifierIndexLookup.clear();
     m_descriptionsList.clear();
     emit peopleChanged();
     emit transactionsChanged();
@@ -189,8 +190,7 @@ int DataCoreObject::numPeople() const
 // PersonInTransactions==false.
 bool DataCoreObject::personExists(const QString& identifier) const
 {
-    // TODO: This is quite slow, maybe consider the data structure for it
-    return m_identifierList.contains(identifier);
+    return m_identifierIndexLookup.contains(identifier);
 }
 
 // Returns true if the datacore has knowledge of the person, meaning
@@ -206,6 +206,7 @@ bool DataCoreObject::addPerson(QString identifier, QString name)
         return false;
     }
 
+    m_identifierIndexLookup[identifier] = m_identifierList.length();
     m_identifierList.append(std::move(identifier));
     m_nameList.append(std::move(name));
     return true;
@@ -232,6 +233,12 @@ bool DataCoreObject::removePeople(int index, int count)
     }
 
     if (indicesToDelete.length() > 0) {
+        // Remove lookup entries
+        for (int i : indicesToDelete) {
+            m_identifierIndexLookup.remove(m_identifierList[i]);
+        }
+
+        // Remove two stringlist entries
         if (indicesToDelete.length() == count) {
             // Bulk delete if none are being left behind (faster)
             m_identifierList.erase(m_identifierList.begin() + index, m_identifierList.begin() + lastIndex + 1);
@@ -283,7 +290,7 @@ const QString& DataCoreObject::getTransactionDescription(int index) const
     return m_descriptionsList[index];
 }
 
-QString DataCoreObject::getResultDebtor(int index) const
+QString DataCoreObject::getResultDebtorId(int index) const
 {
     QString result;
     if (index < 0 || index >= numResults()) {
@@ -299,7 +306,12 @@ QString DataCoreObject::getResultDebtor(int index) const
     return result;
 }
 
-QString DataCoreObject::getResultCreditor(int index) const
+QString DataCoreObject::getResultDebtorName(int index) const
+{
+    return m_nameList[m_identifierIndexLookup[getResultDebtorId(index)]];
+}
+
+QString DataCoreObject::getResultCreditorId(int index) const
 {
     QString result;
     if (index < 0 || index >= numResults()) {
@@ -313,6 +325,11 @@ QString DataCoreObject::getResultCreditor(int index) const
         }
     }
     return result;
+}
+
+QString DataCoreObject::getResultCreditorName(int index) const
+{
+    return m_nameList[m_identifierIndexLookup[getResultCreditorId(index)]];
 }
 
 double DataCoreObject::getResultCost(int index) const
@@ -333,7 +350,6 @@ double DataCoreObject::getResultCost(int index) const
 
 int DataCoreObject::numResults() const
 {
-
     return static_cast<int>(m_data.GetResults().size());
 }
 
@@ -353,9 +369,13 @@ bool DataCoreObject::editPersonIdentifier(int index, const QString& newIdentifie
         return false;
     }
 
-    bool editedInTransactions = m_data.EditPerson(m_identifierList[index].toStdString(), newIdentifier.toStdString());;
+    bool editOccurred = m_data.EditPerson(m_identifierList[index].toStdString(), newIdentifier.toStdString());
+
+    m_identifierIndexLookup.remove(m_identifierList[index]);
+    m_identifierIndexLookup[newIdentifier] = index;
     m_identifierList[index] = newIdentifier;
-    if (editedInTransactions) {
+
+    if (editOccurred) {
         emit transactionsChanged();
         emit resultsChanged();
     }
@@ -376,6 +396,7 @@ bool DataCoreObject::editPersonName(int index, QString newName)
     }
 
     m_nameList[index] = std::move(newName);
+    emit resultsChanged();
     return true;
 }
 

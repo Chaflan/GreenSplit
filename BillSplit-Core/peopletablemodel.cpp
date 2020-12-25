@@ -118,6 +118,7 @@ bool PeopleTableModel::addPerson(QString initials, QString name)
     return result;
 }
 
+// Move this to QML or QtWidgets
 int PeopleTableModel::columnWidth(int columnIndex, int columnSpacing, int totalWidth)
 {
     switch (columnIndex) {

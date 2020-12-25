@@ -18,14 +18,14 @@ Popup {
         buttonAccept.text = "Open"
         textFieldFileName.visible = false
         resultLabel.visible = false
-        privates.setActiveColor(privates.openColor)
+        privates.activeColor = privates.openColor
         privates.listTextColor = privates.openColor
     }
     function setSaveMode() {
         buttonAccept.text = "Save"
         textFieldFileName.visible = true
         resultLabel.visible = true
-        privates.setActiveColor(privates.saveColor)
+        privates.activeColor = privates.saveColor
         privates.listTextColor = "black"
     }
 
@@ -37,13 +37,6 @@ Popup {
 
     QtObject {
         id: privates
-
-        function setActiveColor(newActiveColor) {
-            activeColor = newActiveColor
-            acceptContentItemText.color = activeColor
-            cancelContentItemText.color = activeColor
-            resultLabel.color = activeColor
-        }
 
         property int pressResult: 0
         property color activeColor
@@ -120,6 +113,15 @@ Popup {
             horizontalAlignment: TextInput.AlignHCenter
             font.pixelSize: 15
             color: privates.activeColor
+            onTextChanged: manageAcceptButton()
+            Component.onCompleted: manageAcceptButton()
+            function manageAcceptButton() {
+                if (text === "") {
+                    buttonAccept.disable()
+                } else {
+                    buttonAccept.enable()
+                }
+            }
         }
 
         RowLayout {
@@ -131,6 +133,7 @@ Popup {
             Button {
                 id: buttonAccept
                 text: qsTr("Accept")
+                enabled: textFieldFileName.text !== ""
                 contentItem: Text {
                     id: acceptContentItemText
                     text: buttonAccept.text
@@ -138,6 +141,15 @@ Popup {
                     horizontalAlignment: Text.AlignHCenter
                     verticalAlignment: Text.AlignVCenter
                 }
+                function disable() {
+                    enabled = false;
+                    acceptContentItemText.color = "gray"
+                }
+                function enable() {
+                    enabled = true;
+                    acceptContentItemText.color = privates.activeColor
+                }
+
                 onClicked: { privates.pressResult = 2; close() }
             }
             Item { Layout.fillWidth: true } // Spacer
@@ -147,6 +159,7 @@ Popup {
                 contentItem: Text {
                     id: cancelContentItemText
                     text: buttonCancel.text
+                    color: privates.activeColor
                     font.pixelSize: 15
                     horizontalAlignment: Text.AlignHCenter
                     verticalAlignment: Text.AlignVCenter
@@ -159,6 +172,7 @@ Popup {
 
     onOpened: {
         listView.model = dataCore.getLocalSaveFiles()
+        textFieldFileName.clear()
     }
 
     onClosed: {

@@ -22,6 +22,7 @@ PopupDialog {
                 id: textFieldInitials
                 anchors.fill: parent
                 placeholderText: qsTr("J")
+                maximumLength: 3
             }
         }
 
@@ -34,6 +35,7 @@ PopupDialog {
                 id: textFieldName
                 anchors.fill: parent
                 placeholderText: qsTr("Jane Smith")
+                maximumLength: 30
             }
         }
     }

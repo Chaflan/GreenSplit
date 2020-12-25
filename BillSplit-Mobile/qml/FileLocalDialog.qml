@@ -49,7 +49,6 @@ Popup {
     ColumnLayout {
         id: columnLayout
         anchors.fill: parent
-        //spacing: 20
 
         ListView {
             id: listView
@@ -113,15 +112,6 @@ Popup {
             horizontalAlignment: TextInput.AlignHCenter
             font.pixelSize: 15
             color: privates.activeColor
-            onTextChanged: manageAcceptButton()
-            Component.onCompleted: manageAcceptButton()
-            function manageAcceptButton() {
-                if (text === "") {
-                    buttonAccept.disable()
-                } else {
-                    buttonAccept.enable()
-                }
-            }
         }
 
         RowLayout {
@@ -137,19 +127,11 @@ Popup {
                 contentItem: Text {
                     id: acceptContentItemText
                     text: buttonAccept.text
+                    color: textFieldFileName.text === "" ? "gray" : privates.activeColor
                     font.pixelSize: 15
                     horizontalAlignment: Text.AlignHCenter
                     verticalAlignment: Text.AlignVCenter
                 }
-                function disable() {
-                    enabled = false;
-                    acceptContentItemText.color = "gray"
-                }
-                function enable() {
-                    enabled = true;
-                    acceptContentItemText.color = privates.activeColor
-                }
-
                 onClicked: { privates.pressResult = 2; close() }
             }
             Item { Layout.fillWidth: true } // Spacer

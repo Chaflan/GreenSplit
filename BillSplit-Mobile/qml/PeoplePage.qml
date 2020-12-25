@@ -69,30 +69,36 @@ Page {
                 viewButton.enabled = tableview.activeFocus || (viewButton.enabled && viewButton.activeFocus)
             }
 
-            delegate: Rectangle {
+            delegate: TextField {
+                text: display
                 implicitHeight: 50
-                border.color: "black"
+                font.pixelSize: 15
+                maximumLength: column === 0 ? 3 : 30
 
-                TextField {
-                    id: textField
-                    text: display
-                    font.pixelSize: 15
-                    anchors.fill: parent
-                    width: parent.width
-                    onFocusChanged: { if(focus) { selectAll() } } // Select all on click
+                background: Rectangle {
+                    id: backgroundRectangle
+                    border.color: "lightgray"
+                    border.width: 1
+                }
 
-                    onEditingFinished: {
-                        // "model.edit = text" has problems
-                        if (!tableview.model.setData(row, column, text)) {
-                            text = display
-                        }
+                onEditingFinished: {
+                    // "model.edit = text" has problems
+                    if (!tableview.model.setData(row, column, text)) {
+                        text = display
                     }
+                }
 
-                    onActiveFocusChanged: {
-                        if (textField.activeFocus) {
-                            tableview.selectedRow = row
-                            tableview.selectedColumn = column
-                        }
+                onFocusChanged: { if(focus) { selectAll() } } // Select all on click
+
+                onActiveFocusChanged: {
+                    if (activeFocus) {
+                        tableview.selectedRow = row
+                        tableview.selectedColumn = column
+                        backgroundRectangle.border.color = "blue"
+                        backgroundRectangle.border.width = 2
+                    } else {
+                        backgroundRectangle.border.color = "lightgray"
+                        backgroundRectangle.border.width = 1
                     }
                 }
             }

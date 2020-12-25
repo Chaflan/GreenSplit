@@ -111,6 +111,7 @@ void TransactionModel::loadDefault()
     assert(m_data);
 
     setCostDbl(0);
+    setCostStr("0");
     setDescription("");
 
     m_allPeople.clear();

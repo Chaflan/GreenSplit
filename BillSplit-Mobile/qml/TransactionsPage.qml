@@ -11,6 +11,16 @@ Page {
         anchors.leftMargin: 5
         anchors.rightMargin: 5
 
+        function getColumnWidth(columnIndex, columnSpacing, tableWidth) {
+            switch (columnIndex) {
+                case 0: return 80
+                case 1: return 60
+                case 2: return 95
+                case 3: return tableWidth - columnSpacing * 3 - 235
+            }
+            return 0
+        }
+
         Row {
             id: tableheader
             width: tableview.contentWidth
@@ -22,7 +32,7 @@ Page {
             Repeater {
                 model: tableview.model.columnCount()
                 Rectangle {
-                    width: tableview.model.columnWidth(index, tableheader.spacing, table.width)
+                    width: table.getColumnWidth(index, tableheader.spacing, table.width)
                     height: parent.height
                     color: "green"
 
@@ -46,7 +56,7 @@ Page {
             focus: true
 
             columnWidthProvider: function(column) {
-                return model.columnWidth(column, columnSpacing, table.width);
+                return table.getColumnWidth(column, columnSpacing, table.width)
             }
 
             anchors.fill: parent

@@ -114,19 +114,6 @@ bool TransactionsTableModel::setData(int row, const QString& roleString, const Q
     return setData(row, stringToColumnIndex(roleString), value, role);
 }
 
-int TransactionsTableModel::columnWidth(int columnIndex, int columnSpacing, int totalWidth)
-{
-    // TODO: Static constexpr sum formula here
-    switch (columnIndex) {
-        case Column::Cost: return 100;
-        case Column::Payer: return 100;
-        case Column::Covering: return 100;
-        case Column::Description: return totalWidth - columnSpacing * (Column::COUNT - 1) - 300;
-    }
-
-    return 0;
-}
-
 void TransactionsTableModel::loadToModel(int row, TransactionModel* model) const
 {
     assert(model);

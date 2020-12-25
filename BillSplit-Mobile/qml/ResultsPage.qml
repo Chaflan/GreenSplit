@@ -54,9 +54,14 @@ Page {
                 text: display
                 implicitHeight: 50
                 font.pixelSize: 15
-                anchors.left: parent.left
-                anchors.right: parent.right
                 readOnly: true
+
+                // Binding these causes strange errors
+                // when names are updated
+                Component.onCompleted: {
+                    anchors.left = parent.left
+                    anchors.right = parent.right
+                }
 
                 background: Rectangle {
                     id: backgroundRectangle
@@ -69,7 +74,7 @@ Page {
                         backgroundRectangle.border.color = "blue"
                         backgroundRectangle.border.width = 2
                     } else {
-                        backgroundRectangle.border.color = "black"
+                        backgroundRectangle.border.color = "lightgray"
                         backgroundRectangle.border.width = 1
                     }
                 }

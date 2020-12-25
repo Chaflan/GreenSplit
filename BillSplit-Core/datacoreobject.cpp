@@ -536,7 +536,7 @@ bool DataCoreObject::isNewIdentifierValid(const QString& identifier) const
         return false;
     }
 
-    if (identifier.length() >= 3) {
+    if (identifier.length() > 3) {
         emit signalError("Identifiers cannot exceed 3 characters in length");
         return false;
     }

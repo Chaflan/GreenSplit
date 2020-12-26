@@ -25,7 +25,6 @@ OTHER_FILES += \
     qml/FileLocalDialog.qml \
     qml/main.qml \
     qml/PeoplePage.qml \
-    qml/PersonInputDialog.qml \
     qml/PopupDialog.qml \
     qml/ResultsPage.qml \
     qml/TransactionsInputDialog.qml \

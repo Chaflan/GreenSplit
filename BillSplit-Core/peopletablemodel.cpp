@@ -118,6 +118,16 @@ bool PeopleTableModel::addPerson(QString initials, QString name)
     return result;
 }
 
+bool PeopleTableModel::addDefaultPerson()
+{
+    while (m_data->personExists(m_currDefaultName)) {
+        incrementDefaultName();
+    }
+    bool result = addPerson(m_currDefaultName, "");
+    incrementDefaultName();
+    return result;
+}
+
 // Move this to QML or QtWidgets
 int PeopleTableModel::columnWidth(int columnIndex, int columnSpacing, int totalWidth)
 {
@@ -136,9 +146,17 @@ void PeopleTableModel::setDataCore(DataCoreObject* data)
         assert(m_data);
         emit dataCoreChanged();
 
+        // Default name reset to "A" needs to happen when we clear the model
+        // entirely (new file).  People changed signal only gets sent from
+        // that event for now.  In the future we may need a separate signal.
         QObject::connect(m_data, &DataCoreObject::peopleChanged,
-            this, &PeopleTableModel::resetModel);
+            [this](){
+                resetModel();
+                m_currDefaultName = "A";
+            });
+
         resetModel();
+        m_currDefaultName = "A";
     }
 }
 
@@ -198,4 +216,14 @@ void PeopleTableModel::resetModel()
 {
     beginResetModel();
     endResetModel();
+}
+
+void PeopleTableModel::incrementDefaultName()
+{
+    char lastChar = m_currDefaultName.back().toLatin1();
+    if (lastChar == 'Z') {
+        m_currDefaultName.replace(m_currDefaultName.length() - 1, 1, "AA");
+    } else {
+        m_currDefaultName.replace(m_currDefaultName.length() - 1, 1, lastChar + 1);
+    }
 }

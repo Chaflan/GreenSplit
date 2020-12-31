@@ -11,5 +11,6 @@
         <file>icons/appicon.ico</file>
         <file>icons/ic_menu_grey600_36dp.png</file>
         <file>icons/ic_dots_vertical_grey600_36dp.png</file>
+        <file>qml/PersonInputDialog.qml</file>
     </qresource>
 </RCC>

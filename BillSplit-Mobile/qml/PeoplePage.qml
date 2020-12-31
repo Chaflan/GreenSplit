@@ -67,7 +67,7 @@ Page {
 
             // Enable the view button only when a table cell is selected
             onActiveFocusChanged: {
-                deleteButton.enabled = tableview.activeFocus || (deleteButton.enabled && deleteButton.activeFocus)
+                viewButton.enabled = tableview.activeFocus || (viewButton.enabled && viewButton.activeFocus)
             }
 
             delegate: TextField {
@@ -113,17 +113,18 @@ Page {
             y: -tableview.contentY + tableview.contentHeight + tableheader.height + tableview.rowSpacing + 5
 
             Button {
-                id: deleteButton
+                id: viewButton
                 enabled: false
-                text: "Delete"
+                text: "View"
                 font.pointSize: 10
                 Layout.preferredWidth: 100
                 Layout.preferredHeight: tableheader.height
                 Layout.leftMargin: 0
 
                 onClicked: {
-                    tableview.model.removeRows(tableview.selectedRow, 1)
-                    enabled = false
+                    viewPersonDialog.initials = tableview.model.getData(tableview.selectedRow, "Identifier")
+                    viewPersonDialog.name = tableview.model.getData(tableview.selectedRow, "Name")
+                    viewPersonDialog.open()
                 }
             }
             Item { Layout.fillWidth: true } // Fill Spacer
@@ -150,6 +151,20 @@ Page {
                     }
                 }
             }
+        }
+    }
+
+    PersonInputDialog {
+        id: viewPersonDialog
+        onSavePressed: {
+            tableview.model.setData(tableview.selectedRow, "Identifier", viewPersonDialog.initials)
+            tableview.model.setData(tableview.selectedRow, "Name", viewPersonDialog.name)
+        }
+        onDeletePressed: {
+            tableview.model.removeRows(tableview.selectedRow, 1)
+        }
+        onClosed: {
+            viewButton.enabled = false
         }
     }
 }

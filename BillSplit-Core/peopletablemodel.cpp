@@ -120,12 +120,39 @@ bool PeopleTableModel::addPerson(QString initials, QString name)
 
 bool PeopleTableModel::addDefaultPerson()
 {
-    while (m_data->personExists(m_currDefaultName)) {
-        incrementDefaultName();
-    }
-    bool result = addPerson(m_currDefaultName, "");
-    incrementDefaultName();
-    return result;
+    // Constexpr this
+    const QVector<std::tuple<QString, QString> > defaults{
+        { "C", "Charlie" },
+        { "L", "Lucas" },
+        { "M", "Megan"},
+        { "J", "Javier"},
+        { "X", "Xerxes"}
+    };
+
+    QString nextId;
+    QString nextName;
+
+    do {
+        nextId.clear();
+        nextName.clear();
+
+        if (m_defaultNameIndex < defaults.size()) {
+            nextId = std::get<0>(defaults[m_defaultNameIndex]);
+            nextName = std::get<1>(defaults[m_defaultNameIndex]);
+        } else {
+            int dividend = m_defaultNameIndex - defaults.size() + 1;
+            do {
+                dividend -= 1;
+                int remainder = dividend % 26;
+                nextId.push_front('A' + remainder);
+                dividend /= 26;
+            } while (dividend > 0);
+        }
+
+        m_defaultNameIndex++;
+    } while (m_data->personExists(nextId));
+
+    return addPerson(std::move(nextId), std::move(nextName));
 }
 
 // Move this to QML or QtWidgets
@@ -218,7 +245,7 @@ void PeopleTableModel::resetModel()
     endResetModel();
 }
 
-void PeopleTableModel::incrementDefaultName()
+void PeopleTableModel::getNextDefaultPerson()
 {
     char lastChar = m_currDefaultName.back().toLatin1();
     if (lastChar == 'Z') {

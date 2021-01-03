@@ -53,9 +53,10 @@ private:
     int stringToColumnIndex(const QString& columnRole) const;
     QString columnIndexToString(int columnIndex) const;
     void resetModel();
-    void incrementDefaultName();
+    void getNextDefaultPerson();
 
 private:
+    int m_defaultNameIndex = 0;
     QString m_currDefaultName = "A";
     DataCoreObject* m_data = nullptr;
 };

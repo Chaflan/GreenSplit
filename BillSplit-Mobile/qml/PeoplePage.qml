@@ -12,6 +12,14 @@ Page {
         anchors.rightMargin: 5
         anchors.bottomMargin: 5
 
+        function getColumnWidth(columnIndex, columnSpacing, tableWidth) {
+            switch (columnIndex) {
+                case 0: return 130
+                case 1: return tableWidth - columnSpacing - 130
+            }
+            return 0
+        }
+
         Row {
             id: tableheader
             width: tableview.contentWidth
@@ -23,7 +31,7 @@ Page {
             Repeater {
                 model: tableview.model.columnCount()
                 Rectangle {
-                    width: tableview.model.columnWidth(index, tableheader.spacing, table.width)
+                    width: table.getColumnWidth(index, tableheader.spacing, table.width)
                     height: parent.height
                     color: "green"
 
@@ -51,7 +59,7 @@ Page {
             focus: true
 
             columnWidthProvider: function(column) {
-                return model.columnWidth(column, columnSpacing, table.width);
+                return table.getColumnWidth(column, columnSpacing, table.width);
             }
 
             anchors.fill: parent
@@ -74,6 +82,7 @@ Page {
                 text: display
                 implicitHeight: 50
                 font.pixelSize: 15
+                readOnly: true
                 maximumLength: column === 0 ? 3 : 30
 
                 background: Rectangle {
@@ -82,14 +91,13 @@ Page {
                     border.width: 1
                 }
 
+                // readOnly currently disables this
                 onEditingFinished: {
                     // "model.edit = text" has problems
                     if (!tableview.model.setData(row, column, text)) {
                         text = display
                     }
                 }
-
-                onFocusChanged: { if(focus) { selectAll() } } // Select all on click
 
                 onActiveFocusChanged: {
                     if (activeFocus) {
@@ -98,6 +106,7 @@ Page {
                         backgroundRectangle.border.color = "blue"
                         backgroundRectangle.border.width = 2
                     } else {
+                        readOnly = true
                         backgroundRectangle.border.color = "lightgray"
                         backgroundRectangle.border.width = 1
                     }
@@ -137,23 +146,20 @@ Page {
                 Layout.rightMargin: 0
 
                 onClicked: {
-                    if (tableview.model.addDefaultPerson()) {
-                        // Adjust table to scroll down with the adds
-                        var heightDifference = tableview.contentHeight - tableview.height
-                        if (heightDifference > 0) {
-                            tableview.contentY += 55
-                        } else {
-                            heightDifference += 55
-                            if (heightDifference > 0) {
-                                tableview.contentY += heightDifference
-                            }
-                        }
-                    }
+                    addPersonDialog.initials = ""
+                    addPersonDialog.name = ""
+                    addPersonDialog.open()
                 }
             }
         }
     }
 
+    PersonInputDialog {
+        id: addPersonDialog
+        onSavePressed: {
+            tableview.model.addPerson(addPersonDialog.initials, addPersonDialog.name)
+        }
+    }
     PersonInputDialog {
         id: viewPersonDialog
         onSavePressed: {

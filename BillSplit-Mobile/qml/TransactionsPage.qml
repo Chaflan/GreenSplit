@@ -15,7 +15,7 @@ Page {
             switch (columnIndex) {
                 case 0: return 80
                 case 1: return 60
-                case 2: return 95
+                case 2: return 195
                 case 3: return tableWidth - columnSpacing * 3 - 235
             }
             return 0

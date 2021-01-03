@@ -38,7 +38,6 @@ public:
 
     Q_INVOKABLE bool addPerson(QString initials, QString name);
     Q_INVOKABLE bool addDefaultPerson();
-    Q_INVOKABLE int columnWidth(int columnIndex, int columnSpacing, int totalWidth);
 
     void setDataCore(DataCoreObject* data);
 

@@ -76,7 +76,7 @@ PopupDialog {
                 model: transactionModel.coveringList
                 clip: true
                 cellWidth: 90
-                cellHeight: 30
+                cellHeight: 50
 
                 delegate: CheckDelegate {
                     id: checkDelegate

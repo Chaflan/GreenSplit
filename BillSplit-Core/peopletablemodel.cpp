@@ -155,17 +155,6 @@ bool PeopleTableModel::addDefaultPerson()
     return addPerson(std::move(nextId), std::move(nextName));
 }
 
-// Move this to QML or QtWidgets
-int PeopleTableModel::columnWidth(int columnIndex, int columnSpacing, int totalWidth)
-{
-    switch (columnIndex) {
-        case Column::Identifier: return 150;
-        case Column::Name: return totalWidth - columnSpacing * (Column::COUNT - 1) - 150;
-    }
-
-    return 0;
-}
-
 void PeopleTableModel::setDataCore(DataCoreObject* data)
 {
     if (data != m_data) {

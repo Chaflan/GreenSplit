@@ -168,6 +168,48 @@ bool TransactionsTableModel::addFromModel(TransactionModel* model)
     return result;
 }
 
+int TransactionsTableModel::columnWidth(int columnIndex, int columnSpacing, int tableWidth)
+{
+    // TODO: Size reserves and caching results
+
+    QVector<int> defaultColWidths{ 80, 60, 95, tableWidth - columnSpacing * 3 - 235 };
+
+    QVector<int> maxColLetterCounts(Column::COUNT);
+    for (int c = 0; c < Column::COUNT; ++c) {
+        maxColLetterCounts[c] = columnIndexToString(c).length();
+        for (int r = 0; r < rowCount(); ++r) {
+            maxColLetterCounts[c] = std::max(maxColLetterCounts[c], getData(r , c).toString().length());
+        }
+    }
+
+    const int letterFactor = 12;
+    QVector<int> requiredColWidths(Column::COUNT);
+    for (int c = 0; c < Column::COUNT; ++c) {
+        requiredColWidths[c] = maxColLetterCounts[c] * letterFactor;
+    }
+
+    int excess = 0;
+    for (int c = 0; c < Column::COUNT; ++c) {
+        excess += requiredColWidths[c] > defaultColWidths[c] ? requiredColWidths[c] - defaultColWidths[c] : 0;
+    }
+
+    QVector<int> columnWidths(Column::COUNT);
+    for (int c = Column::COUNT - 1; c >= 0; --c) {
+        int currExcess = defaultColWidths[c] - requiredColWidths[c];
+        if (currExcess >= excess) {
+            columnWidths[c] = defaultColWidths[c] - excess;
+            excess = 0;
+        } else {
+            columnWidths[c] = requiredColWidths[c];
+            if (currExcess > 0) {
+                excess -= currExcess;
+            }
+        }
+    }
+
+    return columnWidths[columnIndex];
+}
+
 void TransactionsTableModel::setDataCore(DataCoreObject* data)
 {
     if (data != m_data) {

@@ -11,16 +11,6 @@ Page {
         anchors.leftMargin: 5
         anchors.rightMargin: 5
 
-        function getColumnWidth(columnIndex, columnSpacing, tableWidth) {
-            switch (columnIndex) {
-                case 0: return 80
-                case 1: return 60
-                case 2: return 195
-                case 3: return tableWidth - columnSpacing * 3 - 235
-            }
-            return 0
-        }
-
         Row {
             id: tableheader
             width: tableview.contentWidth
@@ -29,10 +19,20 @@ Page {
             z: 1
             spacing: 5
 
+            // QML is very painful sometimes.  Calling forceLayout doesnt work so we have to
+            // do this very basic action of resizing column headers with cells manually.  It's unacceptable.
+            function recalculateColumnWidths() {
+                for (var i = 0; i < tableheaderrepeater.count; i++) {
+                    tableheaderrepeater.itemAt(i).width = tableview.model.columnWidth(i, tableheader.spacing, table.width);
+                }
+            }
+
             Repeater {
+                id: tableheaderrepeater
                 model: tableview.model.columnCount()
+
                 Rectangle {
-                    width: table.getColumnWidth(index, tableheader.spacing, table.width)
+                    width: tableview.columnWidthProvider(index)
                     height: parent.height
                     color: "green"
 
@@ -56,7 +56,7 @@ Page {
             focus: true
 
             columnWidthProvider: function(column) {
-                return table.getColumnWidth(column, columnSpacing, table.width)
+                return tableview.model.columnWidth(column, columnSpacing, table.width)
             }
 
             anchors.fill: parent
@@ -74,6 +74,8 @@ Page {
             onActiveFocusChanged: {
                 viewButton.enabled = tableview.activeFocus || (viewButton.enabled && viewButton.activeFocus)
             }
+
+            onWidthChanged: tableview.forceLayout()
 
             delegate: Rectangle {
                 implicitHeight: 50
@@ -139,29 +141,32 @@ Page {
         }
     }
 
+    // TODO, remove the force layout stuff (possibly) once you connect the column resize signal
     // TODO: rename, singular
     TransactionsInputDialog {
         id: addTransactionDialog
         onSavePressed: {
-            if (!tableview.model.addFromModel(transactionModel)) {
-                console.warn("transaction couldn't be added.")
-            } else {
-                tableview.forceLayout() // contentHeight won't update without this as it is loaded on demand
+            if (tableview.model.addFromModel(transactionModel)) {
+                // needed for contentHeight for new row and column widths
+                tableview.forceLayout()
+                tableheader.recalculateColumnWidths()
             }
         }
     }
     TransactionsInputDialog {
         id: viewTransactionDialog
         onSavePressed: {
-            if (!tableview.model.editFromModel(tableview.selectedRow, transactionModel)) {
-                console.warn("transaction couldn't be edited.")
+            if (tableview.model.editFromModel(tableview.selectedRow, transactionModel)) {
+                // needed for contentHeight for new row and column widths
+                tableview.forceLayout()
+                tableheader.recalculateColumnWidths()
             }
         }
         onDeletePressed: {
-            if (!tableview.model.removeRows(tableview.selectedRow, 1)) {
-                console.warn("transaction couldn't be deleted")
-            } else {
-                tableview.forceLayout() // contentHeight won't update without this as it is loaded on demand
+            if (tableview.model.removeRows(tableview.selectedRow, 1)) {
+                // needed for contentHeight for new row and column widths
+                tableview.forceLayout()
+                tableheader.recalculateColumnWidths()
             }
         }
         onClosed: {

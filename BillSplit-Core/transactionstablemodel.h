@@ -43,13 +43,14 @@ public:
     Q_INVOKABLE void loadToModel(int row, TransactionModel* model) const;
     Q_INVOKABLE bool editFromModel(int row, /*const*/ TransactionModel* model);
     Q_INVOKABLE bool addFromModel(/*const*/ TransactionModel* model);
-    Q_INVOKABLE int columnWidth(int columnIndex, int columnSpacing, int tableWidth);
+    Q_INVOKABLE int columnWidth(int columnIndex, int columnSpacing, int tableWidth) const;
 
     void setDataCore(DataCoreObject* data);
 
 signals:
     void signalError(QString message) const;
     void dataCoreChanged() const;
+    void columnWidthsChanged() const;
 
 private:
     DataCoreObject* getDataCore() const          { return m_data; }
@@ -57,10 +58,18 @@ private:
     bool isIndexValid(const QModelIndex& index) const;
     int stringToColumnIndex(const QString& columnRole) const;
     QString columnIndexToString(int columnIndex) const;
+    void checkMaxLettersForChange(int specificColumn = -1) const;
     void resetModel();
 
 private:
     DataCoreObject* m_data = nullptr;
+
+    // Cached column width related data
+    mutable bool m_cwValid = false;             // If false, col widths need to be recalculated
+    mutable QVector<int> m_cwColWidths;         // Stores actual column widths
+    mutable QVector<int> m_cwMaxLetterCounts;   // Stores max letter counts for each column
+    mutable int m_cwColumnSpacing = 0;
+    mutable int m_cwTableWidth = 0;
 };
 
 #endif // TRANSACTIONSTABLEMODEL_H

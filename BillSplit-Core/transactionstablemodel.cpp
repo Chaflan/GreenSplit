@@ -5,7 +5,9 @@
 // TODO: Compare to peopletablemodel and make sure they align nicely
 
 TransactionsTableModel::TransactionsTableModel(QObject *parent) :
-    QAbstractTableModel(parent)
+    QAbstractTableModel(parent),
+    m_cwColWidths(Column::COUNT, 0),
+    m_cwMaxLetterCounts(Column::COUNT, 0)
 {
 }
 
@@ -65,6 +67,7 @@ bool TransactionsTableModel::setData(const QModelIndex& index, const QVariant& v
     }
 
     if (successfulEdit) {
+        checkMaxLettersForChange(index.column());
         emit dataChanged(index, index);
     }
 
@@ -81,6 +84,11 @@ bool TransactionsTableModel::removeRows(int row, int count, const QModelIndex& p
     beginRemoveRows(parent, row, row + count - 1);
     bool result = m_data->deleteTransactions(row, count);
     endRemoveRows();
+
+    if (result) {
+        checkMaxLettersForChange();
+    }
+
     return result;
 }
 
@@ -93,7 +101,6 @@ QVariant TransactionsTableModel::headerData(int section, Qt::Orientation orienta
     return QAbstractItemModel::headerData(section, orientation, role);
 }
 
-// TODO: Are these used anymore?
 QVariant TransactionsTableModel::getData(int row, int column, int role) const
 {
     return data(index(row, column), role);
@@ -165,49 +172,78 @@ bool TransactionsTableModel::addFromModel(TransactionModel* model)
         model->getDescription());
     endInsertRows();
 
+    if (result) {
+        checkMaxLettersForChange();
+    }
+
     return result;
 }
 
-int TransactionsTableModel::columnWidth(int columnIndex, int columnSpacing, int tableWidth)
+int TransactionsTableModel::columnWidth(int columnIndex, int columnSpacing, int tableWidth) const
 {
-    // TODO: Size reserves and caching results
+    // During startup tableWidth can cycle through some nonsense values causing unnecessary calculation
+    if (tableWidth <= 0) {
+        return 0;
+    }
 
-    QVector<int> defaultColWidths{ 80, 60, 95, tableWidth - columnSpacing * 3 - 235 };
+    if (m_cwColumnSpacing != columnSpacing) {
+        m_cwColumnSpacing = columnSpacing;
+        m_cwValid = false;
+    }
 
-    QVector<int> maxColLetterCounts(Column::COUNT);
-    for (int c = 0; c < Column::COUNT; ++c) {
-        maxColLetterCounts[c] = columnIndexToString(c).length();
-        for (int r = 0; r < rowCount(); ++r) {
-            maxColLetterCounts[c] = std::max(maxColLetterCounts[c], getData(r , c).toString().length());
+    if (m_cwTableWidth != tableWidth) {
+        m_cwTableWidth = tableWidth;
+        m_cwValid = false;
+    }
+
+    if (!m_cwValid) {
+        // TODO: Consider using actual font size and style in the future, or just wait for QT
+        // to write some proper table code.
+        const int letterFactor = 12;
+        QVector<int> requiredColWidths(Column::COUNT);
+        for (int c = 0; c < Column::COUNT; ++c) {
+            requiredColWidths[c] = m_cwMaxLetterCounts[c] * letterFactor;
         }
-    }
 
-    const int letterFactor = 12;
-    QVector<int> requiredColWidths(Column::COUNT);
-    for (int c = 0; c < Column::COUNT; ++c) {
-        requiredColWidths[c] = maxColLetterCounts[c] * letterFactor;
-    }
+        const QVector<int> defaultColWidths{ 80, 60, 95, tableWidth - columnSpacing * 3 - 235 };
 
-    int excess = 0;
-    for (int c = 0; c < Column::COUNT; ++c) {
-        excess += requiredColWidths[c] > defaultColWidths[c] ? requiredColWidths[c] - defaultColWidths[c] : 0;
-    }
+        int excess = 0;
+        for (int c = 0; c < Column::COUNT; ++c) {
+            excess += requiredColWidths[c] > defaultColWidths[c] ? requiredColWidths[c] - defaultColWidths[c] : 0;
+        }
 
-    QVector<int> columnWidths(Column::COUNT);
-    for (int c = Column::COUNT - 1; c >= 0; --c) {
-        int currExcess = defaultColWidths[c] - requiredColWidths[c];
-        if (currExcess >= excess) {
-            columnWidths[c] = defaultColWidths[c] - excess;
-            excess = 0;
-        } else {
-            columnWidths[c] = requiredColWidths[c];
-            if (currExcess > 0) {
-                excess -= currExcess;
+        bool widthsChanged = false;
+        for (int c = Column::COUNT - 1; c >= 0; --c) {
+            int newColumnWidth = 0;
+            int currExcess = defaultColWidths[c] - requiredColWidths[c];
+            if (currExcess >= excess) {
+                newColumnWidth = defaultColWidths[c] - excess;
+                excess = 0;
+            } else {
+                newColumnWidth = requiredColWidths[c];
+                if (currExcess > 0) {
+                    excess -= currExcess;
+                }
+            }
+            if (m_cwColWidths[c] != newColumnWidth) {
+                m_cwColWidths[c] = newColumnWidth;
+                widthsChanged = true;
             }
         }
+
+        if (widthsChanged) {
+            // This signal is used only to tell the column header to resize keep it
+            // in sync with the rest of the table. So it is emitted
+            // during a call to get column widths which would normally be circular; how would it
+            // know to get new column widths unless it got a signal?  We rely on view code to
+            // tell when to reset columns
+            emit columnWidthsChanged();
+        }
+
+        m_cwValid = true;
     }
 
-    return columnWidths[columnIndex];
+    return m_cwColWidths[columnIndex];
 }
 
 void TransactionsTableModel::setDataCore(DataCoreObject* data)
@@ -258,7 +294,7 @@ int TransactionsTableModel::stringToColumnIndex(const QString& columnRole) const
 
 QString TransactionsTableModel::columnIndexToString(int columnIndex) const
 {
-    // TODO: Figure out how to do this instead, it doesn't compile
+    // TODO: Figure out how to do this Qt style instead, it doesn't compile
     //
     //static constexpr std::array<QStringView, 2> columnRoles {
     //    "Identifier",
@@ -280,8 +316,42 @@ QString TransactionsTableModel::columnIndexToString(int columnIndex) const
     return columnToString[columnIndex];
 }
 
+// Check the max letters vector for changes and emit a signal if any are seen.
+// specific column is used when only one specific column needs to be checked
+void TransactionsTableModel::checkMaxLettersForChange(int specificColumn) const
+{
+    bool changeOccurred = false;
+    auto checkColumn = [&changeOccurred, this](int colIndex){
+        int currMaxLetterCount = columnIndexToString(colIndex).length();
+        for (int r = 0; r < rowCount(); ++r) {
+            currMaxLetterCount = std::max(
+                currMaxLetterCount,
+                getData(r , colIndex).toString().length());
+        }
+        if (m_cwMaxLetterCounts[colIndex] != currMaxLetterCount) {
+            m_cwMaxLetterCounts[colIndex] = currMaxLetterCount;
+            changeOccurred = true;
+        }
+    };
+
+    if (specificColumn < 0) {
+        for (int c = 0; c < Column::COUNT; ++c) {
+            checkColumn(c);
+        }
+    } else if (specificColumn < Column::COUNT){
+        checkColumn(specificColumn);
+    } else {
+        qDebug() << "Error - TransactionsTableModel::checkMaxLettersForChange - Invalid specificColumn";
+    }
+
+    if (changeOccurred) {
+        m_cwValid = false;
+    }
+}
+
 void TransactionsTableModel::resetModel()
 {
     beginResetModel();
     endResetModel();
+    checkMaxLettersForChange();
 }

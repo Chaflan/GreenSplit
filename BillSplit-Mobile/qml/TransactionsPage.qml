@@ -5,6 +5,13 @@ import Qt.labs.qmlmodels 1.0
 import QtQuick.Layouts 1.3
 
 Page {
+    Connections {
+        target: tableview.model
+        function onColumnWidthsChanged() {
+            tableheader.recalculateColumnWidths()
+        }
+    }
+
     Item {
         id: table
         anchors.fill:parent
@@ -141,15 +148,12 @@ Page {
         }
     }
 
-    // TODO, remove the force layout stuff (possibly) once you connect the column resize signal
     // TODO: rename, singular
     TransactionsInputDialog {
         id: addTransactionDialog
         onSavePressed: {
             if (tableview.model.addFromModel(transactionModel)) {
-                // needed for contentHeight for new row and column widths
-                tableview.forceLayout()
-                tableheader.recalculateColumnWidths()
+                tableview.forceLayout() // needed for contentHeight and col widths
             }
         }
     }
@@ -157,16 +161,12 @@ Page {
         id: viewTransactionDialog
         onSavePressed: {
             if (tableview.model.editFromModel(tableview.selectedRow, transactionModel)) {
-                // needed for contentHeight for new row and column widths
-                tableview.forceLayout()
-                tableheader.recalculateColumnWidths()
+                tableview.forceLayout() // needed for col widths
             }
         }
         onDeletePressed: {
             if (tableview.model.removeRows(tableview.selectedRow, 1)) {
-                // needed for contentHeight for new row and column widths
-                tableview.forceLayout()
-                tableheader.recalculateColumnWidths()
+                tableview.forceLayout() // needed for contentHeight and col widths
             }
         }
         onClosed: {

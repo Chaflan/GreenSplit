@@ -28,7 +28,7 @@ OTHER_FILES += \
     qml/PersonInputDialog.qml \
     qml/PopupDialog.qml \
     qml/ResultsPage.qml \
-    qml/TransactionsInputDialog.qml \
+    qml/TransactionInputDialog.qml \
     qml/TransactionsPage.qml \
     icons/appicon.ico \
     icons/ic_dots_vertical_grey600_36dp.png \

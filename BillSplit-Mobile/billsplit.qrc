@@ -5,7 +5,7 @@
         <file>qml/TransactionsPage.qml</file>
         <file>qtquickcontrols2.conf</file>
         <file>qml/ResultsPage.qml</file>
-        <file>qml/TransactionsInputDialog.qml</file>
+        <file>qml/TransactionInputDialog.qml</file>
         <file>qml/PopupDialog.qml</file>
         <file>qml/FileLocalDialog.qml</file>
         <file>icons/appicon.ico</file>

@@ -148,8 +148,7 @@ Page {
         }
     }
 
-    // TODO: rename, singular
-    TransactionsInputDialog {
+    TransactionInputDialog {
         id: addTransactionDialog
         onSavePressed: {
             if (tableview.model.addFromModel(transactionModel)) {
@@ -157,7 +156,7 @@ Page {
             }
         }
     }
-    TransactionsInputDialog {
+    TransactionInputDialog {
         id: viewTransactionDialog
         onSavePressed: {
             if (tableview.model.editFromModel(tableview.selectedRow, transactionModel)) {

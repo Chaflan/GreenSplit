@@ -136,10 +136,14 @@ bool TransactionsTableModel::editFromModel(int row, TransactionModel* model)
     assert(model);
     bool ret = true;
 
+    QString modelCostStr = model->getCostStr();
     bool ok;
-    model->getCostStr().toDouble(&ok);
+    modelCostStr.toDouble(&ok);
     if (!ok) {
-        emit signalError("Cost must be numeric.\nSetting it to zero.");
+        // Don't pester with this warning for an empty value
+        if (!modelCostStr.isEmpty()) {
+            emit signalError("Cost must be numeric.\nSetting it to zero.");
+        }
         ret &= setData(row, Column::Cost, 0);
     } else {
         ret &= setData(row, Column::Cost, model->getCostDbl());

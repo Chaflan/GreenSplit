@@ -14,8 +14,8 @@ Page {
 
         function getColumnWidth(columnIndex, columnSpacing, tableWidth) {
             switch (columnIndex) {
-                case 0: return 130
-                case 1: return tableWidth - columnSpacing - 130
+                case 0: return 110
+                case 1: return tableWidth - columnSpacing - 110
             }
             return 0
         }

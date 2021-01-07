@@ -111,9 +111,29 @@ ApplicationWindow {
         currentIndex: tabBar.currentIndex
         interactive: false
 
-        PeoplePage {}
-        TransactionsPage {}
-        ResultsPage {}
+        // This bit of foolishness is necessary because I sometimes see pages showing up in
+        // adjacent pages based on scroll status.
+        onCurrentIndexChanged: {
+            peoplepage.visible = false
+            transactionspage.visible = false
+            resultspage.visible = false
+
+            switch (currentIndex) {
+                case 0: peoplepage.visible = true; break
+                case 1: transactionspage.visible = true; break
+                case 2: resultspage.visible = true; break
+            }
+        }
+
+        PeoplePage {
+            id: peoplepage
+        }
+        TransactionsPage {
+            id: transactionspage
+        }
+        ResultsPage {
+            id: resultspage
+        }
     }
 
     footer: TabBar {

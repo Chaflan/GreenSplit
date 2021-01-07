@@ -57,6 +57,7 @@ Page {
             id: tableview
             model: peopleTableModel
             focus: true
+            flickableDirection: Flickable.VerticalFlick
 
             columnWidthProvider: function(column) {
                 return table.getColumnWidth(column, columnSpacing, table.width);
@@ -83,7 +84,7 @@ Page {
                 implicitHeight: 50
                 font.pixelSize: 15
                 readOnly: true
-                maximumLength: column === 0 ? 3 : 30
+                maximumLength: column === 0 ? 3 : 20
 
                 background: Rectangle {
                     id: backgroundRectangle

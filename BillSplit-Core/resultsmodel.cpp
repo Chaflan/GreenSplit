@@ -40,6 +40,16 @@ QVariant ResultsModel::headerData(int section, Qt::Orientation orientation, int 
     return QAbstractItemModel::headerData(section, orientation, role);
 }
 
+int ResultsModel::getMaxLetterCount() const
+{
+    m_maxLetterCount = 6; // "Result" length
+    for (int i = 0; i < rowCount(); ++i) {
+        m_maxLetterCount = std::max(m_maxLetterCount, data(index(i)).toString().length());
+    }
+
+    return m_maxLetterCount;
+}
+
 void ResultsModel::resetModel()
 {
     beginResetModel();

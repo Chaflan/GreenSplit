@@ -12,6 +12,7 @@ class BILLSPLITCORE_EXPORT ResultsModel : public QAbstractListModel
 {
     Q_OBJECT
     Q_PROPERTY(DataCoreObject* data READ getDataCore WRITE setDataCore NOTIFY dataCoreChanged)
+    Q_PROPERTY(int maxLetterCount READ getMaxLetterCount NOTIFY maxLetterCountChanged)
 
 public:
     ResultsModel(QObject* parent = nullptr);
@@ -20,12 +21,14 @@ public:
     QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 
+    int getMaxLetterCount() const;
     void resetModel();
 
     void setDataCore(DataCoreObject* data);
 
 signals:
     void dataCoreChanged() const;
+    void maxLetterCountChanged() const;
 
 private:
     DataCoreObject* getDataCore() const          { return m_data; }
@@ -34,6 +37,7 @@ private:
 
 private:
     DataCoreObject* m_data = nullptr;
+    mutable int m_maxLetterCount;
 };
 
 #endif // RESULTSMODEL_H

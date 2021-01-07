@@ -54,6 +54,7 @@ Page {
             id: tableview
             model: transactionsTableModel
             focus: true
+            flickableDirection: Flickable.HorizontalAndVerticalFlick
 
             columnWidthProvider: function(column) {
                 return tableview.model.columnWidth(column, columnSpacing, table.width)

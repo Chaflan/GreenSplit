@@ -14,6 +14,7 @@ Page {
 
         Row {
             id: tableheader
+            //width: Math.max(maxLetterCount * 12, parent.width)
             anchors.left: parent.left
             anchors.right: parent.right
             height: 40
@@ -44,8 +45,15 @@ Page {
             id: listview
             model: resultsModel
             focus: true
+            flickableDirection: Flickable.HorizontalAndVerticalFlick
 
-            anchors.fill: parent
+            anchors.top: parent.top
+            anchors.bottom: parent.bottom
+            width: Math.max(listview.model.maxLetterCount * 12, parent.width)
+            contentWidth: Math.max(listview.model.maxLetterCount * 12, parent.width)
+
+
+            //anchors.fill: parent
             anchors.topMargin: tableheader.height + 5
             spacing: 5
 

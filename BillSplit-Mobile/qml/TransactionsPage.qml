@@ -5,13 +5,6 @@ import Qt.labs.qmlmodels 1.0
 import QtQuick.Layouts 1.3
 
 Page {
-    Connections {
-        target: tableview.model
-        function onColumnWidthsChanged() {
-            tableheader.recalculateColumnWidths()
-        }
-    }
-
     Item {
         id: table
         anchors.fill:parent
@@ -68,7 +61,7 @@ Page {
 
             anchors.fill: parent
             anchors.topMargin: tableheader.height + 5
-            anchors.bottomMargin: tablefooter.height + 5
+            anchors.bottomMargin: buttonbar.height + 10 + 10
             columnSpacing: 5
             rowSpacing: 5
 
@@ -105,46 +98,55 @@ Page {
                 }
             }
         }
+    }
 
-        RowLayout {
-            id: tablefooter
-            width: tableview.width
-            height: 40
-            x: -tableview.contentX
-            y: -tableview.contentY + tableview.contentHeight + tableheader.height + tableview.rowSpacing + 5
+    RowLayout {
+        id: buttonbar
+        width: tableview.width
+        height: 40
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: 10
+        anchors.left: parent.left
+        anchors.leftMargin: 10
+        anchors.right: parent.right
+        anchors.rightMargin: 10
 
-            Button {
-                id: viewButton
-                enabled: false
-                text: "View"
-                font.pointSize: 10
-                Layout.preferredWidth: 100
-                Layout.preferredHeight: tableheader.height
-                Layout.leftMargin: 0
+        Button {
+            id: viewButton
+            enabled: false
+            text: "View"
+            font.pointSize: 10
+            Layout.preferredWidth: 100
+            Layout.preferredHeight: tableheader.height
 
-                onClicked: {
-                    tableview.model.loadToModel(tableview.selectedRow, viewTransactionDialog.transactionModel)
-                    viewTransactionDialog.open()
+            onClicked: {
+                tableview.model.loadToModel(tableview.selectedRow, viewTransactionDialog.transactionModel)
+                viewTransactionDialog.open()
+            }
+        }
+        Item { Layout.fillWidth: true } // Spacer
+        Button {
+            id: addButton
+            text: "Add"
+            font.pointSize: 10
+            Layout.preferredWidth: 100
+            Layout.preferredHeight: tableheader.height
+
+            onClicked: {
+                if (dataCore.numPeople() < 1) {
+                    popupMessage("Add at least one person to begin adding transactions")
+                } else {
+                    addTransactionDialog.transactionModel.loadDefault()
+                    addTransactionDialog.open()
                 }
             }
-            Item { Layout.fillWidth: true } // Spacer
-            Button {
-                id: addButton
-                text: "Add"
-                font.pointSize: 10
-                Layout.preferredWidth: 100
-                Layout.preferredHeight: tableheader.height
-                Layout.rightMargin: 0
+        }
+    }
 
-                onClicked: {
-                    if (dataCore.numPeople() < 1) {
-                        popupMessage("Add at least one person to begin adding transactions")
-                    } else {
-                        addTransactionDialog.transactionModel.loadDefault()
-                        addTransactionDialog.open()
-                    }
-                }
-            }
+    Connections {
+        target: tableview.model
+        function onColumnWidthsChanged() {
+            tableheader.recalculateColumnWidths()
         }
     }
 

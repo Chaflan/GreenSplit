@@ -64,7 +64,7 @@ Page {
 
             anchors.fill: parent
             anchors.topMargin: tableheader.height + 5
-            anchors.bottomMargin: tablefooter.height + 5
+            anchors.bottomMargin: buttonbar.height + 10 + 10
             columnSpacing: 5
             rowSpacing: 5
 
@@ -113,43 +113,45 @@ Page {
                 }
             }
         }
+    }
 
-        RowLayout {
-            id: tablefooter
-            width: tableview.width
-            height: 40
-            x: -tableview.contentX
-            y: -tableview.contentY + tableview.contentHeight + tableheader.height + tableview.rowSpacing + 5
+    RowLayout {
+        id: buttonbar
+        width: tableview.width
+        height: 40
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: 10
+        anchors.left: parent.left
+        anchors.leftMargin: 10
+        anchors.right: parent.right
+        anchors.rightMargin: 10
 
-            Button {
-                id: viewButton
-                enabled: false
-                text: "View"
-                font.pointSize: 10
-                Layout.preferredWidth: 100
-                Layout.preferredHeight: tableheader.height
-                Layout.leftMargin: 0
+        Button {
+            id: viewButton
+            enabled: false
+            text: "View"
+            font.pointSize: 10
+            Layout.preferredWidth: 100
+            Layout.preferredHeight: tableheader.height
 
-                onClicked: {
-                    viewPersonDialog.initials = tableview.model.getData(tableview.selectedRow, "Identifier")
-                    viewPersonDialog.name = tableview.model.getData(tableview.selectedRow, "Name")
-                    viewPersonDialog.open()
-                }
+            onClicked: {
+                viewPersonDialog.initials = tableview.model.getData(tableview.selectedRow, "Identifier")
+                viewPersonDialog.name = tableview.model.getData(tableview.selectedRow, "Name")
+                viewPersonDialog.open()
             }
-            Item { Layout.fillWidth: true } // Fill Spacer
-            Button {
-                id: addButton
-                text: "Add"
-                font.pointSize: 10
-                Layout.preferredWidth: 100
-                Layout.preferredHeight: tableheader.height
-                Layout.rightMargin: 0
+        }
+        Item { Layout.fillWidth: true } // Fill Spacer
+        Button {
+            id: addButton
+            text: "Add"
+            font.pointSize: 10
+            Layout.preferredWidth: 100
+            Layout.preferredHeight: tableheader.height
 
-                onClicked: {
-                    addPersonDialog.initials = ""
-                    addPersonDialog.name = ""
-                    addPersonDialog.open()
-                }
+            onClicked: {
+                addPersonDialog.initials = ""
+                addPersonDialog.name = ""
+                addPersonDialog.open()
             }
         }
     }

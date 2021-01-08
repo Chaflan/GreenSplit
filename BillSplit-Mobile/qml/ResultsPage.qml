@@ -13,10 +13,8 @@ Page {
         anchors.rightMargin: 5
 
         Row {
-            id: tableheader
-            //width: Math.max(maxLetterCount * 12, parent.width)
-            anchors.left: parent.left
-            anchors.right: parent.right
+            id: listheader
+            width: listview.width
             height: 40
             x: -listview.contentX
             z: 1
@@ -46,30 +44,22 @@ Page {
             model: resultsModel
             focus: true
             flickableDirection: Flickable.HorizontalAndVerticalFlick
-
             anchors.top: parent.top
             anchors.bottom: parent.bottom
-            width: Math.max(listview.model.maxLetterCount * 12, parent.width)
-            contentWidth: Math.max(listview.model.maxLetterCount * 12, parent.width)
+            width: Math.max(listview.model.maxLetterCount * 9, parent.width)
 
+            onWidthChanged: listheader.width = listview.width
 
-            //anchors.fill: parent
-            anchors.topMargin: tableheader.height + 5
+            anchors.topMargin: listheader.height + 5
             spacing: 5
 
             delegate: TextField {
                 id: textField
                 text: display
+                width: listview.width
                 implicitHeight: 50
                 font.pixelSize: 15
                 readOnly: true
-
-                // Binding these causes strange errors
-                // when names are updated
-                Component.onCompleted: {
-                    anchors.left = parent.left
-                    anchors.right = parent.right
-                }
 
                 background: Rectangle {
                     id: backgroundRectangle

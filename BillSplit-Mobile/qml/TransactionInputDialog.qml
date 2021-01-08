@@ -1,3 +1,5 @@
+// TODO: Clean these up
+
 import QtQuick 2.6
 import QtQuick.Layouts 1.3
 import QtQuick.Controls 2.0
@@ -60,6 +62,7 @@ PopupDialog {
                 anchors.fill: parent
                 onFocusChanged: { if(focus) { selectAll() } } // Select all on click
                 text: transactionModel.description
+                maximumLength: 120
                 onDisplayTextChanged: transactionModel.description = text
             }
         }

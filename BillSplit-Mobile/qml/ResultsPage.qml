@@ -46,7 +46,7 @@ Page {
             flickableDirection: Flickable.HorizontalAndVerticalFlick
             anchors.top: parent.top
             anchors.bottom: parent.bottom
-            width: Math.max(listview.model.maxLetterCount * 9, parent.width)
+            width: Math.max(listview.model.getMaxLetterCount() * 9, parent.width)
 
             onWidthChanged: listheader.width = listview.width
 

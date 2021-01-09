@@ -19,13 +19,8 @@ int ResultsModel::rowCount(const QModelIndex& parent) const
 QVariant ResultsModel::data(const QModelIndex& index, int role) const
 {
     if (role == Qt::DisplayRole && isIndexValid(index)) {
-        // TODO: cache these
-        return QString("(%1)%2    owes    (%3)%4    %5")
-                .arg(m_data->getResultDebtorId(index.row()))
-                .arg(m_data->getResultDebtorName(index.row()))
-                .arg(m_data->getResultCreditorId(index.row()))
-                .arg(m_data->getResultCreditorName(index.row()))
-                .arg(QString::number(m_data->getResultCost(index.row()), 'f', 2));
+        checkCacheValidity();
+        return m_results[index.row()];
     }
 
     return QVariant();
@@ -42,17 +37,14 @@ QVariant ResultsModel::headerData(int section, Qt::Orientation orientation, int 
 
 int ResultsModel::getMaxLetterCount() const
 {
-    m_maxLetterCount = 6; // "Result" length
-    for (int i = 0; i < rowCount(); ++i) {
-        m_maxLetterCount = std::max(m_maxLetterCount, data(index(i)).toString().length());
-    }
-
+    checkCacheValidity();
     return m_maxLetterCount;
 }
 
 void ResultsModel::resetModel()
 {
     beginResetModel();
+    m_resultsValid = false;
     endResetModel();
 }
 
@@ -81,4 +73,29 @@ bool ResultsModel::isIndexValid(const QModelIndex& index) const
     }
 
     return true;
+}
+
+void ResultsModel::checkCacheValidity() const
+{
+    if (!m_resultsValid) {
+        buildCache();
+        m_resultsValid = true;
+    }
+}
+
+void ResultsModel::buildCache() const
+{
+    static const QString strTemplate("(%1)%2    owes    (%3)%4    %5");
+
+    m_results.clear();
+    m_maxLetterCount = 6; // "Result" length
+    for (int i = 0; i < rowCount(); ++i ) {
+        m_results.append(strTemplate
+                .arg(m_data->getResultDebtorId(i))
+                .arg(m_data->getResultDebtorName(i))
+                .arg(m_data->getResultCreditorId(i))
+                .arg(m_data->getResultCreditorName(i))
+                .arg(QString::number(m_data->getResultCost(i), 'f', 2)));
+        m_maxLetterCount = std::max(m_maxLetterCount, m_results[i].length());
+    }
 }

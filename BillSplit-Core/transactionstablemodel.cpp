@@ -236,11 +236,8 @@ int TransactionsTableModel::columnWidth(int columnIndex, int columnSpacing, int 
         }
 
         if (widthsChanged) {
-            // This signal is used only to tell the column header to resize keep it
-            // in sync with the rest of the table. So it is emitted
-            // during a call to get column widths which would normally be circular; how would it
-            // know to get new column widths unless it got a signal?  We rely on view code to
-            // tell when to reset columns
+            // This signal is used only to tell the column header to resize, keeping it
+            // in sync with the rest of the table.
             emit columnWidthsChanged();
         }
 
@@ -279,7 +276,6 @@ bool TransactionsTableModel::isIndexValid(const QModelIndex& index) const
 
 int TransactionsTableModel::stringToColumnIndex(const QString& columnRole) const
 {
-    // TODO: Iterator initialization
     const static QMap<QString, int> stringToColumn {
         { columnIndexToString(Column::Cost), Column::Cost },
         { columnIndexToString(Column::Payer), Column::Payer },
@@ -321,7 +317,7 @@ QString TransactionsTableModel::columnIndexToString(int columnIndex) const
 }
 
 // Check the max letters vector for changes and emit a signal if any are seen.
-// specific column is used when only one specific column needs to be checked
+// specific column is used when only one specific column needs to be checked.
 void TransactionsTableModel::checkMaxLettersForChange(int specificColumn) const
 {
     bool changeOccurred = false;
@@ -338,14 +334,13 @@ void TransactionsTableModel::checkMaxLettersForChange(int specificColumn) const
         }
     };
 
-    if (specificColumn < 0) {
+    if (0 <= specificColumn && specificColumn < Column::COUNT) {
+        checkColumn(specificColumn);
+    } else {
+        // Check all columns
         for (int c = 0; c < Column::COUNT; ++c) {
             checkColumn(c);
         }
-    } else if (specificColumn < Column::COUNT){
-        checkColumn(specificColumn);
-    } else {
-        qDebug() << "Error - TransactionsTableModel::checkMaxLettersForChange - Invalid specificColumn";
     }
 
     if (changeOccurred) {

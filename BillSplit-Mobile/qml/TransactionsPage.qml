@@ -55,18 +55,15 @@ Page {
             model: transactionsTableModel
             focus: true
             flickableDirection: Flickable.HorizontalAndVerticalFlick
-
-            columnWidthProvider: function(column) {
-                return tableview.model.columnWidth(column, columnSpacing, table.width)
-            }
-
             anchors.fill: parent
             anchors.topMargin: tableheader.height + 5
             anchors.bottomMargin: buttonbar.height + 10 + 10
             columnSpacing: 5
             rowSpacing: 5
-
             ScrollBar.vertical: ScrollBar { }
+            columnWidthProvider: function(column) {
+                return tableview.model.columnWidth(column, columnSpacing, table.width)
+            }
 
             property var selectedRow: 0
             property var selectedColumn: 0
@@ -76,7 +73,7 @@ Page {
                 viewButton.enabled = tableview.activeFocus || (viewButton.enabled && viewButton.activeFocus)
             }
 
-            onWidthChanged: tableview.forceLayout()
+            onWidthChanged: tableview.forceLayout() // Changes won't show otherwise
 
             delegate: Rectangle {
                 implicitHeight: 50

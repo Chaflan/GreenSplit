@@ -1,5 +1,16 @@
 #include "algocore.h"
 #include <queue>
+#include <cmath>
+
+//static_assert()
+
+// TODO: Boundaries and throws,
+// compile time warnings about margin
+double round(double toRound, int decimals)
+{
+    const double tens = std::pow(10, decimals);
+    return std::round(toRound * tens) / tens;
+}
 
 std::vector<std::tuple<std::string, std::string, double> >
     AlgoCore::SolveGreedy(const std::unordered_map<std::string, double>& credits)
@@ -32,11 +43,12 @@ std::vector<std::tuple<std::string, std::string, double> >
     std::vector<std::string> nNameLookup;
 
     for (const auto& [name, cost] : credits) {
-        if (cost < nMargin) {
-            nQueue.emplace(cost, nNameLookup.size());
+        double rCost = round(cost, 2);
+        if (rCost < nMargin) {
+            nQueue.emplace(rCost, nNameLookup.size());
             nNameLookup.push_back(name);
-        } else if (cost > pMargin) {
-            pQueue.emplace(cost, pNameLookup.size());
+        } else if (rCost > pMargin) {
+            pQueue.emplace(rCost, pNameLookup.size());
             pNameLookup.push_back(name);
         }
     }
@@ -192,7 +204,7 @@ std::vector<std::tuple<std::string, std::string, double> >
         }
 
         // If numTrans didn't change, then the final solution was unchanged from greedy and we can just return it.
-        // Otherwise we need to convert the indexed solution to a string one using the lookups.
+        // Otherwise we need to convert the indexed solution to a string solution using the lookups.
         if (numTransOriginal != numTransFinal) {
             solnFinalStr.clear();
             for (const auto& iTrans : solnFinalIdx) {

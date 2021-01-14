@@ -207,7 +207,7 @@ bool DataCore::UpdateLedger() const
     return true;
 }
 
-// retrun true if results were updated
+// return true if results were updated
 bool DataCore::UpdateResults() const
 {
     UpdateLedger();

@@ -5,6 +5,7 @@
 #include <string>
 #include <unordered_map>
 
+// TODO: Six decimal places https://stackoverflow.com/questions/149033/best-way-to-store-currency-values-in-c
 // TODO: its possible to set your margins as one thing and to have a solution problem
 // TODO: need a fewest transaction and lowest transfer cost algo
 // TODO: review data structure choice here.  Order is irrelevant with return value.
@@ -47,8 +48,11 @@ namespace AlgoCore
     //---------------------------------------------------------------------------------------
     void Validate(const std::unordered_map<std::string, double>& credits);
 
+    // TODO: This should not be inclusive!  It should be exclusive
+
     // Values between the margins (inclusive) are considered essentially zero
-    // (a settled transaction) for the purpose of the algorithm
+    // (a settled transaction) for the purpose of the algorithm.  The algorithms will round
+    // any input to the nearest pMargin.
     static constexpr double pMargin = 0.01;
     static constexpr double nMargin = pMargin * -1;
 };

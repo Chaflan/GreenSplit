@@ -7,7 +7,7 @@
 TransactionsWidget::TransactionsWidget(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::TransactionsWidget),
-    m_dialog(new TransactionEditDialog())
+    m_dialog(new TransactionEditDialog(this))
 {
     ui->setupUi(this);
     m_dialog->setModal(true);

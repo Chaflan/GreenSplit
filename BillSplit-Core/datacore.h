@@ -50,6 +50,7 @@ private:
         std::set<std::string> covering;
     };
 
+    AlgoCore m_algoCore;
     std::vector<Transaction> m_transactions;
 
     // Cached data to speed calculations

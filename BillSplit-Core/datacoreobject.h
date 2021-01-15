@@ -6,6 +6,7 @@
 #include "billsplit-core_global.h"
 #include "datacore.h"
 
+// TODO: noexcept
 // TODO: Standardize use of name vs identifier
 // TODO: QDebug lines
 // TODO: Upper Lower case method name confusion (all lower in any qobject for qinvokableness)

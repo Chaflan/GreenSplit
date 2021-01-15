@@ -21,6 +21,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
     algocore.cpp \
+    algocore_impl.cpp \
     datacore.cpp \
     datacoreobject.cpp \
     peopletablemodel.cpp \
@@ -30,6 +31,7 @@ SOURCES += \
 
 HEADERS += \
     algocore.h \
+    algocore_impl.h \
     billsplit-core_global.h \
     datacore.h \
     datacoreobject.h \

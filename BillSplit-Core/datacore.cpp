@@ -240,7 +240,7 @@ std::vector<std::tuple<std::string, std::string, double> > DataCore::Solve() con
         return {};
     }
 
-    return AlgoCore::SolveFewestTransfers(m_ledger[m_ledger.size() - 1]);
+    return m_algoCore.SolveFewestTransfers(m_ledger[m_ledger.size() - 1]);
 }
 
 void DataCore::DebugOutputLedgerData() const

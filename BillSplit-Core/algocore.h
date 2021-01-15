@@ -4,11 +4,9 @@
 #include <vector>
 #include <string>
 #include <unordered_map>
+#include <memory>
 
-// TODO: Six decimal places https://stackoverflow.com/questions/149033/best-way-to-store-currency-values-in-c
-// TODO: its possible to set your margins as one thing and to have a solution problem
-// TODO: need a fewest transaction and lowest transfer cost algo
-// TODO: review data structure choice here.  Order is irrelevant with return value.
+class AlgoCore_Impl;
 
 //---------------------------------------------------------------------------------------
 // A namespace of functions to solve the fewest transactions problem.
@@ -20,41 +18,55 @@
 //      problem.  Order is arbitrary. Tuple elements are <from, to, amount>.
 //      e.g. <"Mary", "Tom", 50> is a transaction where Mary pays Tom 50 units of currency.
 //---------------------------------------------------------------------------------------
-namespace AlgoCore
+class AlgoCore
 {
+public:
+    //---------------------------------------------------------------------------------------
+    // Use decimalPlaces to set the significance of the solution.  Input costs are rounded to
+    // this before processing.  Not doing this can lead to solutions that pass
+    // validation, but combine in such a way to stack rounding errors yielding an unsolvable
+    // solution upon processing.
+    //
+    // An exception will be thrown if this results in exceeding the numeric limits of a double.
+    //---------------------------------------------------------------------------------------
+    AlgoCore(double decimalPlaces = 2);
+    ~AlgoCore();
+
     //---------------------------------------------------------------------------------------
     // Greedy algorithm, fast but non-optimal for some cases.
-    // These cases will be ones where a subset of the payments can be solved in isolation.
-    // These could be common with larger sets, whole number prices, and/or a large margin
+    // These cases will be ones where a subset of the payments can be solved in isolation
+    // and that solution is not preferred over a higher value settlement.
+    // These could be common with larger sets and rounded number costs.
     //      n = debts.size()
     //      Time -> O(n)
     //      Space -> O(n)
     //---------------------------------------------------------------------------------------
     std::vector<std::tuple<std::string, std::string, double> >
-        SolveGreedy(const std::unordered_map<std::string, double>& credits);
+        SolveGreedy(const std::unordered_map<std::string, double>& credits) const;
 
     //---------------------------------------------------------------------------------------
     // Solves the problem such that you have the fewest number of transactions possible.
     // It is always slower than greedy.
     //      n = debts.size()
+
+    // TODO, really?
+
     //      Time -> O(n)
     //      Space -> O(n)
     //---------------------------------------------------------------------------------------
     std::vector<std::tuple<std::string, std::string, double> >
-        SolveFewestTransfers(const std::unordered_map<std::string, double>& credits);
+        SolveFewestTransfers(const std::unordered_map<std::string, double>& credits) const;
 
     //---------------------------------------------------------------------------------------
-    // Throws an invalid argument exception if its impossible to solve the passed credits.
+    // Check the passed credits for values that overflow upon rounding (due to too many
+    // decimalPlaces or very high costs) and to ensure it is possible to solve the passed credits.
+    // That is, they sum to a zero cost.  Invalid argument excepsions are thrown upon both
+    // failures.  Solve functions will also validate before processing.
     //---------------------------------------------------------------------------------------
-    void Validate(const std::unordered_map<std::string, double>& credits);
+    void Validate(const std::unordered_map<std::string, double>& credits) const;
 
-    // TODO: This should not be inclusive!  It should be exclusive
-
-    // Values between the margins (inclusive) are considered essentially zero
-    // (a settled transaction) for the purpose of the algorithm.  The algorithms will round
-    // any input to the nearest pMargin.
-    static constexpr double pMargin = 0.01;
-    static constexpr double nMargin = pMargin * -1;
+private:
+    std::unique_ptr<AlgoCore_Impl> impl;
 };
 
 #endif // ALGOCORE_H

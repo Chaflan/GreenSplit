@@ -46,8 +46,8 @@ void PeopleWidget::ViewSelected(const QModelIndex& index)
     // TODO: Cache this in PeopleWidget class?  Will have to make a set mode
     NameEditDialog dialog(NameEditDialog::Mode::Edit);
     dialog.setModal(true);
-    dialog.SetInitials(m_model->getData(index.row(), PeopleTableModel::Column::Identifier).toString());
-    dialog.SetName(m_model->getData(index.row(), PeopleTableModel::Column::Name).toString());
+    dialog.SetInitials(m_model->data(index.row(), PeopleTableModel::Column::Identifier).toString());
+    dialog.SetName(m_model->data(index.row(), PeopleTableModel::Column::Name).toString());
 
     for (bool isValid = false; !isValid;) {
         dialog.exec();

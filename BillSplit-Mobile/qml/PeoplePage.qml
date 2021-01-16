@@ -136,8 +136,8 @@ Page {
             Layout.preferredHeight: tableheader.height
 
             onClicked: {
-                viewPersonDialog.initials = tableview.model.getData(tableview.selectedRow, "Identifier")
-                viewPersonDialog.name = tableview.model.getData(tableview.selectedRow, "Name")
+                viewPersonDialog.initials = tableview.model.data(tableview.selectedRow, "Identifier")
+                viewPersonDialog.name = tableview.model.data(tableview.selectedRow, "Name")
                 viewPersonDialog.open()
             }
         }

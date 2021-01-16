@@ -16,7 +16,7 @@
 class BILLSPLITCORE_EXPORT ResultsModel : public QAbstractListModel
 {
     Q_OBJECT
-    Q_PROPERTY(DataCoreObject* data READ getDataCore WRITE setDataCore NOTIFY dataCoreChanged)
+    Q_PROPERTY(DataCoreObject* dataCore READ getDataCore WRITE setDataCore NOTIFY dataCoreChanged)
 
 public:
     ResultsModel(QObject* parent = nullptr);

@@ -15,7 +15,7 @@ PopupDialog {
 
     TransactionModel {
         id: transactionModel
-        data: dataCore
+        dataCore: dataCoreInstance
     }
 
     ColumnLayout {

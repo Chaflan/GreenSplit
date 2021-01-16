@@ -101,14 +101,14 @@ QVariant TransactionsTableModel::headerData(int section, Qt::Orientation orienta
     return QAbstractItemModel::headerData(section, orientation, role);
 }
 
-QVariant TransactionsTableModel::getData(int row, int column, int role) const
+QVariant TransactionsTableModel::data(int row, int column, int role) const
 {
     return data(index(row, column), role);
 }
 
-QVariant TransactionsTableModel::getData(int row, const QString& roleString, int role) const
+QVariant TransactionsTableModel::data(int row, const QString& roleString, int role) const
 {
-    return getData(row, stringToColumnIndex(roleString), role);
+    return data(row, stringToColumnIndex(roleString), role);
 }
 
 bool TransactionsTableModel::setData(int row, int column, const QVariant& value, int role)
@@ -326,7 +326,7 @@ void TransactionsTableModel::checkMaxLettersForChange(int specificColumn) const
         for (int r = 0; r < rowCount(); ++r) {
             currMaxLetterCount = std::max(
                 currMaxLetterCount,
-                getData(r , colIndex).toString().length());
+                data(r , colIndex).toString().length());
         }
         if (m_cwMaxLetterCounts[colIndex] != currMaxLetterCount) {
             m_cwMaxLetterCounts[colIndex] = currMaxLetterCount;

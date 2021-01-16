@@ -131,7 +131,7 @@ Page {
             Layout.preferredHeight: tableheader.height
 
             onClicked: {
-                if (dataCore.numPeople() < 1) {
+                if (dataCoreInstance.numPeople() < 1) {
                     popupMessage("Add at least one person to begin adding transactions")
                 } else {
                     addTransactionDialog.transactionModel.loadDefault()

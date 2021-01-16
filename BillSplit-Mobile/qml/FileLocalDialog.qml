@@ -153,7 +153,7 @@ Popup {
     }
 
     onOpened: {
-        listView.model = dataCore.getLocalSaveFiles()
+        listView.model = dataCoreInstance.getLocalSaveFiles()
         textFieldFileName.clear()
     }
 

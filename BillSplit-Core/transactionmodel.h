@@ -53,7 +53,7 @@ class BILLSPLITCORE_EXPORT TransactionModel : public QObject
     Q_OBJECT
 
     // ReadWrite properties
-    Q_PROPERTY(DataCoreObject* data READ getDataCore WRITE setDataCore NOTIFY dataSet)
+    Q_PROPERTY(DataCoreObject* dataCore READ getDataCore WRITE setDataCore NOTIFY dataSet)
     Q_PROPERTY(int payerIndex READ getPayerIndex WRITE setPayerIndex NOTIFY payerIndexChanged)
     Q_PROPERTY(double costDbl READ getCostDbl WRITE setCostDbl NOTIFY costChanged)
     Q_PROPERTY(QString costStr READ getCostStr WRITE setCostStr NOTIFY costChanged)

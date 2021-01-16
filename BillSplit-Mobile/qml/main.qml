@@ -34,7 +34,7 @@ ApplicationWindow {
                 MenuItem {
                     text: "New"
                     onClicked: {
-                        dataCore.clear();
+                        dataCoreInstance.clear();
                         saveMenuItem.enabled = false;
                         saveMenuItem.text = "Save"
                     }
@@ -53,7 +53,7 @@ ApplicationWindow {
 
                     text: "Save"
                     onClicked: {
-                        dataCore.jsonWrite(activeFileName)
+                        dataCoreInstance.jsonWrite(activeFileName)
                     }
                 }
                 MenuItem {
@@ -86,7 +86,7 @@ ApplicationWindow {
         id: fileLocalDialogSave
         Component.onCompleted: setSaveMode()
         onAcceptPressed: {
-            if (dataCore.jsonWrite(fileLocalDialogSave.fileName)) {
+            if (dataCoreInstance.jsonWrite(fileLocalDialogSave.fileName)) {
                 saveMenuItem.enabled = true
                 saveMenuItem.activeFileName = fileLocalDialogSave.fileName
                 saveMenuItem.text = "Save (" + saveMenuItem.activeFileName + ")"
@@ -97,7 +97,7 @@ ApplicationWindow {
         id: fileLocalDialogOpen
         Component.onCompleted: setOpenMode()
         onAcceptPressed: {
-            if (dataCore.jsonRead(fileLocalDialogOpen.fileName)) {
+            if (dataCoreInstance.jsonRead(fileLocalDialogOpen.fileName)) {
                 saveMenuItem.enabled = true
                 saveMenuItem.activeFileName = fileLocalDialogOpen.fileName
                 saveMenuItem.text = "Save (" + saveMenuItem.activeFileName + ")"
@@ -154,24 +154,24 @@ ApplicationWindow {
     // TODO: Put these in the scopes to which they belong? (and their connections)
     // Models
     DataCore {
-        id: dataCore
+        id: dataCoreInstance
     }
     PeopleTableModel {
         id: peopleTableModel
-        data: dataCore
+        dataCore: dataCoreInstance
     }
     TransactionsTableModel {
         id: transactionsTableModel
-        data: dataCore
+        dataCore: dataCoreInstance
     }
     ResultsModel {
         id: resultsModel
-        data: dataCore
+        dataCore: dataCoreInstance
     }
 
     // Creat a popup when an error signal is sent from the models
     Connections {
-        target: dataCore
+        target: dataCoreInstance
         function onSignalError(errorMessage) { popupMessage(errorMessage) }
     }
     Connections {

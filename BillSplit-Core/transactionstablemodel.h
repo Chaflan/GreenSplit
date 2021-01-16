@@ -12,7 +12,7 @@
 class BILLSPLITCORE_EXPORT TransactionsTableModel : public QAbstractTableModel
 {
     Q_OBJECT
-    Q_PROPERTY(DataCoreObject* data READ getDataCore WRITE setDataCore NOTIFY dataCoreChanged)
+    Q_PROPERTY(DataCoreObject* dataCore READ getDataCore WRITE setDataCore NOTIFY dataCoreChanged)
 
 public:
     enum Column
@@ -34,9 +34,9 @@ public:
     Q_INVOKABLE bool removeRows(int row, int count, const QModelIndex& parent = QModelIndex()) override;
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 
-    // data and setData overloads for easier direct calling.  data name must be changed to avoid property conflict
-    Q_INVOKABLE QVariant getData(int row, int column, int role = Qt::DisplayRole) const;
-    Q_INVOKABLE QVariant getData(int row, const QString& roleString, int role = Qt::DisplayRole) const;
+    // data and setData overloads for easier direct calling.
+    Q_INVOKABLE QVariant data(int row, int column, int role = Qt::DisplayRole) const;
+    Q_INVOKABLE QVariant data(int row, const QString& roleString, int role = Qt::DisplayRole) const;
     Q_INVOKABLE bool setData(int row, int column, const QVariant& value, int role = Qt::EditRole);
     Q_INVOKABLE bool setData(int row, const QString& roleString, const QVariant& value, int role = Qt::EditRole);
 

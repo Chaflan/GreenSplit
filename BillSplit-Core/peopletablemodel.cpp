@@ -4,8 +4,7 @@
 
 PeopleTableModel::PeopleTableModel(QObject *parent) :
     QAbstractTableModel(parent)
-{
-}
+{ }
 
 int PeopleTableModel::rowCount(const QModelIndex& parent) const
 {
@@ -88,14 +87,14 @@ Qt::ItemFlags PeopleTableModel::flags(const QModelIndex& index) const
     return QAbstractItemModel::flags(index) | Qt::ItemIsEditable;
 }
 
-QVariant PeopleTableModel::getData(int row, int column, int role) const
+QVariant PeopleTableModel::data(int row, int column, int role) const
 {
     return data(index(row, column), role);
 }
 
-QVariant PeopleTableModel::getData(int row, const QString& roleString, int role) const
+QVariant PeopleTableModel::data(int row, const QString& roleString, int role) const
 {
-    return getData(row, stringToColumnIndex(roleString), role);
+    return data(row, stringToColumnIndex(roleString), role);
 }
 
 bool PeopleTableModel::setData(int row, int column, const QVariant& value, int role)

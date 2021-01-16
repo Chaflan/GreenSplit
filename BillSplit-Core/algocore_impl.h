@@ -33,7 +33,6 @@ private:
         SolveFewestTransfersValidated(const std::unordered_map<std::string, double>& credits) const;
 
 private:
-
     // Values between the margins (exclusive) are considered essentially zero
     // (a settled transaction) for the purpose of the algorithm.
     double m_pMargin;

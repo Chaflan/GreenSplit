@@ -1,12 +1,7 @@
 #include "datacore.h"
 #include <algorithm>
 
-// TODO: add noexcepts
-// TODO: Remove this
-#include <iostream>
-#include <limits>
-
-std::size_t DataCore::NumTransactions() const
+std::size_t DataCore::NumTransactions() const noexcept
 {
     return m_transactions.size();
 }
@@ -33,12 +28,13 @@ bool DataCore::DeleteTransactions(int index, int count)
         throw std::out_of_range("DeleteTransaction index + count = " + std::to_string(index + count) +
             " exceeds NumTransactions = " + std::to_string(NumTransactions()));
     }
+    if (count == 0) {
+        return false;
+    }
 
-    // TODO: ok if count == 0
     m_transactions.erase(m_transactions.begin() + index, m_transactions.begin() + index + count);
     SetLedgerRevisionIndex(index);
-
-    return count > 0;
+    return true;
 }
 
 bool DataCore::EditTransactionPayer(int index, std::string newPayer)
@@ -78,7 +74,7 @@ bool DataCore::EditTransactionCovering(int index, std::set<std::string> newCover
 }
 
 // Returns true if person was edited
-bool DataCore::EditPerson(const std::string& oldName, const std::string& newName)
+bool DataCore::EditPerson(const std::string& oldName, const std::string& newName) noexcept
 {
     if (PersonExists(newName)) {
         // Attempting to change name to one that already exists
@@ -138,35 +134,30 @@ const std::set<std::string>& DataCore::GetTransactionCovering(int index) const
     return m_transactions[index].covering;
 }
 
-const std::vector<std::tuple<std::string, std::string, double> >& DataCore::GetResults() const
+const std::vector<std::tuple<std::string, std::string, double> >& DataCore::GetResults()
 {
     UpdateResults();
     return m_results;
 }
 
-bool DataCore::PersonExists(const std::string& name) const
+bool DataCore::PersonExists(const std::string& name) const noexcept
 {
-    // We can't just check the last ledger line (which would be very fast)
-    // A transaction with a below margin cost could exist.  So we must check all transactions
-
-    for (const auto& transaction : m_transactions) {
-        if (transaction.payer == name || transaction.covering.find(name) != transaction.covering.end()) {
-            return true;
-        }
+    if (m_ledger.empty()) {
+        return false;
     }
 
-    return false;
+    const auto& lastLedgerLine = m_ledger[m_ledger.size() - 1];
+    return lastLedgerLine.find(name) != lastLedgerLine.end();
 }
 
-void DataCore::Clear()
+void DataCore::Clear() noexcept
 {
     m_transactions.clear();
     m_ledgerRevisionIndex = 0;
     m_resultsDirty = true;
 }
 
-// return true if ledger was updated
-bool DataCore::UpdateLedger() const
+bool DataCore::UpdateLedger() noexcept
 {
     if (m_ledger.size() == m_transactions.size() && m_ledgerRevisionIndex >= m_ledger.size()) {
         return false;
@@ -207,8 +198,7 @@ bool DataCore::UpdateLedger() const
     return true;
 }
 
-// return true if results were updated
-bool DataCore::UpdateResults() const
+bool DataCore::UpdateResults()
 {
     UpdateLedger();
     if (m_resultsDirty) {
@@ -227,14 +217,14 @@ void DataCore::VerifyTransactionIndex(int index) const
     }
 }
 
-void DataCore::SetLedgerRevisionIndex(std::size_t newIndex) const
+void DataCore::SetLedgerRevisionIndex(std::size_t newIndex) noexcept
 {
     m_ledgerRevisionIndex = std::min(m_ledgerRevisionIndex, newIndex);
 }
 
-std::vector<std::tuple<std::string, std::string, double> > DataCore::Solve() const
+std::vector<std::tuple<std::string, std::string, double> > DataCore::Solve()
 {
-    // Beware: Solve assumes ledger is updated.  The chain of calls currently makes this always true.
+    // Beware: Solve is private and assumes ledger is updated.
 
     if (m_ledger.empty()) {
         return {};
@@ -242,20 +232,3 @@ std::vector<std::tuple<std::string, std::string, double> > DataCore::Solve() con
 
     return m_algoCore.SolveFewestTransfers(m_ledger[m_ledger.size() - 1]);
 }
-
-void DataCore::DebugOutputLedgerData() const
-{
-    for (const auto& ledger : m_ledger) {
-        bool needsComma = false;
-        for (const auto& entry : ledger) {
-            if (needsComma) {
-                std::cout << ", ";
-            } else {
-                needsComma = true;
-            }
-            std::cout << entry.first << ":" << entry.second;
-        }
-        std::cout << std::endl;
-    }
-}
-

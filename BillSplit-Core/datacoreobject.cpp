@@ -290,7 +290,7 @@ const QString& DataCoreObject::getTransactionDescription(int index) const
     return m_descriptionsList[index];
 }
 
-QString DataCoreObject::getResultDebtorId(int index) const
+QString DataCoreObject::getResultDebtorId(int index)
 {
     QString result;
     if (index < 0 || index >= numResults()) {
@@ -306,12 +306,12 @@ QString DataCoreObject::getResultDebtorId(int index) const
     return result;
 }
 
-QString DataCoreObject::getResultDebtorName(int index) const
+QString DataCoreObject::getResultDebtorName(int index)
 {
     return m_nameList[m_identifierIndexLookup[getResultDebtorId(index)]];
 }
 
-QString DataCoreObject::getResultCreditorId(int index) const
+QString DataCoreObject::getResultCreditorId(int index)
 {
     QString result;
     if (index < 0 || index >= numResults()) {
@@ -327,12 +327,12 @@ QString DataCoreObject::getResultCreditorId(int index) const
     return result;
 }
 
-QString DataCoreObject::getResultCreditorName(int index) const
+QString DataCoreObject::getResultCreditorName(int index)
 {
     return m_nameList[m_identifierIndexLookup[getResultCreditorId(index)]];
 }
 
-double DataCoreObject::getResultCost(int index) const
+double DataCoreObject::getResultCost(int index)
 {
     double result = 0;
     if (index < 0 || index >= numResults()) {
@@ -348,7 +348,7 @@ double DataCoreObject::getResultCost(int index) const
     return result;
 }
 
-int DataCoreObject::numResults() const
+int DataCoreObject::numResults()
 {
     return static_cast<int>(m_data.GetResults().size());
 }

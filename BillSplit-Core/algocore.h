@@ -9,7 +9,7 @@
 class AlgoCore_Impl;
 
 //---------------------------------------------------------------------------------------
-// A namespace of functions to solve the fewest transactions problem.
+// A class of functions to solve the fewest transactions problem.
 //
 // Input (credits): a mapping of names (string) to amount of money owed to them (double).
 //      This amount can be negative indicating that it is a debt; money they owe.
@@ -27,7 +27,7 @@ public:
     // validation, but combine in such a way to stack rounding errors yielding an unsolvable
     // solution upon processing.
     //
-    // An exception will be thrown if this results in exceeding the numeric limits of a double.
+    // An exception will be thrown if this results in exceeding the limit
     //---------------------------------------------------------------------------------------
     AlgoCore(double decimalPlaces = 2);
     ~AlgoCore();
@@ -37,7 +37,7 @@ public:
     // These cases will be ones where a subset of the payments can be solved in isolation
     // and that solution is not preferred over a higher value settlement.
     // These could be common with larger sets and rounded number costs.
-    //      n = debts.size()
+    //      n = credits.size()
     //      Time -> O(n)
     //      Space -> O(n)
     //---------------------------------------------------------------------------------------
@@ -47,11 +47,8 @@ public:
     //---------------------------------------------------------------------------------------
     // Solves the problem such that you have the fewest number of transactions possible.
     // It is always slower than greedy.
-    //      n = debts.size()
-
-    // TODO, really?
-
-    //      Time -> O(n)
+    //      n = credits.size()
+    //      Time -> O(n^2)
     //      Space -> O(n)
     //---------------------------------------------------------------------------------------
     std::vector<std::tuple<std::string, std::string, double> >

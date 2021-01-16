@@ -5,11 +5,15 @@
 AlgoCore_Impl::AlgoCore_Impl(unsigned int decimalPlaces)
     : m_decimalPlaces(decimalPlaces)
 {
-    if (m_decimalPlaces > std::numeric_limits<double>::digits10) {
+    // Margins need one extra level of significance.  Otherwise, rounding errors in a double mean that
+    // 0.01 = 0.010000000000000007 or similar causing us to treat a cent as zero.
+    const unsigned int marginPlaces = m_decimalPlaces + 1;
+
+    if (marginPlaces > std::numeric_limits<double>::digits10) {
         throw std::invalid_argument("Decimal places too large.  Overflow will occur.");
     }
 
-    m_pMargin = std::pow(10, -1 * decimalPlaces);
+    m_pMargin = std::pow(static_cast<double>(10), -1 * static_cast<int>(marginPlaces));
     m_nMargin = -1 * m_pMargin;
 }
 
@@ -32,7 +36,7 @@ void AlgoCore_Impl::Validate(const std::unordered_map<std::string, double>& cred
         sum += Round(debt);
     }
 
-    if(sum <= m_nMargin || m_pMargin <= sum) {
+    if(sum < m_nMargin || m_pMargin < sum) {
         throw std::invalid_argument("impossible to solve debts");
     }
 }
@@ -78,10 +82,10 @@ std::vector<std::tuple<std::string, std::string, double> >
     std::vector<std::string> nNameLookup;
 
     for (const auto& [name, cost] : credits) {
-        if (cost <= m_nMargin) {
+        if (cost < m_nMargin) {
             nQueue.emplace(cost, nNameLookup.size());
             nNameLookup.push_back(name);
-        } else if (cost >= m_pMargin) {
+        } else if (cost > m_pMargin) {
             pQueue.emplace(cost, pNameLookup.size());
             pNameLookup.push_back(name);
         }
@@ -97,9 +101,9 @@ std::vector<std::tuple<std::string, std::string, double> >
         pQueue.pop();
         nQueue.pop();
 
-        if (remainder <= m_nMargin) {
+        if (remainder < m_nMargin) {
             nQueue.emplace(remainder, nIndex);
-        } else if (remainder >= m_pMargin) {
+        } else if (remainder > m_pMargin) {
             pQueue.emplace(remainder, pIndex);
         }
 
@@ -117,9 +121,9 @@ std::vector<std::tuple<std::string, std::string, double> >
     std::vector<std::tuple<std::string, std::string, double> > solnFinalStr = SolveGreedyValidated(credits);
     int numTransFinal = static_cast<int>(solnFinalStr.size());
 
-    // Fewer than 4 transactions is guaranteed optimal already.  I have a proof in my notebook.
-    // Example of a 4 that can be optimized: 4,3,-3,-2,-2
-    if (numTransFinal >= 4) {
+    // Fewer than 5 transactions is guaranteed optimal already.  I have a proof in my notebook.
+    // Example of a 5 that can be optimized: 4,3,-3,-2,-2
+    if (numTransFinal >= 5) {
         const int numTransOriginal = numTransFinal;
 
         // Sets of positive and negative costs in the debts object.
@@ -132,10 +136,10 @@ std::vector<std::tuple<std::string, std::string, double> >
         std::vector<std::tuple<std::size_t, std::size_t, double> > solnFinalIdx(numTransOriginal - 1);
         std::vector<std::tuple<std::size_t, std::size_t, double> > solnCurrIdx(numTransOriginal - 1);
         for (const auto& [name, cost] : credits) {
-            if (cost <= m_nMargin) {
+            if (cost < m_nMargin) {
                 nNameLookup.push_back(name);
                 nFirstSet.push_back(cost);
-            } else if (cost >= m_pMargin) {
+            } else if (cost > m_pMargin) {
                 pNameLookup.push_back(name);
                 pFirstSet.push_back(cost);
             }
@@ -143,7 +147,8 @@ std::vector<std::tuple<std::string, std::string, double> >
 
         // The algorithm is intuitively recursive but can be solved iteratively with for loops and by preserving
         // the below information in each stack frame.  Doing it this way allows us to preallocate for this data
-        // since we know the depth of the stack can never exceed the size of the greedy solution
+        // since we know the depth of the stack can never exceed the size of the greedy solution.  Depth first
+        // traversal preserves frame information higher up the tree until it is no longer needed.
         struct StackFrame {
             std::size_t pix;
             std::size_t nix;
@@ -156,7 +161,7 @@ std::vector<std::tuple<std::string, std::string, double> >
         const size_t nSetSize = nFirstSet.size();
         std::vector<StackFrame> st(numTransOriginal, { 0, 0, pFirstSet, nFirstSet, pSetSize, nSetSize});
 
-        // Note that tree depth = number of transactions
+        // Note that tree depth == number of transactions
         for(int depth = 0; depth >= 0;) {
 
             if (static_cast<int>(std::max(st[depth].pcount, st[depth].ncount)) + depth >= numTransFinal) {
@@ -178,12 +183,12 @@ std::vector<std::tuple<std::string, std::string, double> >
             bool descend = false;
 
             for (auto& p = st[depth].pix; p < pSetSize; ++p) {
-                if (st[depth].pset[p] < m_pMargin) {
+                if (st[depth].pset[p] <= m_pMargin) {
                     continue;
                 }
 
                 for (auto& n = st[depth].nix; n < nSetSize && !descend; ++n) {
-                    if (st[depth].nset[n] > m_nMargin) {
+                    if (st[depth].nset[n] >= m_nMargin) {
                         continue;
                     }
 
@@ -206,14 +211,14 @@ std::vector<std::tuple<std::string, std::string, double> >
                         st[depthNext].nset[n] = remainder;
                         st[depthNext].pset[p] = 0;
                         st[depthNext].pcount--;
-                        if (remainder > m_nMargin) {
+                        if (remainder >= m_nMargin) {
                             st[depthNext].ncount--;
                         }
                     } else {
                         st[depthNext].nset[n] = 0;
                         st[depthNext].pset[p] = remainder;
                         st[depthNext].ncount--;
-                        if (remainder < m_pMargin) {
+                        if (remainder <= m_pMargin) {
                             st[depthNext].pcount--;
                         }
                     }
@@ -258,7 +263,7 @@ std::unordered_map<std::string, double> AlgoCore_Impl::Prepare(std::unordered_ma
         sum += debt;
     }
 
-    if(sum <= m_nMargin || m_pMargin <= sum) {
+    if(sum < m_nMargin || m_pMargin < sum) {
         throw std::invalid_argument("impossible to solve debts");
     }
 

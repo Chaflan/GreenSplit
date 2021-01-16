@@ -15,4 +15,6 @@
 
 // const
 // braced initialization
-//
+// noexcept
+// include cleanup
+// arrange functions in order

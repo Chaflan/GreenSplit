@@ -7,14 +7,19 @@
 #include <vector>
 #include <unordered_map>
 
-// TODO: Analyze use of set vs uset for names
-// TODO: Consider a "Transactions" method that returns the whole thing const ref
-//      could include a tuple instead of transactions object
-
+//---------------------------------------------------------------------------------------
+// A pure C++ class for calculating the bill splitting.  DataCore will store the data
+// and reduce the problem to a series of debts and credits for each person involved.
+// This is then passed to the AlgoCore for processing the final step of solving
+// in the fewest steps.  The series of debts and credits is stored in a ledger.
+//
+// bool return values of true generally mean the edit/action took place.  false means
+// no error, but nothing was changed.  Improper use results in exceptions.
+//---------------------------------------------------------------------------------------
 class DataCore
 {
 public:
-    std::size_t NumTransactions() const;
+    std::size_t NumTransactions() const noexcept;
     void AddTransaction(std::string payer, double cost, std::set<std::string> covering);
     bool DeleteTransactions(int index, int count);
 
@@ -26,20 +31,32 @@ public:
     double GetTransactionCost(int index) const;
     const std::set<std::string>& GetTransactionCovering(int index) const;
 
-    bool PersonExists(const std::string& name) const;
-    bool EditPerson(const std::string& oldName, const std::string& newName);
+    bool PersonExists(const std::string& name) const noexcept;
+    bool EditPerson(const std::string& oldName, const std::string& newName) noexcept;
 
-    const std::vector<std::tuple<std::string, std::string, double> >& GetResults() const;
-    bool UpdateLedger() const;
-    bool UpdateResults() const;
+    //---------------------------------------------------------------------------------------
+    // Output (return value): A sequence of payments/transactions to be made to solve the
+    //      problem.  Order is arbitrary. Tuple elements are <from, to, amount>.
+    //      e.g. <"Mary", "Tom", 50> is a transaction where Mary pays Tom 50 units of currency.
+    //---------------------------------------------------------------------------------------
+    const std::vector<std::tuple<std::string, std::string, double> >& GetResults();
 
-    void Clear();
+    //---------------------------------------------------------------------------------------
+    // These update methods allow you to control the time of calculation.
+    // A call to GetResults will update ledger, and then update results before returning
+    // results.  You could optionally (for example) update ledger each time a transaction
+    // is added or altered to partially precalculate for the results.
+    // They return true if an update took place.
+    //---------------------------------------------------------------------------------------
+    bool UpdateLedger() noexcept;
+    bool UpdateResults();
+
+    void Clear() noexcept;
 
 private:
     void VerifyTransactionIndex(int index) const;
-    void SetLedgerRevisionIndex(std::size_t newIndex) const;
-    void DebugOutputLedgerData() const;
-    std::vector<std::tuple<std::string, std::string, double> > Solve() const;
+    void SetLedgerRevisionIndex(std::size_t newIndex) noexcept;
+    std::vector<std::tuple<std::string, std::string, double> > Solve();
 
 private:
 
@@ -53,11 +70,12 @@ private:
     AlgoCore m_algoCore;
     std::vector<Transaction> m_transactions;
 
-    // Cached data to speed calculations
-    mutable std::vector<std::unordered_map<std::string, double> > m_ledger;
-    mutable std::size_t m_ledgerRevisionIndex = 0;
-    mutable std::vector<std::tuple<std::string, std::string, double> > m_results;
-    mutable bool m_resultsDirty = true;
+    // Mapping of names to credits/debts that reflects the state of the problem in relation to each transaction.
+    std::vector<std::unordered_map<std::string, double> > m_ledger;
+    std::size_t m_ledgerRevisionIndex = 0;  // Index at which ledger is invalid due to changes
+
+    std::vector<std::tuple<std::string, std::string, double> > m_results;
+    bool m_resultsDirty = true;
 };
 
 #endif // DATACORE_H

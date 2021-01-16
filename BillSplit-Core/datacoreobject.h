@@ -6,6 +6,7 @@
 #include "billsplit-core_global.h"
 #include "datacore.h"
 
+// TODO: Trace covering and decide on set vs uset in datacore
 // TODO: noexcept
 // TODO: Standardize use of name vs identifier
 // TODO: QDebug lines
@@ -24,10 +25,10 @@ public:
     int numTransactions() const;
     bool addTransaction(double cost, const QString& payer, const QStringList& covering, QString description, bool silent = false);
     bool deleteTransactions(int index, int count);
-    QString getTransactionPayer(int index) const; // Cache this and return const &
+    QString getTransactionPayer(int index) const;
     double getTransactionCost(int index) const;
     const QString& getTransactionDescription(int index) const;
-    QStringList getTransactionCovering(int index) const; // TODO: Stringlist?  Cache this?
+    QStringList getTransactionCovering(int index) const;
     bool editTransactionPayer(int index, const QString& newPayer);
     bool editTransactionCost(int index, double newCost);
     bool editTransactionDescription(int index, const QString& newDescription);
@@ -42,12 +43,12 @@ public:
     bool editPersonIdentifier(int index, const QString& newIdentifier);
     bool editPersonName(int index, QString newName);
 
-    int numResults() const;
-    QString getResultDebtorId(int index) const;
-    QString getResultDebtorName(int index) const;
-    QString getResultCreditorId(int index) const;
-    QString getResultCreditorName(int index) const;
-    double getResultCost(int index) const;
+    int numResults();
+    QString getResultDebtorId(int index);
+    QString getResultDebtorName(int index);
+    QString getResultCreditorId(int index);
+    QString getResultCreditorName(int index);
+    double getResultCost(int index);
 
     Q_INVOKABLE void clear();
 

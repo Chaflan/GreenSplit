@@ -117,43 +117,6 @@ bool PeopleTableModel::addPerson(QString initials, QString name)
     return result;
 }
 
-bool PeopleTableModel::addDefaultPerson()
-{
-    // Constexpr this
-    const QVector<std::tuple<QString, QString> > defaults{
-        { "C", "Charlie" },
-        { "L", "Lucas" },
-        { "M", "Megan"},
-        { "J", "Javier"},
-        { "X", "Xerxes"}
-    };
-
-    QString nextId;
-    QString nextName;
-
-    do {
-        nextId.clear();
-        nextName.clear();
-
-        if (m_defaultNameIndex < defaults.size()) {
-            nextId = std::get<0>(defaults[m_defaultNameIndex]);
-            nextName = std::get<1>(defaults[m_defaultNameIndex]);
-        } else {
-            int dividend = m_defaultNameIndex - defaults.size() + 1;
-            do {
-                dividend -= 1;
-                int remainder = dividend % 26;
-                nextId.push_front('A' + remainder);
-                dividend /= 26;
-            } while (dividend > 0);
-        }
-
-        m_defaultNameIndex++;
-    } while (m_data->personExists(nextId));
-
-    return addPerson(std::move(nextId), std::move(nextName));
-}
-
 void PeopleTableModel::setDataCore(DataCoreObject* data)
 {
     if (data != m_data) {
@@ -161,17 +124,9 @@ void PeopleTableModel::setDataCore(DataCoreObject* data)
         assert(m_data);
         emit dataCoreChanged();
 
-        // Default name reset to "A" needs to happen when we clear the model
-        // entirely (new file).  People changed signal only gets sent from
-        // that event for now.  In the future we may need a separate signal.
         QObject::connect(m_data, &DataCoreObject::peopleChanged,
-            [this](){
-                resetModel();
-                m_currDefaultName = "A";
-            });
-
+            this, &PeopleTableModel::resetModel);
         resetModel();
-        m_currDefaultName = "A";
     }
 }
 
@@ -207,13 +162,6 @@ int PeopleTableModel::stringToColumnIndex(const QString& columnRole) const
 
 QString PeopleTableModel::columnIndexToString(int columnIndex) const
 {
-    // TODO: Figure out how to do this instead, it doesn't compile
-    //
-    //static constexpr std::array<QStringView, 2> columnRoles {
-    //    "Identifier",
-    //    "Name"
-    //};
-
     const static QString columnToString[Column::COUNT] {
         "Identifier",
         "Name"
@@ -231,14 +179,4 @@ void PeopleTableModel::resetModel()
 {
     beginResetModel();
     endResetModel();
-}
-
-void PeopleTableModel::getNextDefaultPerson()
-{
-    char lastChar = m_currDefaultName.back().toLatin1();
-    if (lastChar == 'Z') {
-        m_currDefaultName.replace(m_currDefaultName.length() - 1, 1, "AA");
-    } else {
-        m_currDefaultName.replace(m_currDefaultName.length() - 1, 1, lastChar + 1);
-    }
 }

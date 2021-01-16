@@ -37,7 +37,6 @@ public:
     Q_INVOKABLE bool setData(int row, const QString& roleString, const QVariant& value, int role = Qt::EditRole);
 
     Q_INVOKABLE bool addPerson(QString initials, QString name);
-    Q_INVOKABLE bool addDefaultPerson();
 
     void setDataCore(DataCoreObject* data);
 
@@ -52,11 +51,8 @@ private:
     int stringToColumnIndex(const QString& columnRole) const;
     QString columnIndexToString(int columnIndex) const;
     void resetModel();
-    void getNextDefaultPerson();
 
 private:
-    int m_defaultNameIndex = 0;
-    QString m_currDefaultName = "A";
     DataCoreObject* m_data = nullptr;
 };
 

@@ -8,8 +8,7 @@
 
 ResultsModel::ResultsModel(QObject* parent) :
     QAbstractListModel(parent)
-{
-}
+{ }
 
 int ResultsModel::rowCount(const QModelIndex& parent) const
 {

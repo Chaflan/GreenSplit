@@ -44,7 +44,6 @@ QVariant TransactionsTableModel::data(const QModelIndex& index, int role) const
         }
     }
 
-    // TODO: Try calling base data instead here, same with peopletablemodel
     return QVariant();
 }
 

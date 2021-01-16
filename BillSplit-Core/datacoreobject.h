@@ -6,15 +6,15 @@
 #include "billsplit-core_global.h"
 #include "datacore.h"
 
-// TODO: Trace covering and decide on set vs uset in datacore
-// TODO: noexcept
-// TODO: Standardize use of name vs identifier
-// TODO: QDebug lines
-// TODO: Upper Lower case method name confusion (all lower in any qobject for qinvokableness)
-// TODO: Return whole list in some cases?
-// TODO: Currently there is nothing preventing the front end from adding a transaction with nonexistant people
-// TODO: Braced initialization
-
+//---------------------------------------------------------------------------------------
+// A Qt adapter of the pure C++ data core.  This class stores extra information needed
+// by views but not by the data core to solve.  It also streamlines data conversion
+// and provides a central hub for the models.
+//
+// In contrast to the raw data core, bool return values of true here will mean normal
+// operation and false means failure.  The approach with this design is to swallow
+// errors and exceptions while providing a debug output of the problem.
+//---------------------------------------------------------------------------------------
 class BILLSPLITCORE_EXPORT DataCoreObject : public QObject
 {
     Q_OBJECT
@@ -52,7 +52,7 @@ public:
 
     Q_INVOKABLE void clear();
 
-    // Save and Load methods
+    // Save and Load methods.  This is very simplistic.
     Q_INVOKABLE bool jsonRead(const QString& filePath = "autosave.json");
     Q_INVOKABLE bool jsonWrite(const QString& filePath = "autosave.json") const;
     Q_INVOKABLE bool jsonRead(const QUrl& filePath);

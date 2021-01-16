@@ -73,7 +73,6 @@ bool DataCore::EditTransactionCovering(int index, std::set<std::string> newCover
     return false;
 }
 
-// Returns true if person was edited
 bool DataCore::EditPerson(const std::string& oldName, const std::string& newName) noexcept
 {
     if (PersonExists(newName)) {

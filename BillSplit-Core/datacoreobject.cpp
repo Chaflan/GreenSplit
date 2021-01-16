@@ -1,14 +1,11 @@
 #include "datacoreobject.h"
 #include <QDebug>
 
-// TODO: Future remove includes
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QFile>
 #include <QJsonDocument>
 #include <QDir>
-
-// TODO: Disallow blank payer name?
 
 DataCoreObject::DataCoreObject(QObject *parent) :
     QObject(parent)
@@ -29,10 +26,21 @@ int DataCoreObject::numTransactions() const
 // silent flag exists for bulk transaction add
 bool DataCoreObject::addTransaction(double cost, const QString& payer, const QStringList& covering, QString description, bool silent)
 {
+    if (!personExists(payer)) {
+        qDebug() << "Error - DataCoreObject::addTransaction - Adding nonexistant person (payer)";
+        return false;
+    }
+    for (const auto& person : covering) {
+        if (!personExists(person)) {
+            qDebug() << "Error - DataCoreObject::addTransaction - Adding nonexistant person (covering)";
+            return false;
+        }
+    }
+
     try {
         m_data.AddTransaction(payer.toStdString(), cost, stringListToStdSet(covering));
     } catch (const std::exception& ex) {
-        qDebug() << "Error - DataCoreObject::AddTransaction - " << ex.what();
+        qDebug() << "Error - DataCoreObject::addTransaction - " << ex.what();
         return false;
     }
     m_descriptionsList.append(std::move(description));
@@ -49,7 +57,7 @@ bool DataCoreObject::deleteTransactions(int index, int count)
     try {
         success = m_data.DeleteTransactions(index, count);
     } catch (const std::exception& ex) {
-        qDebug() << "Error - DataCoreObject::DeleteTransactions - " << ex.what();
+        qDebug() << "Error - DataCoreObject::deleteTransactions - " << ex.what();
         return false;
     }
 
@@ -61,11 +69,16 @@ bool DataCoreObject::deleteTransactions(int index, int count)
 
 bool DataCoreObject::editTransactionPayer(int index, const QString& newPayer)
 {
+    if (!personExists(newPayer)) {
+        qDebug() << "Error - DataCoreObject::editTransactionPayer - Editing payer to nonexistant person";
+        return false;
+    }
+
     bool wasChanged = false;
     try {
         wasChanged = m_data.EditTransactionPayer(index, newPayer.toStdString());
     } catch (const std::exception& ex) {
-        qDebug() << "Error - DataCoreObject::GetTransactionPayer - " << ex.what();
+        qDebug() << "Error - DataCoreObject::getTransactionPayer - " << ex.what();
         return false;
     }
 
@@ -75,14 +88,13 @@ bool DataCoreObject::editTransactionPayer(int index, const QString& newPayer)
     return true;
 }
 
-// TODO: Make a note somewhere.  DCO returns false if something went wrong, DC returns true if something changed.
 bool DataCoreObject::editTransactionCost(int index, double newCost)
 {
     bool wasChanged = false;
     try {
         wasChanged = m_data.EditTransactionCost(index, newCost);
     } catch (const std::exception& ex) {
-        qDebug() << "Error - DataCoreObject::GetTransactionPayer - " << ex.what();
+        qDebug() << "Error - DataCoreObject::getTransactionPayer - " << ex.what();
         return false;
     }
 
@@ -95,7 +107,7 @@ bool DataCoreObject::editTransactionCost(int index, double newCost)
 bool DataCoreObject::editTransactionDescription(int index, const QString& newDescription)
 {
     if (index < 0 || index >= numPeople()) {
-        qDebug() << "Error - DataCoreObject::EditTransactionDescription - Invalid index:" << index;
+        qDebug() << "Error - DataCoreObject::editTransactionDescription - Invalid index:" << index;
         return false;
     }
 
@@ -113,6 +125,13 @@ bool DataCoreObject::editTransactionCovering(int index, const QStringList& newCo
     if (newCovering.isEmpty()) {
         emit signalError("A transaction must cover one or more person");
         return false;
+    }
+
+    for (const auto& person : newCovering) {
+        if (!personExists(person)) {
+            qDebug() << "Error - DataCoreObject::editTransactionCovering - Adding nonexistant person (covering)";
+            return false;
+        }
     }
 
     bool wasChanged = false;
@@ -134,7 +153,7 @@ QString DataCoreObject::getTransactionPayer(int index) const
     try {
         return QString::fromStdString(m_data.GetTransactionPayer(index));
     } catch (const std::exception& ex) {
-        qDebug() << "Error - DataCoreObject::GetTransactionPayer - " << ex.what();
+        qDebug() << "Error - DataCoreObject::getTransactionPayer - " << ex.what();
     }
 
     return QString();
@@ -145,7 +164,7 @@ double DataCoreObject::getTransactionCost(int index) const
     try {
         return m_data.GetTransactionCost(index);
     } catch (const std::exception& ex) {
-        qDebug() << "Error - DataCoreObject::GetTransactionCost - " << ex.what();
+        qDebug() << "Error - DataCoreObject::getTransactionCost - " << ex.what();
     }
 
     return 0;
@@ -160,7 +179,7 @@ QStringList DataCoreObject::getTransactionCovering(int index) const
             result.append(QString::fromStdString(str));
         }
     } catch (const std::exception& ex) {
-        qDebug() << "Error - DataCoreObject::GetTransactionCovering - " << ex.what();
+        qDebug() << "Error - DataCoreObject::getTransactionCovering - " << ex.what();
         result.clear();
     }
 
@@ -217,7 +236,7 @@ bool DataCoreObject::removePeople(int index, int count)
 {
     const int lastIndex = index + count - 1;
     if (index < 0 || count < 1 || lastIndex >= numPeople()) {
-        qDebug() << "Error - DataCoreObject::RemovePeople - Invalid parameters.  index = "
+        qDebug() << "Error - DataCoreObject::removePeople - Invalid parameters.  index = "
             << index << " count = " << count << " NumPeople = " << numPeople();
         return false;
     }
@@ -260,7 +279,7 @@ bool DataCoreObject::removePeople(int index, int count)
 const QString& DataCoreObject::getPersonIdentifier(int index) const
 {
     if (index < 0 || index >= numPeople()) {
-        qDebug() << "Error - DataCoreObject::GetPersonIdentifier - Invalid index:" << index;
+        qDebug() << "Error - DataCoreObject::getPersonIdentifier - Invalid index:" << index;
         const static QString errorString = "";
         return errorString;
     }
@@ -271,7 +290,7 @@ const QString& DataCoreObject::getPersonIdentifier(int index) const
 const QString& DataCoreObject::getPersonName(int index) const
 {
     if (index < 0 || index >= numPeople()) {
-        qDebug() << "Error - DataCoreObject::GetPersonName - Invalid index:" << index;
+        qDebug() << "Error - DataCoreObject::getPersonName - Invalid index:" << index;
         const static QString errorString = "";
         return errorString;
     }
@@ -282,7 +301,7 @@ const QString& DataCoreObject::getPersonName(int index) const
 const QString& DataCoreObject::getTransactionDescription(int index) const
 {
     if (index < 0 || index >= numTransactions()) {
-        qDebug() << "Error - DataCoreObject::GetTransactionDescription - Invalid index:" << index;
+        qDebug() << "Error - DataCoreObject::getTransactionDescription - Invalid index:" << index;
         const static QString errorString = "";
         return errorString;
     }
@@ -294,12 +313,12 @@ QString DataCoreObject::getResultDebtorId(int index)
 {
     QString result;
     if (index < 0 || index >= numResults()) {
-        qDebug() << "Error - DataCoreObject::GetResultDebtor - Invalid index:" << index;
+        qDebug() << "Error - DataCoreObject::getResultDebtor - Invalid index:" << index;
     } else {
         try {
             result = QString::fromStdString(std::get<0>(m_data.GetResults()[index]));
         } catch (const std::exception& ex) {
-            qDebug() << "Error - DataCoreObject::GetResultDebtor - " << ex.what();
+            qDebug() << "Error - DataCoreObject::getResultDebtor - " << ex.what();
             result.clear();
         }
     }
@@ -315,12 +334,12 @@ QString DataCoreObject::getResultCreditorId(int index)
 {
     QString result;
     if (index < 0 || index >= numResults()) {
-        qDebug() << "Error - DataCoreObject::GetResultCreditor - Invalid index:" << index;
+        qDebug() << "Error - DataCoreObject::getResultCreditor - Invalid index:" << index;
     } else {
         try {
             result = QString::fromStdString(std::get<1>(m_data.GetResults()[index]));
         } catch (const std::exception& ex) {
-            qDebug() << "Error - DataCoreObject::GetResultDebtor - " << ex.what();
+            qDebug() << "Error - DataCoreObject::getResultDebtor - " << ex.what();
             result.clear();
         }
     }
@@ -336,12 +355,12 @@ double DataCoreObject::getResultCost(int index)
 {
     double result = 0;
     if (index < 0 || index >= numResults()) {
-        qDebug() << "Error - DataCoreObject::GetResultCost - Invalid index:" << index;
+        qDebug() << "Error - DataCoreObject::getResultCost - Invalid index:" << index;
     } else {
         try {
             result = std::get<2>(m_data.GetResults()[index]);
         } catch (const std::exception& ex) {
-            qDebug() << "Error - DataCoreObject::GetResultDebtor - " << ex.what();
+            qDebug() << "Error - DataCoreObject::getResultDebtor - " << ex.what();
             result = 0;
         }
     }
@@ -356,7 +375,7 @@ int DataCoreObject::numResults()
 bool DataCoreObject::editPersonIdentifier(int index, const QString& newIdentifier)
 {
     if (index < 0 || index >= numPeople()) {
-        qDebug() << "Error - DataCoreObject::EditPersonIdentifier - Invalid index:" << index;
+        qDebug() << "Error - DataCoreObject::editPersonIdentifier - Invalid index:" << index;
         return false;
     }
 
@@ -386,7 +405,7 @@ bool DataCoreObject::editPersonIdentifier(int index, const QString& newIdentifie
 bool DataCoreObject::editPersonName(int index, QString newName)
 {
     if (index < 0 || index >= numPeople()) {
-        qDebug() << "Error - DataCoreObject::EditPersonName - Invalid index:" << index;
+        qDebug() << "Error - DataCoreObject::editPersonName - Invalid index:" << index;
         return false;
     }
 
@@ -415,7 +434,6 @@ bool DataCoreObject::jsonRead(const QUrl& filePath)
     QString fileString(filePath.toLocalFile());
     QFile file(fileString);
 
-    // TODO: Clean up this error code
     if (!file.open(QIODevice::ReadOnly)) {
         qDebug() << "Could not open file for reading: " + fileString;
         qDebug() << "Code: " << file.error() << "Reason: " << file.errorString();
@@ -434,7 +452,6 @@ bool DataCoreObject::jsonWrite(const QUrl& filePath) const
     QString fileString(filePath.toLocalFile());
     QFile file(fileString);
 
-    // TODO: Clean up this error code
     if (!file.open(QIODevice::WriteOnly)) {
         qDebug() << "Could not open file for writing: " + fileString;
         qDebug() << "Code: " << file.error() << "Reason: " << file.errorString();

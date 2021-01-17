@@ -26,9 +26,11 @@ QVariant TransactionsTableModel::data(const QModelIndex& index, int role) const
             case Column::Cost: return m_data->getTransactionCost(index.row());
             case Column::Payer: return m_data->getTransactionPayer(index.row());
             case Column::Covering: {
+                // TODO: Cache this
                 QString coveringListStr;
                 bool needsComma = false;
-                for (const auto& str : m_data->getTransactionCovering(index.row())) {
+                const QStringList& tempLValue = m_data->getTransactionCovering(index.row());
+                for (const auto& str : tempLValue) {
                     if (needsComma) {
                         coveringListStr += ',';
                     } else {

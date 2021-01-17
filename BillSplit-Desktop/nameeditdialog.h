@@ -16,7 +16,7 @@ public:
     enum CustomDialogCode { Cancel, Delete, Save };
 
 public:
-    explicit NameEditDialog(Mode mode, QWidget* parent = nullptr);
+    explicit NameEditDialog(QWidget* parent = nullptr);
     ~NameEditDialog();
 
     void SetName(const QString& name);
@@ -24,13 +24,16 @@ public:
     QString GetName() const;
     QString GetInitials() const;
 
+    void SetMode(Mode mode);
+    void Clear();
+
 private slots:
     void on_pushButtonCancel_clicked();
     void on_pushButtonDelete_clicked();
     void on_pushButtonSave_clicked();
 
 private:
-    Ui::NameEditDialog *ui;
+    Ui::NameEditDialog* m_ui = nullptr;
 };
 
 #endif // NAMEEDITDIALOG_H

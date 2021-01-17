@@ -523,7 +523,8 @@ void DataCoreObject::jsonWrite(QJsonObject& jsonObj) const
         curr["payer"] = getTransactionPayer(i);
 
         QJsonArray coveringArray;
-        for (const auto& name : getTransactionCovering(i)) {
+        QStringList tempLValue = getTransactionCovering(i);
+        for (const auto& name : tempLValue) {
             coveringArray.append(name);
         }
         curr["covering"] = coveringArray;

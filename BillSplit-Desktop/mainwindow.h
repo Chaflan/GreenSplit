@@ -5,13 +5,6 @@
 #include <QMessageBox>
 #include <QUrl>
 
-// -Hide implementation
-// -Some kind of inheritance for the transaction and people widgets.  They
-// are very similar
-
-// TODO: standardize on m_
-// TODO: standardize on singleTransactionModel
-
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
@@ -27,7 +20,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    MainWindow(QWidget *parent = nullptr);
+    MainWindow(QWidget* parent = nullptr);
     ~MainWindow();
 
 private:
@@ -43,11 +36,11 @@ private:
     mutable QMessageBox m_errorMessageBox;
     mutable QUrl m_saveFile;
 
-    Ui::MainWindow* ui;
-    DataCoreObject* m_data;
-    PeopleTableModel* m_peopleModel;
-    TransactionsTableModel* m_transactionsModel;
-    TransactionModel* m_transactionModel;
-    ResultsModel* mResultsModel;
+    Ui::MainWindow* m_ui = nullptr;
+    DataCoreObject* m_data = nullptr;
+    PeopleTableModel* m_peopleModel = nullptr;
+    TransactionsTableModel* m_transactionsModel = nullptr;
+    TransactionModel* m_transactionModel = nullptr;
+    ResultsModel* m_resultsModel = nullptr;
 };
 #endif // MAINWINDOW_H

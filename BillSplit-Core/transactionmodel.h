@@ -6,9 +6,6 @@
 
 class DataCoreObject;
 
-// TODO: Consistent order cost payer covering description
-// TODO: some of the sets and gets can be private
-
 //------------------------------------------------------------------------------------------
 // Person Check
 //

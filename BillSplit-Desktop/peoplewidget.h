@@ -2,11 +2,6 @@
 #define PEOPLEWIDGET_H
 
 #include <QWidget>
-#include "nameeditdialog.h"
-
-
-// TODO: SetPeopleModel -> SetModel for all
-// TODO: Do a const check
 
 namespace Ui {
 class PeopleWidget;
@@ -14,6 +9,7 @@ class PeopleWidget;
 
 class QItemSelectionModel;
 class PeopleTableModel;
+class NameEditDialog;
 
 class PeopleWidget : public QWidget
 {
@@ -32,8 +28,9 @@ private slots:
 
 private:
 
-    Ui::PeopleWidget* ui;
-    PeopleTableModel* m_model;
+    Ui::PeopleWidget* m_ui = nullptr;
+    NameEditDialog* m_dialog = nullptr;
+    PeopleTableModel* m_model = nullptr;
 };
 
 #endif // PEOPLEWIDGET_H

@@ -3,9 +3,6 @@
 
 #include <QWidget>
 
-// TODO: = nullptr everywhere
-// TODO: try it for UI
-
 namespace Ui {
 class TransactionsWidget;
 }
@@ -19,7 +16,7 @@ class TransactionsWidget : public QWidget
     Q_OBJECT
 
 public:
-    explicit TransactionsWidget(QWidget *parent = nullptr);
+    explicit TransactionsWidget(QWidget* parent = nullptr);
     ~TransactionsWidget();
 
     void SetTransactionsModel(TransactionsTableModel* transactionsTableModel);
@@ -31,7 +28,7 @@ private slots:
     void on_pushButtonView_clicked();
 
 private:
-    Ui::TransactionsWidget* ui;
+    Ui::TransactionsWidget* m_ui = nullptr;
     TransactionEditDialog* m_dialog = nullptr;
     TransactionsTableModel* m_model = nullptr;
 };

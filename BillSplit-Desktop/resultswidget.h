@@ -20,8 +20,8 @@ public:
     void SetResultsModel(ResultsModel* m);
 
 private:
-    Ui::ResultsWidget* ui;
-    ResultsModel* model;
+    Ui::ResultsWidget* m_ui = nullptr;
+    ResultsModel* m_model= nullptr;
 };
 
 #endif // RESULTSWIDGET_H

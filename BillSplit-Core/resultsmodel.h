@@ -24,7 +24,7 @@ public:
     QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 
-    Q_INVOKABLE int getMaxLetterCount() const;
+    Q_INVOKABLE int getMaxLetterCount() const;  // For column sizing
     void resetModel();
 
     void setDataCore(DataCoreObject* data);

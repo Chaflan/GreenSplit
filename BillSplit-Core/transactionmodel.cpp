@@ -4,8 +4,7 @@
 
 PersonCheck::PersonCheck(QObject* parent) :
     QObject(parent)
-{
-}
+{ }
 
 PersonCheck::PersonCheck(QString name, bool checkStatus, QObject* parent) :
     QObject(parent),

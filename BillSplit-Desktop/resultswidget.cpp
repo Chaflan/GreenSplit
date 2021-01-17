@@ -1,23 +1,22 @@
 #include "resultswidget.h"
 #include "ui_resultswidget.h"
-
 #include "resultsmodel.h"
 
 ResultsWidget::ResultsWidget(QWidget *parent) :
     QWidget(parent),
-    ui(new Ui::ResultsWidget),
-    model(nullptr)
+    m_ui(new Ui::ResultsWidget),
+    m_model(nullptr)
 {
-    ui->setupUi(this);
+    m_ui->setupUi(this);
 }
 
 ResultsWidget::~ResultsWidget()
 {
-    delete ui;
+    delete m_ui;
 }
 
 void ResultsWidget::SetResultsModel(ResultsModel* m)
 {
-    model = m;
-    ui->listView->setModel(model);
+    m_model = m;
+    m_ui->listView->setModel(m_model);
 }

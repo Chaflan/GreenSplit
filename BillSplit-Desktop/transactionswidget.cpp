@@ -5,34 +5,33 @@
 
 TransactionsWidget::TransactionsWidget(QWidget *parent) :
     QWidget(parent),
-    ui(new Ui::TransactionsWidget),
+    m_ui(new Ui::TransactionsWidget),
     m_dialog(new TransactionEditDialog(this))
 {
-    ui->setupUi(this);
+    m_ui->setupUi(this);
     m_dialog->setModal(true);
 }
 
 TransactionsWidget::~TransactionsWidget()
 {
-    delete m_dialog;
-    delete ui;
+    delete m_ui;
 }
 
 void TransactionsWidget::SetTransactionsModel(TransactionsTableModel* transactionsTableModel)
 {
     m_model = transactionsTableModel;
-    ui->tableView->setModel(m_model);
+    m_ui->tableView->setModel(m_model);
 
-    ui->pushButtonView->setDisabled(true);
-    QObject::connect(ui->tableView->selectionModel(), &QItemSelectionModel::selectionChanged,
-        [this]() { ui->pushButtonView->setDisabled(!ui->tableView->selectionModel()->hasSelection()); });
+    m_ui->pushButtonView->setDisabled(true);
+    QObject::connect(m_ui->tableView->selectionModel(), &QItemSelectionModel::selectionChanged,
+        [this]() { m_ui->pushButtonView->setDisabled(!m_ui->tableView->selectionModel()->hasSelection()); });
     QObject::connect(m_model, &TransactionsTableModel::modelReset,
-        [this]() { ui->pushButtonView->setDisabled(!ui->tableView->selectionModel()->hasSelection()); });
+        [this]() { m_ui->pushButtonView->setDisabled(!m_ui->tableView->selectionModel()->hasSelection()); });
 
     // Table formatting
-    ui->tableView->horizontalHeader()->setDefaultAlignment(Qt::AlignLeft);
-    ui->tableView->horizontalHeader()->setStretchLastSection(true);
-    ui->tableView->setStyleSheet("QHeaderView::section { background-color:gray }");
+    m_ui->tableView->horizontalHeader()->setDefaultAlignment(Qt::AlignLeft);
+    m_ui->tableView->horizontalHeader()->setStretchLastSection(true);
+    m_ui->tableView->setStyleSheet("QHeaderView::section { background-color:gray }");
 }
 
 void TransactionsWidget::SetTransactionModel(TransactionModel* transactionModel)
@@ -83,5 +82,5 @@ void TransactionsWidget::on_pushButtonNew_clicked()
 
 void TransactionsWidget::on_pushButtonView_clicked()
 {
-    ViewSelected(ui->tableView->selectionModel()->currentIndex());
+    ViewSelected(m_ui->tableView->selectionModel()->currentIndex());
 }

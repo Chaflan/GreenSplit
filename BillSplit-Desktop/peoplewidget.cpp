@@ -8,33 +8,33 @@
 
 PeopleWidget::PeopleWidget(QWidget *parent) :
     QWidget(parent),
-    ui(new Ui::PeopleWidget),
-    m_model(nullptr)
+    m_ui(new Ui::PeopleWidget),
+    m_dialog(new NameEditDialog(this))
 {
-    ui->setupUi(this);
+    m_ui->setupUi(this);
+    m_dialog->setModal(true);
 }
 
 PeopleWidget::~PeopleWidget()
 {
-    delete ui;
+    delete m_ui;
 }
 
-// TODO: Maybe call this init?
 void PeopleWidget::SetPeopleModel(PeopleTableModel* peopleModel)
 {
     m_model = peopleModel;
-    ui->tableView->setModel(m_model);
+    m_ui->tableView->setModel(m_model);
 
-    ui->pushButtonView->setDisabled(true);
-    QObject::connect(ui->tableView->selectionModel(), &QItemSelectionModel::selectionChanged,
-        [this]() { ui->pushButtonView->setDisabled(!ui->tableView->selectionModel()->hasSelection()); });
+    m_ui->pushButtonView->setDisabled(true);
+    QObject::connect(m_ui->tableView->selectionModel(), &QItemSelectionModel::selectionChanged,
+        [this]() { m_ui->pushButtonView->setDisabled(!m_ui->tableView->selectionModel()->hasSelection()); });
     QObject::connect(m_model, &PeopleTableModel::modelReset,
-        [this]() { ui->pushButtonView->setDisabled(!ui->tableView->selectionModel()->hasSelection()); });
+        [this]() { m_ui->pushButtonView->setDisabled(!m_ui->tableView->selectionModel()->hasSelection()); });
 
     // Table formatting
-    ui->tableView->horizontalHeader()->setDefaultAlignment(Qt::AlignLeft);
-    ui->tableView->horizontalHeader()->setStretchLastSection(true);
-    ui->tableView->setStyleSheet("QHeaderView::section { background-color:gray }");
+    m_ui->tableView->horizontalHeader()->setDefaultAlignment(Qt::AlignLeft);
+    m_ui->tableView->horizontalHeader()->setStretchLastSection(true);
+    m_ui->tableView->setStyleSheet("QHeaderView::section { background-color:gray }");
 }
 
 void PeopleWidget::ViewSelected(const QModelIndex& index)
@@ -43,23 +43,21 @@ void PeopleWidget::ViewSelected(const QModelIndex& index)
         return;
     }
 
-    // TODO: Cache this in PeopleWidget class?  Will have to make a set mode
-    NameEditDialog dialog(NameEditDialog::Mode::Edit);
-    dialog.setModal(true);
-    dialog.SetInitials(m_model->data(index.row(), PeopleTableModel::Column::Identifier).toString());
-    dialog.SetName(m_model->data(index.row(), PeopleTableModel::Column::Name).toString());
+    m_dialog->SetMode(NameEditDialog::Mode::Edit);
+    m_dialog->SetInitials(m_model->data(index.row(), PeopleTableModel::Column::Identifier).toString());
+    m_dialog->SetName(m_model->data(index.row(), PeopleTableModel::Column::Name).toString());
 
     for (bool isValid = false; !isValid;) {
-        dialog.exec();
+        m_dialog->exec();
 
-        if (dialog.result() == NameEditDialog::CustomDialogCode::Save) {
-            if (m_model->setData(index.row(), PeopleTableModel::Column::Identifier, dialog.GetInitials()) &&
-                m_model->setData(index.row(), PeopleTableModel::Column::Name, dialog.GetName()))
+        if (m_dialog->result() == NameEditDialog::CustomDialogCode::Save) {
+            if (m_model->setData(index.row(), PeopleTableModel::Column::Identifier, m_dialog->GetInitials()) &&
+                m_model->setData(index.row(), PeopleTableModel::Column::Name, m_dialog->GetName()))
             {
                 isValid = true;
             }
         }
-        else if (dialog.result() == NameEditDialog::CustomDialogCode::Delete) {
+        else if (m_dialog->result() == NameEditDialog::CustomDialogCode::Delete) {
             m_model->removeRow(index.row());
             isValid = true;
         }
@@ -73,12 +71,12 @@ void PeopleWidget::ViewSelected(const QModelIndex& index)
 void PeopleWidget::on_pushButtonNew_clicked()
 {
     for (bool isValid = false; !isValid;) {
-        NameEditDialog dialog(NameEditDialog::Mode::Add);
-        dialog.setModal(true);
-        dialog.exec();
+        m_dialog->SetMode(NameEditDialog::Mode::Add);
+        m_dialog->Clear();
+        m_dialog->exec();
 
-        if (dialog.result() != NameEditDialog::CustomDialogCode::Save ||
-            m_model->addPerson(dialog.GetInitials(), dialog.GetName()))
+        if (m_dialog->result() != NameEditDialog::CustomDialogCode::Save ||
+            m_model->addPerson(m_dialog->GetInitials(), m_dialog->GetName()))
         {
             isValid = true;
         }
@@ -87,5 +85,5 @@ void PeopleWidget::on_pushButtonNew_clicked()
 
 void PeopleWidget::on_pushButtonView_clicked()
 {
-    ViewSelected(ui->tableView->selectionModel()->currentIndex());
+    ViewSelected(m_ui->tableView->selectionModel()->currentIndex());
 }

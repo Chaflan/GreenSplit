@@ -19,3 +19,5 @@
 // include cleanup
 // arrange functions in order
 // include order
+// consistent bracing
+// always const signals?

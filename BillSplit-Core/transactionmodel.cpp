@@ -1,7 +1,6 @@
 #include "transactionmodel.h"
+#include "datacoreobject.h"
 #include <QDebug>
-
-// TODO: data assert consideration
 
 PersonCheck::PersonCheck(QObject* parent) :
     QObject(parent)

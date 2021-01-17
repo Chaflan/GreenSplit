@@ -1,10 +1,6 @@
 #include "resultsmodel.h"
-#include <QJsonArray>
-#include <QJsonObject>
-#include <QFont>
-#include <QFontMetrics>
-
-// TODO: Ensure your brace style is upheld throughout
+#include "datacoreobject.h"
+#include <QDebug>
 
 ResultsModel::ResultsModel(QObject* parent) :
     QAbstractListModel(parent)

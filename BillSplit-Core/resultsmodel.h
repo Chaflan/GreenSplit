@@ -2,10 +2,9 @@
 #define RESULTSMODEL_H
 
 #include "billsplit-core_global.h"
-#include "datacoreobject.h"
-
 #include <QAbstractListModel>
-#include <vector>
+
+class DataCoreObject;
 
 //---------------------------------------------------------------------------------
 // ResultsModel is a lot simpler than the other models.  It is wholely reliant on its

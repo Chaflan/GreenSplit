@@ -43,7 +43,7 @@ private:
     mutable QMessageBox m_errorMessageBox;
     mutable QUrl m_saveFile;
 
-    Ui::MainWindow *ui;
+    Ui::MainWindow* ui;
     DataCoreObject* m_data;
     PeopleTableModel* m_peopleModel;
     TransactionsTableModel* m_transactionsModel;

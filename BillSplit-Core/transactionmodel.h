@@ -3,13 +3,17 @@
 
 #include <QObject>
 #include "billsplit-core_global.h"
-#include "datacoreobject.h"
+
+class DataCoreObject;
 
 // TODO: Consistent order cost payer covering description
-// TODO: const signals in all classes
-// TODO: dataSet name?  dataChaned has already been used
 // TODO: some of the sets and gets can be private
 
+//------------------------------------------------------------------------------------------
+// Person Check
+//
+// Represents a name and a check for use as elements in a checkable list view
+//------------------------------------------------------------------------------------------
 class BILLSPLITCORE_EXPORT PersonCheck : public QObject
 {
     Q_OBJECT

@@ -20,7 +20,7 @@ class PeopleWidget : public QWidget
     Q_OBJECT
 
 public:
-    explicit PeopleWidget(QWidget *parent = nullptr);
+    explicit PeopleWidget(QWidget* parent = nullptr);
     ~PeopleWidget();
 
     void SetPeopleModel(PeopleTableModel* peopleModel);
@@ -32,7 +32,7 @@ private slots:
 
 private:
 
-    Ui::PeopleWidget *ui;
+    Ui::PeopleWidget* ui;
     PeopleTableModel* m_model;
 };
 

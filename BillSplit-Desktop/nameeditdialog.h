@@ -16,7 +16,7 @@ public:
     enum CustomDialogCode { Cancel, Delete, Save };
 
 public:
-    explicit NameEditDialog(Mode mode, QWidget *parent = nullptr);
+    explicit NameEditDialog(Mode mode, QWidget* parent = nullptr);
     ~NameEditDialog();
 
     void SetName(const QString& name);

@@ -1,8 +1,6 @@
-import QtQuick 2.15
+import QtQuick 2.12
 import QtQuick.Controls 2.12
-import QtQml.Models 2.12
-import Qt.labs.qmlmodels 1.0
-import QtQuick.Layouts 1.3
+import QtQuick.Layouts 1.12
 
 Page {
     Item {
@@ -20,7 +18,7 @@ Page {
             spacing: 5
 
             // QML is very painful sometimes.  Calling forceLayout doesnt work so we have to
-            // do this very basic action of resizing column headers with cells manually.  It's unacceptable.
+            // do this very basic action of resizing column headers with cells manually.
             function recalculateColumnWidths() {
                 for (var i = 0; i < tableheaderrepeater.count; i++) {
                     tableheaderrepeater.itemAt(i).width = tableview.model.columnWidth(i, tableheader.spacing, table.width);

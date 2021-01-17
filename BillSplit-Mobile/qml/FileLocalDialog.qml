@@ -1,12 +1,6 @@
-// TODO: What is necessary here?  What is the .
-
-import QtQuick 2.6
-import QtQuick.Layouts 1.3
-import QtQuick.Controls 2.0
-import QtQuick.Dialogs 1.2
-import QtQuick.Window 2.2
-import QtQuick.Controls.Styles 1.4
-import "."
+import QtQuick 2.12
+import QtQuick.Controls 2.12
+import QtQuick.Layouts 1.12
 
 Popup {
     y: origin.y + 10
@@ -56,7 +50,7 @@ Popup {
             Layout.fillWidth: true
             spacing: 5
 
-            // Bug fix: QML does not automatically do this caulcation which throws off layout sizing
+            // QML does not automatically do this caulcation which throws off layout sizing
             implicitHeight: {
                 var iheight = 0
                 for (var i = 0; i < contentItem.children.length; i++) {

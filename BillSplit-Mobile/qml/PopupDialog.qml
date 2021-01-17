@@ -1,6 +1,6 @@
-import QtQuick 2.15
-import QtQuick.Controls 2.5
-import QtQuick.Layouts 1.3
+import QtQuick 2.12
+import QtQuick.Controls 2.12
+import QtQuick.Layouts 1.12
 
 //-----------------------------------------------------------------------
 // Custom Dialog
@@ -38,7 +38,7 @@ Popup {
             Layout.fillHeight: true
             Layout.fillWidth: true
 
-            // Bug fix: QML does not automatically do this caulcation which throws off layout sizing
+            // QML does not automatically do this caulcation which throws off layout sizing
             implicitHeight: {
                 var iheight = 0
                 for (var i = 0; i < contentItem.children.length; i++) {

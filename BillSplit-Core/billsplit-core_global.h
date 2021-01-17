@@ -21,3 +21,5 @@
 // include order
 // consistent bracing
 // always const signals?
+
+// com.company.core

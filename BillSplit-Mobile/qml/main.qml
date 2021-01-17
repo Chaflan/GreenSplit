@@ -150,37 +150,15 @@ ApplicationWindow {
         }
     }
 
-    // TODO: Put these in the scopes to which they belong? (and their connections)
-    // Models
     DataCore {
         id: dataCoreInstance
     }
-    PeopleTableModel {
-        id: peopleTableModel
-        dataCore: dataCoreInstance
-    }
-    TransactionsTableModel {
-        id: transactionsTableModel
-        dataCore: dataCoreInstance
-    }
-    ResultsModel {
-        id: resultsModel
-        dataCore: dataCoreInstance
-    }
-
-    // Creat a popup when an error signal is sent from the models
     Connections {
         target: dataCoreInstance
         function onSignalError(errorMessage) { popupMessage(errorMessage) }
     }
-    Connections {
-        target: peopleTableModel
-        function onSignalError(errorMessage) { popupMessage(errorMessage) }
-    }
-    Connections {
-        target: transactionsTableModel
-        function onSignalError(errorMessage) { popupMessage(errorMessage) }
-    }
+
+    // Creat an error popup with the passed text.  Used with error signals from models.
     function popupMessage(messageText) {
         errorPopup.errorMessage.text = messageText// + " paaaaaa aaaa aaa aa aaaaa aaa aadding "
         errorPopup.open()

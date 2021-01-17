@@ -1,6 +1,7 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
+import com.company.core 1.0
 
 Page {
     Item {
@@ -9,6 +10,15 @@ Page {
         anchors.leftMargin: 5
         anchors.rightMargin: 5
         anchors.bottomMargin: 5
+
+        PeopleTableModel {
+            id: peopleTableModel
+            dataCore: dataCoreInstance
+        }
+        Connections {
+            target: peopleTableModel
+            function onSignalError(errorMessage) { popupMessage(errorMessage) }
+        }
 
         function getColumnWidth(columnIndex, columnSpacing, tableWidth) {
             switch (columnIndex) {

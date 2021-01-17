@@ -1,6 +1,7 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
+import com.company.core 1.0
 
 Page {
     Item {
@@ -8,6 +9,15 @@ Page {
         anchors.fill:parent
         anchors.leftMargin: 5
         anchors.rightMargin: 5
+
+        TransactionsTableModel {
+            id: transactionsTableModel
+            dataCore: dataCoreInstance
+        }
+        Connections {
+            target: transactionsTableModel
+            function onSignalError(errorMessage) { popupMessage(errorMessage) }
+        }
 
         Row {
             id: tableheader

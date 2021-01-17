@@ -95,7 +95,7 @@ void TransactionModel::load(double cost, const QString& payer, const QStringList
     for (int i = 0; i < m_data->numPeople(); ++i) {
         const QString& currId = m_data->getPersonIdentifier(i);
         m_allPeople.append(currId);
-        m_coveringList.append(new PersonCheck(currId, covering.contains(currId), this));   // TODO: How does deleting work here?
+        m_coveringList.append(new PersonCheck(currId, covering.contains(currId), this));
         if (payer == currId) {
             setPayerIndex(i);
         }
@@ -117,7 +117,7 @@ void TransactionModel::loadDefault()
     for (int i = 0; i < m_data->numPeople(); ++i) {
         const QString& currId = m_data->getPersonIdentifier(i);
         m_allPeople.append(currId);
-        m_coveringList.append(new PersonCheck(currId, true, this));   // TODO: How does deleting work here?
+        m_coveringList.append(new PersonCheck(currId, true, this));
     }
     setPayerIndex(0);
 

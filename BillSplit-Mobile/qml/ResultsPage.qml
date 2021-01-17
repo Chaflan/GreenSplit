@@ -1,5 +1,6 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
+import com.company.core 1.0
 
 Page {
     id: page
@@ -8,6 +9,11 @@ Page {
         anchors.fill:parent
         anchors.leftMargin: 5
         anchors.rightMargin: 5
+
+        ResultsModel {
+            id: resultsModel
+            dataCore: dataCoreInstance
+        }
 
         Row {
             id: listheader

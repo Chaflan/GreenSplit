@@ -1,8 +1,6 @@
 #include "transactionstablemodel.h"
 #include <QDebug>
 
-// TODO: Compare to peopletablemodel and make sure they align nicely
-
 TransactionsTableModel::TransactionsTableModel(QObject *parent) :
     QAbstractTableModel(parent),
     m_cwColWidths(Column::COUNT, 0),

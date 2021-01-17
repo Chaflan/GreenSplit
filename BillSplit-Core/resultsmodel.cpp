@@ -32,6 +32,12 @@ QVariant ResultsModel::headerData(int section, Qt::Orientation orientation, int 
 
 int ResultsModel::getMaxLetterCount() const
 {
+    // getMaxLetterCount can get called before data is set in QML due
+    // to it being involved in graphical layout.
+    if (!m_data) {
+        return 0;
+    }
+
     checkCacheValidity();
     return m_maxLetterCount;
 }

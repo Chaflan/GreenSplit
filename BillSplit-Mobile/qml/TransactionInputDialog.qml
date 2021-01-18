@@ -43,6 +43,7 @@ PopupDialog {
                 inputMethodHints: Qt.ImhDigitsOnly
                 onFocusChanged: { if(focus) { selectAll() } } // Select all on click
                 text: transactionModel.costStr
+                maximumLength: 10
                 onDisplayTextChanged: transactionModel.costStr = text
             }
         }

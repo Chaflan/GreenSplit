@@ -21,8 +21,10 @@ QVariant TransactionsTableModel::data(const QModelIndex& index, int role) const
 {
     if (isIndexValid(index) && role == Qt::DisplayRole) {
         switch (index.column()) {
-            case Column::Cost: return m_data->getTransactionCost(index.row());
-            case Column::Payer: return m_data->getTransactionPayer(index.row());
+            case Column::Cost:
+                return QString::number(m_data->getTransactionCost(index.row()), 'f', 2);
+            case Column::Payer:
+                return m_data->getTransactionPayer(index.row());
             case Column::Covering: {
                 // TODO: Cache this
                 QString coveringListStr;
@@ -38,7 +40,8 @@ QVariant TransactionsTableModel::data(const QModelIndex& index, int role) const
                 }
                 return coveringListStr;
             }
-            case Column::Description: return m_data->getTransactionDescription(index.row());
+            case Column::Description:
+                return m_data->getTransactionDescription(index.row());
         }
     }
 

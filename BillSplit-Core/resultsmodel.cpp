@@ -8,7 +8,8 @@ ResultsModel::ResultsModel(QObject* parent) :
 
 int ResultsModel::rowCount(const QModelIndex& parent) const
 {
-    return parent.isValid() ? 0 : m_data->numResults();
+    checkCacheValidity();
+    return parent.isValid() ? 0 : m_numResults;
 }
 
 QVariant ResultsModel::data(const QModelIndex& index, int role) const
@@ -89,14 +90,23 @@ void ResultsModel::buildCache() const
     static const QString strTemplate("(%1)%2    owes    (%3)%4    %5");
 
     m_results.clear();
+    m_numResults = m_data->numResults();
     m_maxLetterCount = 6; // "Result" length
-    for (int i = 0; i < rowCount(); ++i ) {
-        m_results.append(strTemplate
-                .arg(m_data->getResultDebtorId(i))
-                .arg(m_data->getResultDebtorName(i))
-                .arg(m_data->getResultCreditorId(i))
-                .arg(m_data->getResultCreditorName(i))
-                .arg(QString::number(m_data->getResultCost(i), 'f', 2)));
+    for (int i = 0; i < m_numResults; ++i ) {
+         m_results.append(strTemplate.arg(
+                m_data->getResultDebtorId(i),
+                m_data->getResultDebtorName(i),
+                m_data->getResultCreditorId(i),
+                m_data->getResultCreditorName(i),
+                QString::number(m_data->getResultCost(i), 'f', 2)));
         m_maxLetterCount = std::max(m_maxLetterCount, m_results[i].length());
+    }
+
+    if (m_numResults == 0) {
+        m_numResults = 1;
+        m_results.append("All debts have been settled.");
+    } else if (m_numResults < 0) {
+        m_numResults = 1;
+        m_results.append("Error");
     }
 }

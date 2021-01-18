@@ -44,6 +44,7 @@ private:
     DataCoreObject* m_data = nullptr;
 
     // Cached data
+    mutable int m_numResults;
     mutable QStringList m_results;
     mutable bool m_resultsValid;
     mutable int m_maxLetterCount;

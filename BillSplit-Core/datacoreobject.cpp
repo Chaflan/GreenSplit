@@ -369,7 +369,15 @@ double DataCoreObject::getResultCost(int index)
 
 int DataCoreObject::numResults()
 {
-    return static_cast<int>(m_data.GetResults().size());
+    int res = -1;
+    try {
+        res = static_cast<int>(m_data.GetResults().size());
+    } catch (const std::exception& ex) {
+        qDebug() << "Error - DataCoreObject::numResults - " << ex.what();
+        res = -1;
+    }
+
+    return res;
 }
 
 bool DataCoreObject::editPersonIdentifier(int index, const QString& newIdentifier)

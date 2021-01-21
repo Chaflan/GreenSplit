@@ -178,7 +178,7 @@ ApplicationWindow {
             anchors.fill: parent
             Text {
                 id: messageText
-                height: parent.height - circleButton.height
+                height: parent.height - popupOkButton.height
                 width: parent.width
                 font.pointSize: 15
                 anchors.horizontalCenter: parent.horizontalCenter
@@ -186,8 +186,8 @@ ApplicationWindow {
                 verticalAlignment: Text.AlignVCenter
                 horizontalAlignment: Text.AlignHCenter
             }
-            RoundButton {
-                id: circleButton
+            Button {
+                id: popupOkButton
 
                 height: 80
                 width: 100

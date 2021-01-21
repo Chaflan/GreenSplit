@@ -21,15 +21,7 @@ class AlgoCore_Impl;
 class AlgoCore
 {
 public:
-    //---------------------------------------------------------------------------------------
-    // Use decimalPlaces to set the significance of the solution.  Input costs are rounded to
-    // this before processing.  Not doing this can lead to solutions that pass
-    // validation, but combine in such a way to stack rounding errors yielding an unsolvable
-    // solution upon processing.
-    //
-    // An exception will be thrown if this results in exceeding the limit
-    //---------------------------------------------------------------------------------------
-    AlgoCore(double decimalPlaces = 2);
+    AlgoCore();
     ~AlgoCore();
 
     //---------------------------------------------------------------------------------------
@@ -55,10 +47,9 @@ public:
         SolveFewestTransfers(const std::unordered_map<std::string, double>& credits) const;
 
     //---------------------------------------------------------------------------------------
-    // Check the passed credits for values that overflow upon rounding (due to too many
-    // decimalPlaces or very high costs) and to ensure it is possible to solve the passed credits.
-    // That is, they sum to a zero cost.  Invalid argument excepsions are thrown upon both
-    // failures.  Solve functions will also validate before processing.
+    // Check the passed credits to ensure it is possible to solve the passed credits.
+    // That is, they sum to a zero cost.  Invalid argument exceptions are thrown upon
+    // failure.  Solve functions will validate before solving.
     //---------------------------------------------------------------------------------------
     void Validate(const std::unordered_map<std::string, double>& credits) const;
 

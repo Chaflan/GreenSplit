@@ -1,55 +1,30 @@
 #include "algocore_impl.h"
 #include <queue>
-#include <cmath>
-
-AlgoCore_Impl::AlgoCore_Impl(unsigned int decimalPlaces)
-    : m_decimalPlaces(decimalPlaces)
-{
-    // Margins need one extra level of significance.  Otherwise, rounding errors in a double mean that
-    // 0.01 = 0.010000000000000007 or similar causing us to treat a cent as zero.
-    const unsigned int marginPlaces = m_decimalPlaces + 1;
-
-    if (marginPlaces > std::numeric_limits<double>::digits10) {
-        throw std::invalid_argument("Decimal places too large.  Overflow will occur.");
-    }
-
-    m_pMargin = std::pow(static_cast<double>(10), -1 * static_cast<int>(marginPlaces));
-    m_nMargin = -1 * m_pMargin;
-}
 
 std::vector<std::tuple<std::string, std::string, double> >
     AlgoCore_Impl::SolveGreedy(const std::unordered_map<std::string, double>& credits) const
 {
-    return SolveGreedyValidated(Prepare(credits));
+    Validate(credits);
+    return SolveGreedyValidated(credits);
 }
 
 std::vector<std::tuple<std::string, std::string, double> >
     AlgoCore_Impl::SolveFewestTransfers(const std::unordered_map<std::string, double>& credits) const
 {
-    return SolveFewestTransfersValidated(Prepare(credits));
+    Validate(credits);
+    return SolveFewestTransfersValidated(credits);
 }
 
 void AlgoCore_Impl::Validate(const std::unordered_map<std::string, double>& credits) const
 {
     double sum = 0;
     for (const auto& [ name, debt ]  : credits) {
-        sum += Round(debt);
+        sum += debt;
     }
 
     if(sum < m_nMargin || m_pMargin < sum) {
         throw std::invalid_argument("impossible to solve debts");
     }
-}
-
-double AlgoCore_Impl::Round(double d) const
-{
-    static const double tens = std::pow(10, m_decimalPlaces);
-    if (std::numeric_limits<double>::max() / tens < d) {
-        throw std::invalid_argument(
-            std::string("value %f overflows upon rounding to %d decimal places", d, m_decimalPlaces));
-    }
-
-    return std::round(d * tens) / tens;
 }
 
 std::vector<std::tuple<std::string, std::string, double> >
@@ -253,19 +228,4 @@ std::vector<std::tuple<std::string, std::string, double> >
     }
 
     return solnFinalStr;
-}
-
-std::unordered_map<std::string, double> AlgoCore_Impl::Prepare(std::unordered_map<std::string, double> credits) const
-{
-    double sum = 0;
-    for (auto& [ name, debt ]  : credits) {
-        debt = Round(debt);
-        sum += debt;
-    }
-
-    if(sum < m_nMargin || m_pMargin < sum) {
-        throw std::invalid_argument("impossible to solve debts");
-    }
-
-    return credits;
 }

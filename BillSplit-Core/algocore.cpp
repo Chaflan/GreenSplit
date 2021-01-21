@@ -1,8 +1,8 @@
 #include "algocore.h"
 #include "algocore_impl.h"
 
-AlgoCore::AlgoCore(double decimalPlaces)
-    : impl( std::make_unique<AlgoCore_Impl>(decimalPlaces))
+AlgoCore::AlgoCore()
+    : impl( std::make_unique<AlgoCore_Impl>())
 { }
 
 // Needed to satisfy unique_ptr with incomplete type

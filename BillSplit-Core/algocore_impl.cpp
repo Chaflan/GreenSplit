@@ -86,6 +86,13 @@ std::vector<std::tuple<std::string, std::string, double> >
         res.emplace_back(nNameLookup[nIndex], pNameLookup[pIndex], payment);
     }
 
+    if constexpr (DEBUG) {
+        std::cout << "Greedy Solution:\n";
+        for (const auto& [ from, to, cost ] : res) {
+            std::cout << from << " > " << to << " : " << cost << std::endl;
+        }
+    }
+
     return res;
 }
 
@@ -95,6 +102,7 @@ std::vector<std::tuple<std::string, std::string, double> >
     // Prime the final solution using the greedy solution.  The optimal tree solution
     // will attempt to improve upon this, but won't be able to in most cases.
     std::vector<std::tuple<std::string, std::string, double> > solnFinalStr = SolveGreedyValidated(credits);
+    if constexpr (DEBUG) { std::cout << "\nOptimal Solution:"; }
     int numTransFinal = static_cast<int>(solnFinalStr.size());
 
     // Fewer than 4 transactions is guaranteed optimal already.
@@ -263,6 +271,13 @@ std::vector<std::tuple<std::string, std::string, double> >
                     pNameLookup[std::get<1>(iTrans)],
                     std::get<2>(iTrans));
             }
+        }
+    }
+
+    if constexpr (DEBUG) {
+        std::cout << std::endl;
+        for (const auto& [ from, to, cost ] : solnFinalStr) {
+            std::cout << from << " > " << to << " : " << cost << std::endl;
         }
     }
 

@@ -1,5 +1,6 @@
 #include "algocore_impl.h"
 #include <queue>
+#include <iostream>
 
 std::vector<std::tuple<std::string, std::string, double> >
     AlgoCore_Impl::SolveGreedy(const std::unordered_map<std::string, double>& credits) const
@@ -140,14 +141,47 @@ std::vector<std::tuple<std::string, std::string, double> >
         // Note that tree depth == number of transactions
         for(int depth = 0; depth >= 0;) {
 
+            if constexpr (DEBUG) {
+                std::cout << std::endl;
+                for (int i = 0; i < depth; ++i) { std::cout << '\t'; }
+                std::cout << "pix=" << st[depth].pix << " pset{";
+                bool needsComma = false;
+                for (const auto& x : st[depth].pset) {
+                    if (needsComma) { std::cout << ","; }
+                    else { needsComma = true; }
+                    std::cout << x;
+                }
+                std::cout << "}, nix=" << st[depth].nix  << " nset{";
+                needsComma = false;
+                for (const auto& x : st[depth].nset) {
+                    if (needsComma) { std::cout << ","; }
+                    else { needsComma = true; }
+                    std::cout << x;
+                }
+                std::cout << "}, numT=" << depth << std::flush;
+            }
+
             if (static_cast<int>(std::max(st[depth].pcount, st[depth].ncount)) + depth >= numTransFinal) {
                 // Base Case: Can't possibly improve upon final solution
+                if constexpr (DEBUG) { std::cout << " ascend(cant improve)"; }
+
                 --depth;
                 continue;
             }
 
             if (st[depth].pcount == 0 && st[depth].ncount == 0) {
                 // Base case: Solution found
+                if constexpr (DEBUG) {
+                    std::cout << " SOLN=";
+                    int i = 0;
+                    for (const auto& x : solnFinalIdx) {
+                        std::cout << (i >= numTransFinal ? "ignore" : "");
+                        std::cout << '{' << std::get<0>(x) << ',' << std::get<1>(x) << ',' << std::get<2>(x) << "},";
+                        i++;
+                    }
+                    std::cout << "ascend";
+                }
+
                 numTransFinal = depth;
                 solnFinalIdx = solnCurrIdx;
                 --depth;
@@ -179,6 +213,8 @@ std::vector<std::tuple<std::string, std::string, double> >
                     // Prime next recurse/descent, curr stack frame is intact to continuse the loop
                     // when we come back.
                     const int depthNext = depth + 1;
+                    st[depthNext].pix = 0;
+                    st[depthNext].nix = 0;
                     st[depthNext].pset = st[depth].pset;
                     st[depthNext].nset = st[depth].nset;
                     st[depthNext].pcount = st[depth].pcount;
@@ -208,9 +244,11 @@ std::vector<std::tuple<std::string, std::string, double> >
             }
 
             if (descend) {;
+                if constexpr (DEBUG) { std::cout << " descend" << std::flush; }
                 ++depth;
             } else {
                 // No solutions in this branch of the tree, ascend
+                if constexpr (DEBUG) { std::cout << " ascend(end loop)"; }
                 --depth;
             }
         }

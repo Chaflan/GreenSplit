@@ -29,6 +29,9 @@ private:
     // for the purpose of the algorithm.
     static constexpr double m_pMargin =  0.000001;
     static constexpr double m_nMargin = -0.000001;
+
+    // Set to true for debug output
+    static constexpr bool DEBUG = false;
 };
 
 #endif // ALGOCORE_IMPL_H

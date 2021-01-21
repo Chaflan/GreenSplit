@@ -96,9 +96,10 @@ std::vector<std::tuple<std::string, std::string, double> >
     std::vector<std::tuple<std::string, std::string, double> > solnFinalStr = SolveGreedyValidated(credits);
     int numTransFinal = static_cast<int>(solnFinalStr.size());
 
-    // Fewer than 5 transactions is guaranteed optimal already.  I have a proof in my notebook.
-    // Example of a 5 that can be optimized: 4,3,-3,-2,-2
-    if (numTransFinal >= 5) {
+    // Fewer than 4 transactions is guaranteed optimal already.
+    // Example of a 5 credit problem that can be optimized from 4 to 3 transactions: 4,3,-3,-2,-2.
+    // 4 transactions -> number of inputs ranging from 5 to 8 inclusive.
+    if (numTransFinal >= 4) {
         const int numTransOriginal = numTransFinal;
 
         // Sets of positive and negative costs in the debts object.

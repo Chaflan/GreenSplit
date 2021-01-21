@@ -214,7 +214,7 @@ bool DataCoreObject::personExists(const QString& identifier) const
 
 // Returns true if the datacore has knowledge of the person, meaning
 // they are involved in one or more transactions
-bool DataCoreObject::personInTransactions(const QString& identifier) const
+bool DataCoreObject::personInTransactions(const QString& identifier)
 {
     return m_data.PersonExists(identifier.toStdString());
 }

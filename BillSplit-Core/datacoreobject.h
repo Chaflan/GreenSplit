@@ -88,7 +88,7 @@ signals:
 
 private:
     static QString addJsonExtension(QString path);
-    bool personInTransactions(const QString& identifier) const;
+    bool personInTransactions(const QString& identifier);
     static std::set<std::string> stringListToStdSet(const QStringList& stringList);
     bool isNewIdentifierValid(const QString& identifier) const;
 

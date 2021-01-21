@@ -31,7 +31,7 @@ public:
     double GetTransactionCost(int index) const;
     const std::set<std::string>& GetTransactionCovering(int index) const;
 
-    bool PersonExists(const std::string& name) const noexcept;
+    bool PersonExists(const std::string& name) noexcept;
     bool EditPerson(const std::string& oldName, const std::string& newName) noexcept;
 
     //---------------------------------------------------------------------------------------

@@ -139,8 +139,9 @@ const std::vector<std::tuple<std::string, std::string, double> >& DataCore::GetR
     return m_results;
 }
 
-bool DataCore::PersonExists(const std::string& name) const noexcept
+bool DataCore::PersonExists(const std::string& name) noexcept
 {
+    UpdateLedger();
     if (m_ledger.empty()) {
         return false;
     }

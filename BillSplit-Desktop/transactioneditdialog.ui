@@ -64,7 +64,7 @@
         </font>
        </property>
        <property name="prefix">
-        <string>$</string>
+        <string/>
        </property>
        <property name="maximum">
         <double>99999999.989999994635582</double>

@@ -37,6 +37,11 @@ bool DataCoreObject::addTransaction(double cost, const QString& payer, const QSt
         }
     }
 
+    if (covering.isEmpty()) {
+        emit signalError("A transaction must cover one or more person.");
+        return false;
+    }
+
     try {
         m_data.AddTransaction(payer.toStdString(), cost, stringListToStdSet(covering));
     } catch (const std::exception& ex) {

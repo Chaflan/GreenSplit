@@ -168,13 +168,15 @@ bool TransactionsTableModel::addFromModel(TransactionModel* model)
         cost = model->getCostDbl();
     }
 
-    beginInsertRows(QModelIndex(), rowCount(), rowCount());
+    // Can't use begin/endInsertRows here. Qt still adds to view
+    // even if addTransaction fails.
+    beginResetModel();
     bool result = m_data->addTransaction(
         cost,
         model->getPayerName(),
         model->getCoveringStringList(),
         model->getDescription());
-    endInsertRows();
+    endResetModel();
 
     if (result) {
         checkMaxLettersForChange();

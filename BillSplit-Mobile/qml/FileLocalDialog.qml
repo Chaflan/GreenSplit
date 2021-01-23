@@ -109,7 +109,14 @@ Popup {
             horizontalAlignment: TextInput.AlignHCenter
             font.pixelSize: 15
             color: privates.activeColor
+
+            echoMode: TextInput.Normal
+            // More high level QML foolishness: For some reason android won't sync displayText and text
+            // echo mode doesn't help.  I changed the commented lines below to make a workable fix
+            // but it is ugly.  I tried doing this directly with onDisplayTextChanged, but that led to
+            // only more bugs.
         }
+
 
         RowLayout {
             id: buttonRow
@@ -120,16 +127,25 @@ Popup {
             Button {
                 id: buttonAccept
                 text: qsTr("Accept")
-                enabled: textFieldFileName.text !== ""
+                //enabled: textFieldFileName.text !== ""   // Doesn't work on android for some reason
+                enabled: true
                 contentItem: Text {
                     id: acceptContentItemText
                     text: buttonAccept.text
-                    color: textFieldFileName.text === "" ? "gray" : privates.activeColor
+                    //color: textFieldFileName.text === "" ? "gray" : privates.activeColor
+                    color: privates.activeColor
                     font.pixelSize: 15
                     horizontalAlignment: Text.AlignHCenter
                     verticalAlignment: Text.AlignVCenter
                 }
-                onClicked: { privates.pressResult = 2; close() }
+                onClicked: {
+                    // If check workaround for android enabling bug mentioned in above comments
+                    if (textFieldFileName.text === "") {
+                        popupMessage("File name cannot be blank.")
+                    } else {
+                        privates.pressResult = 2; close()
+                    }
+                }
             }
             Item { Layout.fillWidth: true } // Spacer
             Button {

@@ -15,9 +15,9 @@ std::vector<std::tuple<std::string, std::string, double> >
 }
 
 std::vector<std::tuple<std::string, std::string, double> >
-    AlgoCore::SolveFewestTransfers(const std::unordered_map<std::string, double>& credits) const
+    AlgoCore::SolveFewestTransfers(const std::unordered_map<std::string, double>& credits, int maxTimeMS) const
 {
-    return impl->SolveFewestTransfers(credits);
+    return impl->SolveFewestTransfers(credits, maxTimeMS);
 }
 
 void AlgoCore::Validate(const std::unordered_map<std::string, double>& credits) const

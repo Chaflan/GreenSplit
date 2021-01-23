@@ -1,6 +1,7 @@
 #include "algocore_impl.h"
 #include <queue>
 #include <iostream>
+#include <chrono>
 
 std::vector<std::tuple<std::string, std::string, double> >
     AlgoCore_Impl::SolveGreedy(const std::unordered_map<std::string, double>& credits) const
@@ -10,10 +11,10 @@ std::vector<std::tuple<std::string, std::string, double> >
 }
 
 std::vector<std::tuple<std::string, std::string, double> >
-    AlgoCore_Impl::SolveFewestTransfers(const std::unordered_map<std::string, double>& credits) const
+    AlgoCore_Impl::SolveFewestTransfers(const std::unordered_map<std::string, double>& credits, int maxTimeMS) const
 {
     Validate(credits);
-    return SolveFewestTransfersValidated(credits);
+    return SolveFewestTransfersValidated(credits, maxTimeMS);
 }
 
 void AlgoCore_Impl::Validate(const std::unordered_map<std::string, double>& credits) const
@@ -97,7 +98,7 @@ std::vector<std::tuple<std::string, std::string, double> >
 }
 
 std::vector<std::tuple<std::string, std::string, double> >
-    AlgoCore_Impl::SolveFewestTransfersValidated(const std::unordered_map<std::string, double>& credits) const
+    AlgoCore_Impl::SolveFewestTransfersValidated(const std::unordered_map<std::string, double>& credits, int maxTimeMS) const
 {
     // Prime the final solution using the greedy solution.  The optimal tree solution
     // will attempt to improve upon this, but won't be able to in most cases.
@@ -109,7 +110,7 @@ std::vector<std::tuple<std::string, std::string, double> >
     // Example of a 5 credit problem that can be optimized from 4 to 3 transactions: 4,3,-3,-2,-2.
     // 4 transactions -> number of inputs ranging from 5 to 8 inclusive.
     if (numTransFinal >= 4) {
-        const int numTransOriginal = numTransFinal;
+        const int numTransOriginal = numTransFinal;  
 
         // Sets of positive and negative costs in the debts object.
         std::vector<double> pFirstSet;
@@ -146,8 +147,13 @@ std::vector<std::tuple<std::string, std::string, double> >
         const size_t nSetSize = nFirstSet.size();
         std::vector<StackFrame> st(numTransOriginal, { 0, 0, pFirstSet, nFirstSet, pSetSize, nSetSize});
 
+        const auto timeLimit = std::chrono::high_resolution_clock::now() + std::chrono::milliseconds(maxTimeMS);
+        auto timeLimitReached = [maxTimeMS, &timeLimit = std::as_const(timeLimit)]()->bool {
+            return maxTimeMS >= 0 && std::chrono::high_resolution_clock::now() >= timeLimit;
+        };
+
         // Note that tree depth == number of transactions
-        for(int depth = 0; depth >= 0;) {
+        for(int depth = 0; depth >= 0 && !timeLimitReached();) {
 
             if constexpr (DEBUG) {
                 std::cout << std::endl;

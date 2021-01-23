@@ -12,7 +12,7 @@ public:
         SolveGreedy(const std::unordered_map<std::string, double>& credits) const;
 
     std::vector<std::tuple<std::string, std::string, double> >
-        SolveFewestTransfers(const std::unordered_map<std::string, double>& credits) const;
+        SolveFewestTransfers(const std::unordered_map<std::string, double>& credits, int maxTimeMS = -1) const;
 
     void Validate(const std::unordered_map<std::string, double>& credits) const;
 
@@ -22,7 +22,7 @@ private:
     std::vector<std::tuple<std::string, std::string, double> >
         SolveGreedyValidated(const std::unordered_map<std::string, double>& credits) const;
     std::vector<std::tuple<std::string, std::string, double> >
-        SolveFewestTransfersValidated(const std::unordered_map<std::string, double>& credits) const;
+        SolveFewestTransfersValidated(const std::unordered_map<std::string, double>& credits, int maxTimeMS) const;
 
 private:
     // Values between the margins (inclusive) are considered essentially zero
@@ -31,7 +31,7 @@ private:
     static constexpr double m_nMargin = -0.000001;
 
     // Set to true for debug output
-    static constexpr bool DEBUG = false;
+    static constexpr bool DEBUG = true;
 };
 
 #endif // ALGOCORE_IMPL_H

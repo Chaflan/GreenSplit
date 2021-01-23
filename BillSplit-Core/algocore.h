@@ -38,13 +38,16 @@ public:
 
     //---------------------------------------------------------------------------------------
     // Solves the problem such that you have the fewest number of transactions possible.
-    // It is always slower than greedy.
+    // It is always slower than greedy and can quickly grow to be terminally slow.
+    // Use maxTimeMS to specify how many miliseconds to spend trying to find this optimal
+    // solution before defaulting to the possibly suboptimal greedy solution.  Value of 0 means
+    // use greedy, negative value means unlimited time.
     //      n = credits.size()
-    //      Time -> O(n^2)
+    //      Time -> O(n^3)
     //      Space -> O(n)
     //---------------------------------------------------------------------------------------
     std::vector<std::tuple<std::string, std::string, double> >
-        SolveFewestTransfers(const std::unordered_map<std::string, double>& credits) const;
+        SolveFewestTransfers(const std::unordered_map<std::string, double>& credits, int maxTimeMS = 900) const;
 
     //---------------------------------------------------------------------------------------
     // Check the passed credits to ensure it is possible to solve the passed credits.

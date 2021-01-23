@@ -47,7 +47,7 @@ public:
     //      Space -> O(n)
     //---------------------------------------------------------------------------------------
     std::vector<std::tuple<std::string, std::string, double> >
-        SolveFewestTransfers(const std::unordered_map<std::string, double>& credits, int maxTimeMS = 900) const;
+        SolveFewestTransfers(const std::unordered_map<std::string, double>& credits, int maxTimeMS = 500) const;
 
     //---------------------------------------------------------------------------------------
     // Check the passed credits to ensure it is possible to solve the passed credits.

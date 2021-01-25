@@ -63,7 +63,7 @@ void MainWindow::FileNew()
 
 void MainWindow::FileOpen()
 {
-    QUrl fileToOpen = QFileDialog::getOpenFileUrl(this, "Select File To Open", QUrl(), "*.json");
+    QUrl fileToOpen = QFileDialog::getOpenFileUrl(this, "Open", QUrl(), "*.json");
     if (!fileToOpen.isEmpty() && m_data->jsonRead(fileToOpen)) {
         m_ui->actionSave->setEnabled(true);
         m_ui->actionSave->setText("Save (" + fileToOpen.fileName() + ")");
@@ -78,7 +78,7 @@ void MainWindow::FileSave()
 
 void MainWindow::FileSaveAs()
 {
-    QUrl fileToSave = QFileDialog::getSaveFileUrl(this, "Select File To Save", QUrl(), "*.json");
+    QUrl fileToSave = QFileDialog::getSaveFileUrl(this, "Save As", QUrl(), "*.json");
     if (!fileToSave.isEmpty() && m_data->jsonWrite(fileToSave)) {
         m_ui->actionSave->setEnabled(true);
         m_ui->actionSave->setText("Save (" + fileToSave.fileName() + ")");

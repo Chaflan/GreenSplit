@@ -25,6 +25,11 @@ void TransactionEditDialog::SetModel(TransactionModel* model)
 void TransactionEditDialog::SetMode(TransactionEditDialog::Mode mode)
 {
     m_ui->pushButtonDelete->setDisabled(mode == Mode::Add);
+    switch (mode) {
+        case Mode::Add: setWindowTitle("Add Transaction"); break;
+        case Mode::Edit: setWindowTitle("View Transaction"); break;
+        default: setWindowTitle("Transaction");
+    }
 }
 
 int TransactionEditDialog::exec()

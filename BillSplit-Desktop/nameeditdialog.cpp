@@ -39,6 +39,11 @@ QString NameEditDialog::GetInitials() const
 void NameEditDialog::SetMode(NameEditDialog::Mode mode)
 {
     m_ui->pushButtonDelete->setDisabled(mode == Mode::Add);
+    switch (mode) {
+        case Mode::Add: setWindowTitle("Add Person"); break;
+        case Mode::Edit: setWindowTitle("View Person"); break;
+        default: setWindowTitle("Person");
+    }
 }
 
 void NameEditDialog::Clear()

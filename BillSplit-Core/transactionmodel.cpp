@@ -90,18 +90,23 @@ void TransactionModel::load(double cost, const QString& payer, const QStringList
     setCostDbl(cost);
     setDescription(description);
 
+    int payerIndex = 0;
+    bool payerIndexFound = false;
+
     m_allPeople.clear();
     m_coveringList.clear();
     for (int i = 0; i < m_data->numPeople(); ++i) {
         const QString& currId = m_data->getPersonIdentifier(i);
         m_allPeople.append(currId);
         m_coveringList.append(new PersonCheck(currId, covering.contains(currId), this));
-        if (payer == currId) {
-            setPayerIndex(i);
+        if (!payerIndexFound && payer == currId) {
+            payerIndex = i;
+            payerIndexFound = true;
         }
     }
     emit allPeopleChanged();
     emit coveringListChanged();
+    setPayerIndex(payerIndex);
 }
 
 void TransactionModel::loadDefault()

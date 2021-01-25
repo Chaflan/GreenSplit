@@ -109,6 +109,7 @@ Popup {
             horizontalAlignment: TextInput.AlignHCenter
             font.pixelSize: 15
             color: privates.activeColor
+            maximumLength: 20
 
             echoMode: TextInput.Normal
             // More high level QML foolishness: For some reason android won't sync displayText and text

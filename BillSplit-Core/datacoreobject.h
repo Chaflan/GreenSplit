@@ -53,10 +53,10 @@ public:
     Q_INVOKABLE void clear();
 
     // Save and Load methods.  This is very simplistic.
-    Q_INVOKABLE bool jsonRead(const QString& filePath = "autosave.json");
-    Q_INVOKABLE bool jsonWrite(const QString& filePath = "autosave.json") const;
-    Q_INVOKABLE bool jsonRead(const QUrl& filePath);
-    Q_INVOKABLE bool jsonWrite(const QUrl& filePath) const;
+    Q_INVOKABLE bool jsonRead(const QString& filePath, bool failSilent = false);
+    Q_INVOKABLE bool jsonWrite(const QString& filePath, bool failSilent = false) const;
+    Q_INVOKABLE bool jsonRead(const QUrl& filePath, bool failSilent = false);
+    Q_INVOKABLE bool jsonWrite(const QUrl& filePath, bool failSilent = false) const;
     void jsonRead(const QJsonObject& jsonObj);
     void jsonWrite(QJsonObject& jsonObj) const;
     Q_INVOKABLE QStringList getLocalSaveFiles() const;

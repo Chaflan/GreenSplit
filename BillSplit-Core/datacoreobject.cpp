@@ -10,12 +10,12 @@
 DataCoreObject::DataCoreObject(QObject *parent) :
     QObject(parent)
 {
-    jsonRead();
+    jsonRead("autosave.json", true);
 }
 
 DataCoreObject::~DataCoreObject()
 {
-    jsonWrite();
+    jsonWrite("autosave.json");
 }
 
 int DataCoreObject::numTransactions() const
@@ -432,25 +432,27 @@ bool DataCoreObject::editPersonName(int index, QString newName)
     return true;
 }
 
-bool DataCoreObject::jsonRead(const QString& filePath)
+bool DataCoreObject::jsonRead(const QString& filePath, bool failSilent)
 {
-    return jsonRead(QUrl::fromLocalFile(addJsonExtension(filePath)));
+    return jsonRead(QUrl::fromLocalFile(addJsonExtension(filePath)), failSilent);
 }
 
-bool DataCoreObject::jsonWrite(const QString& filePath) const
+bool DataCoreObject::jsonWrite(const QString& filePath, bool failSilent) const
 {
-    return jsonWrite(QUrl::fromLocalFile(addJsonExtension(filePath)));
+    return jsonWrite(QUrl::fromLocalFile(addJsonExtension(filePath)), failSilent);
 }
 
-bool DataCoreObject::jsonRead(const QUrl& filePath)
+bool DataCoreObject::jsonRead(const QUrl& filePath, bool failSilent)
 {
     QString fileString(filePath.toLocalFile());
     QFile file(fileString);
 
     if (!file.open(QIODevice::ReadOnly)) {
+        if (!failSilent) {
+            emit signalError("Could not open file for reading: " + fileString);
+        }
         qDebug() << "Could not open file for reading: " + fileString;
         qDebug() << "Code: " << file.error() << "Reason: " << file.errorString();
-        emit signalError("Could not open file for reading: " + fileString);
         return false;
     }
 
@@ -460,15 +462,17 @@ bool DataCoreObject::jsonRead(const QUrl& filePath)
     return true;
 }
 
-bool DataCoreObject::jsonWrite(const QUrl& filePath) const
+bool DataCoreObject::jsonWrite(const QUrl& filePath, bool failSilent) const
 {
     QString fileString(filePath.toLocalFile());
     QFile file(fileString);
 
     if (!file.open(QIODevice::WriteOnly)) {
+        if (!failSilent) {
+            emit signalError("Could not open file for writing: " + fileString);
+        }
         qDebug() << "Could not open file for writing: " + fileString;
         qDebug() << "Code: " << file.error() << "Reason: " << file.errorString();
-        emit signalError("Could not open file for writing: " + fileString);
         return false;
     }
 

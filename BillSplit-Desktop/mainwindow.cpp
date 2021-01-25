@@ -21,7 +21,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
     m_data = new DataCoreObject(this);
     QObject::connect(m_data, &DataCoreObject::signalError, this, &MainWindow::ShowErrorMessage);
-    m_data->jsonRead();
 
     m_peopleModel = new PeopleTableModel(this);
     QObject::connect(m_peopleModel, &PeopleTableModel::signalError, this, &MainWindow::ShowErrorMessage);

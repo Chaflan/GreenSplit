@@ -269,7 +269,7 @@ std::vector<std::tuple<std::string, std::string, double> >
 
         // If numTrans didn't change, then the final solution was unchanged from greedy and we can just return it.
         // Otherwise we need to convert the indexed solution to a string solution using the lookups.
-        if (numTransOriginal != numTransFinal) {
+        if (numTransOriginal > numTransFinal) {
             solnFinalStr.clear();
             for (const auto& iTrans : solnFinalIdx) {
                 solnFinalStr.emplace_back(

@@ -48,14 +48,14 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 windows {
-    message(WWWWWWWWWWWWWW-WINDOWS MOBILE-MMMMMMMMMMMMMMMM)
+    # message(WWWWWWWWWWWWWW-WINDOWS MOBILE-MMMMMMMMMMMMMMMM)
     win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../BillSplit-Core/release/ -lBillSplit-Core
     else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../BillSplit-Core/debug/ -lBillSplit-Core
     else:unix: LIBS += -L$$OUT_PWD/../BillSplit-Core/ -lBillSplit-Core
 }
 
 android {
-    message(AAAAAAAAAAAAAA-ANDROID MOBILE-MMMMMMMMMMMMMMMM)
+    # message(AAAAAAAAAAAAAA-ANDROID MOBILE-MMMMMMMMMMMMMMMM)
     win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../BillSplit-Core/ -lBillSplit-Core_armeabi-v7a
     else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../BillSplit-Core/ -lBillSplit-Core_armeabi-v7ad
     else:unix: LIBS += -L$$OUT_PWD/../BillSplit-Core/ -lBillSplit-Core_armeabi-v7a

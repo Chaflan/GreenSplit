@@ -1,10 +1,10 @@
 #ifndef TRANSACTIONSTABLEMODEL_H
 #define TRANSACTIONSTABLEMODEL_H
 
-#include <QAbstractTableModel>
 #include "billsplit-core_global.h"
 #include "datacoreobject.h"
 #include "transactionmodel.h"
+#include <QAbstractTableModel>
 
 class BILLSPLITCORE_EXPORT TransactionsTableModel : public QAbstractTableModel
 {

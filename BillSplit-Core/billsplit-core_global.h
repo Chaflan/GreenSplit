@@ -10,16 +10,3 @@
 #endif
 
 #endif // BILLSPLITCORE_GLOBAL_H
-
-// TODO: FULL PROGRAM TODOS
-
-// const
-// braced initialization
-// noexcept
-// include cleanup
-// arrange functions in order
-// include order
-// consistent bracing
-// always const signals?
-
-// com.company.core

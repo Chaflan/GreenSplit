@@ -1,8 +1,8 @@
 #ifndef TRANSACTIONMODEL_H
 #define TRANSACTIONMODEL_H
 
-#include <QObject>
 #include "billsplit-core_global.h"
+#include <QObject>
 
 class DataCoreObject;
 

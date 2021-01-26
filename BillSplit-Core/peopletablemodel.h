@@ -1,8 +1,8 @@
 #ifndef PEOPLETABLEMODEL_H
 #define PEOPLETABLEMODEL_H
 
-#include <QAbstractTableModel>
 #include "billsplit-core_global.h"
+#include <QAbstractTableModel>
 
 class DataCoreObject;
 

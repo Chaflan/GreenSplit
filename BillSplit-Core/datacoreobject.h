@@ -1,10 +1,10 @@
 #ifndef DATACOREOBJECT_H
 #define DATACOREOBJECT_H
 
-#include <QObject>
-#include <QMap>
 #include "billsplit-core_global.h"
 #include "datacore.h"
+#include <QObject>
+#include <QMap>
 
 //---------------------------------------------------------------------------------------
 // A Qt adapter of the pure C++ data core.  This class stores extra information needed

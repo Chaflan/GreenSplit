@@ -37,7 +37,7 @@ void PeopleWidget::SetPeopleModel(PeopleTableModel* peopleModel)
     m_ui->tableView->setStyleSheet("QHeaderView::section { background-color:gray }");
 }
 
-void PeopleWidget::ViewSelected(const QModelIndex& index)
+void PeopleWidget::ViewSelected(const QModelIndex& index) const
 {
     if (!index.isValid()) {
         return;
@@ -68,7 +68,7 @@ void PeopleWidget::ViewSelected(const QModelIndex& index)
     }
 }
 
-void PeopleWidget::on_pushButtonNew_clicked()
+void PeopleWidget::on_pushButtonNew_clicked() const
 {
     for (bool isValid = false; !isValid;) {
         m_dialog->SetMode(NameEditDialog::Mode::Add);
@@ -83,7 +83,7 @@ void PeopleWidget::on_pushButtonNew_clicked()
     }
 }
 
-void PeopleWidget::on_pushButtonView_clicked()
+void PeopleWidget::on_pushButtonView_clicked() const
 {
     ViewSelected(m_ui->tableView->selectionModel()->currentIndex());
 }

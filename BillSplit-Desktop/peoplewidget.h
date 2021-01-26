@@ -20,11 +20,11 @@ public:
     ~PeopleWidget();
 
     void SetPeopleModel(PeopleTableModel* peopleModel);
-    void ViewSelected(const QModelIndex& index);
+    void ViewSelected(const QModelIndex& index) const;
 
 private slots:
-    void on_pushButtonNew_clicked();
-    void on_pushButtonView_clicked();
+    void on_pushButtonNew_clicked() const;
+    void on_pushButtonView_clicked() const;
 
 private:
 

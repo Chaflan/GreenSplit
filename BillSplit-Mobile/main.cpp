@@ -22,11 +22,11 @@ int main(int argc, char *argv[])
     app.setOrganizationName("OrgName");
     app.setOrganizationDomain("OrgDomain");
 
-    qmlRegisterType<DataCoreObject>("com.company.core", 1,0, "DataCore");
-    qmlRegisterType<PeopleTableModel>("com.company.core", 1,0, "PeopleTableModel");
-    qmlRegisterType<TransactionsTableModel>("com.company.core", 1,0, "TransactionsTableModel");
-    qmlRegisterType<TransactionModel>("com.company.core", 1,0, "TransactionModel");
-    qmlRegisterType<ResultsModel>("com.company.core", 1,0, "ResultsModel");
+    qmlRegisterType<DataCoreObject>("BillSplit.Core", 1,0, "DataCore");
+    qmlRegisterType<PeopleTableModel>("BillSplit.Core", 1,0, "PeopleTableModel");
+    qmlRegisterType<TransactionsTableModel>("BillSplit.Core", 1,0, "TransactionsTableModel");
+    qmlRegisterType<TransactionModel>("BillSplit.Core", 1,0, "TransactionModel");
+    qmlRegisterType<ResultsModel>("BillSplit.Core", 1,0, "ResultsModel");
 
     const QUrl url(QStringLiteral("qrc:/qml/main.qml"));
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,

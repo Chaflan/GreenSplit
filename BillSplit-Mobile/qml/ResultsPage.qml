@@ -1,6 +1,6 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
-import com.company.core 1.0
+import BillSplit.Core 1.0
 
 Page {
     id: page

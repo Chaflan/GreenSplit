@@ -8,7 +8,7 @@ ApplicationWindow {
     visible: true
     width: 800
     height: 600
-    title: qsTr("Tabs")
+    title: qsTr("GreenSplit")
 
     Item {
         id: origin

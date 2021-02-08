@@ -12,7 +12,7 @@ Example:
  - Mark drives Susan and Charlie using his car and pays for gas covering the three of them.  
  
     
-**What is the fastest way to settle everyone's debt in this situation?**
+*What is the fastest way to settle everyone's debt in this situation?*
 
 ---
 

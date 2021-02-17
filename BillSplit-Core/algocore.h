@@ -29,9 +29,6 @@ public:
     // These cases will be ones where a subset of the payments can be solved in isolation
     // and that solution is not preferred over a higher value settlement.
     // These could be common with larger sets and rounded number costs.
-    //      n = credits.size()
-    //      Time -> O(n)
-    //      Space -> O(n)
     //---------------------------------------------------------------------------------------
     std::vector<std::tuple<std::string, std::string, double> >
         SolveGreedy(const std::unordered_map<std::string, double>& credits) const;
@@ -42,9 +39,6 @@ public:
     // Use maxTimeMS to specify how many miliseconds to spend trying to find this optimal
     // solution before defaulting to the possibly suboptimal greedy solution.  Value of 0 means
     // use greedy, negative value means unlimited time.
-    //      n = credits.size()
-    //      Time -> O(n^3)
-    //      Space -> O(n)
     //---------------------------------------------------------------------------------------
     std::vector<std::tuple<std::string, std::string, double> >
         SolveFewestTransfers(const std::unordered_map<std::string, double>& credits, int maxTimeMS = 500) const;

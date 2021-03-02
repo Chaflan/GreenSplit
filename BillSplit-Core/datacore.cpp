@@ -1,5 +1,6 @@
 #include "datacore.h"
 #include <algorithm>
+#include <stdexcept>
 
 std::size_t DataCore::NumTransactions() const noexcept
 {

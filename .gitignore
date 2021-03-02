@@ -1,3 +1,7 @@
 *.user
 *.autosave
 /README.md.backup
+/Makefile
+/.qmake.stash
+/BillSplit-Core/algocore.o
+/BillSplit-Core/Makefile
